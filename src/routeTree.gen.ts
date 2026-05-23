@@ -9,20 +9,59 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SlaRouteImport } from './routes/sla'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as EscalationsRouteImport } from './routes/escalations'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuditRouteImport } from './routes/audit'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
+import { Route as ConfigWorkflowRouteImport } from './routes/config.workflow'
+import { Route as ConfigComplaintTypesRouteImport } from './routes/config.complaint-types'
+import { Route as ComplaintsNewRouteImport } from './routes/complaints.new'
 
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SlaRoute = SlaRouteImport.update({
+  id: '/sla',
+  path: '/sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EscalationsRoute = EscalationsRouteImport.update({
+  id: '/escalations',
+  path: '/escalations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,47 +79,169 @@ const InboxIdRoute = InboxIdRouteImport.update({
   path: '/inbox/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfigWorkflowRoute = ConfigWorkflowRouteImport.update({
+  id: '/config/workflow',
+  path: '/config/workflow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigComplaintTypesRoute = ConfigComplaintTypesRouteImport.update({
+  id: '/config/complaint-types',
+  path: '/config/complaint-types',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplaintsNewRoute = ComplaintsNewRouteImport.update({
+  id: '/complaints/new',
+  path: '/complaints/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
+  '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/reports': typeof ReportsRoute
+  '/sla': typeof SlaRoute
+  '/tasks': typeof TasksRoute
+  '/users': typeof UsersRoute
+  '/complaints/new': typeof ComplaintsNewRoute
+  '/config/complaint-types': typeof ConfigComplaintTypesRoute
+  '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
+  '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/reports': typeof ReportsRoute
+  '/sla': typeof SlaRoute
+  '/tasks': typeof TasksRoute
+  '/users': typeof UsersRoute
+  '/complaints/new': typeof ComplaintsNewRoute
+  '/config/complaint-types': typeof ConfigComplaintTypesRoute
+  '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
+  '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/reports': typeof ReportsRoute
+  '/sla': typeof SlaRoute
+  '/tasks': typeof TasksRoute
+  '/users': typeof UsersRoute
+  '/complaints/new': typeof ComplaintsNewRoute
+  '/config/complaint-types': typeof ConfigComplaintTypesRoute
+  '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/inbox/$id' | '/inbox/'
+  fullPaths:
+    | '/'
+    | '/audit'
+    | '/dashboard'
+    | '/escalations'
+    | '/login'
+    | '/reports'
+    | '/sla'
+    | '/tasks'
+    | '/users'
+    | '/complaints/new'
+    | '/config/complaint-types'
+    | '/config/workflow'
+    | '/inbox/$id'
+    | '/inbox/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/login' | '/inbox/$id' | '/inbox'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/inbox/$id' | '/inbox/'
+  to:
+    | '/'
+    | '/audit'
+    | '/dashboard'
+    | '/escalations'
+    | '/login'
+    | '/reports'
+    | '/sla'
+    | '/tasks'
+    | '/users'
+    | '/complaints/new'
+    | '/config/complaint-types'
+    | '/config/workflow'
+    | '/inbox/$id'
+    | '/inbox'
+  id:
+    | '__root__'
+    | '/'
+    | '/audit'
+    | '/dashboard'
+    | '/escalations'
+    | '/login'
+    | '/reports'
+    | '/sla'
+    | '/tasks'
+    | '/users'
+    | '/complaints/new'
+    | '/config/complaint-types'
+    | '/config/workflow'
+    | '/inbox/$id'
+    | '/inbox/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditRoute: typeof AuditRoute
   DashboardRoute: typeof DashboardRoute
+  EscalationsRoute: typeof EscalationsRoute
   LoginRoute: typeof LoginRoute
+  ReportsRoute: typeof ReportsRoute
+  SlaRoute: typeof SlaRoute
+  TasksRoute: typeof TasksRoute
+  UsersRoute: typeof UsersRoute
+  ComplaintsNewRoute: typeof ComplaintsNewRoute
+  ConfigComplaintTypesRoute: typeof ConfigComplaintTypesRoute
+  ConfigWorkflowRoute: typeof ConfigWorkflowRoute
   InboxIdRoute: typeof InboxIdRoute
   InboxIndexRoute: typeof InboxIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sla': {
+      id: '/sla'
+      path: '/sla'
+      fullPath: '/sla'
+      preLoaderRoute: typeof SlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -88,11 +249,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/escalations': {
+      id: '/escalations'
+      path: '/escalations'
+      fullPath: '/escalations'
+      preLoaderRoute: typeof EscalationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,13 +291,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InboxIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/config/workflow': {
+      id: '/config/workflow'
+      path: '/config/workflow'
+      fullPath: '/config/workflow'
+      preLoaderRoute: typeof ConfigWorkflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/config/complaint-types': {
+      id: '/config/complaint-types'
+      path: '/config/complaint-types'
+      fullPath: '/config/complaint-types'
+      preLoaderRoute: typeof ConfigComplaintTypesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/complaints/new': {
+      id: '/complaints/new'
+      path: '/complaints/new'
+      fullPath: '/complaints/new'
+      preLoaderRoute: typeof ComplaintsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditRoute: AuditRoute,
   DashboardRoute: DashboardRoute,
+  EscalationsRoute: EscalationsRoute,
   LoginRoute: LoginRoute,
+  ReportsRoute: ReportsRoute,
+  SlaRoute: SlaRoute,
+  TasksRoute: TasksRoute,
+  UsersRoute: UsersRoute,
+  ComplaintsNewRoute: ComplaintsNewRoute,
+  ConfigComplaintTypesRoute: ConfigComplaintTypesRoute,
+  ConfigWorkflowRoute: ConfigWorkflowRoute,
   InboxIdRoute: InboxIdRoute,
   InboxIndexRoute: InboxIndexRoute,
 }
