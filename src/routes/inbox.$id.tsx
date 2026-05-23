@@ -28,15 +28,7 @@ function ComplaintDetail() {
       <PageHeader
         breadcrumbs={[{ label: t("COMMON_INBOX") }, { label: c.id }]}
         title={type.name}
-        subtitle={
-          <span className="flex items-center gap-2 text-[12px]">
-            <span className="font-mono">{c.id}</span>
-            <span>·</span>
-            <span>{type.department}</span>
-            <span>·</span>
-            <span>{c.ward} · {c.locality}</span>
-          </span>
-        as unknown as string}
+        subtitle={`${c.id} · ${type.department} · ${c.ward} · ${c.locality}`}
         primaryAction={
           <div className="flex items-center gap-2">
             <Link to="/inbox" className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium hover:bg-muted">
