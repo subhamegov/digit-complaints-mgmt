@@ -41,7 +41,7 @@ export const messages: Record<string, string> = {
   COMMON_REMOVE: "Remove",
   COMMON_BACK: "Back",
   COMMON_NEXT: "Next",
-  COMMON_TENANT: "ULB",
+  COMMON_TENANT: "Account",
   COMMON_JURISDICTION: "Jurisdiction",
   COMMON_ROLE: "Role",
   COMMON_SIGN_IN: "Sign In",
