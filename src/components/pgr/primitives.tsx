@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import type { ReactNode, ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import type { ComplaintStatus, SlaState, Priority } from "@/lib/mock-data";
+import type { ComplaintStatus, SlaState, Priority, Complaint } from "@/lib/mock-data";
+import { officerOf } from "@/lib/mock-data";
 import { t } from "@/lib/i18n";
+import { useRbac, type Permission } from "@/lib/rbac";
 
 const STATUS_TOKEN: Record<ComplaintStatus, { bg: string; fg: string; label: string }> = {
   OPEN:        { bg: "bg-status-open-bg",     fg: "text-status-open",     label: "STATUS_OPEN" },
