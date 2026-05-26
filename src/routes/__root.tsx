@@ -104,11 +104,14 @@ function AppLayout() {
     return <Outlet />;
   }
 
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <Sidebar />
+      <MobileSidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar />
+        <TopBar onMenuClick={() => setMobileNavOpen(true)} />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
