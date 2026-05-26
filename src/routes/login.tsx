@@ -37,17 +37,10 @@ function LoginPage() {
           </div>
 
           <div>
-            <h1 className="text-[28px] font-semibold leading-tight">Public Grievance Redressal</h1>
+            <h1 className="text-[26px] font-semibold leading-tight">Public Grievance Redressal</h1>
             <p className="mt-3 max-w-md text-[13px] leading-relaxed text-chrome-muted">
               Operations console for municipal staff to receive, route, resolve, and monitor citizen complaints across departments and localities.
             </p>
-
-            <ul className="mt-8 space-y-2.5 text-[12px] text-chrome-muted">
-              <li className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 rounded-full bg-primary" />Role-based access aligned with departmental hierarchy</li>
-              <li className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 rounded-full bg-primary" />SLA-driven workflows with automatic escalation</li>
-              <li className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 rounded-full bg-primary" />Tenant- and jurisdiction-scoped data isolation</li>
-              <li className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 rounded-full bg-primary" />Audit-grade logging of every state transition</li>
-            </ul>
           </div>
 
           <div className="text-[11px] text-chrome-muted">© 2026 eGovernments Foundation · DIGIT 2.9</div>
