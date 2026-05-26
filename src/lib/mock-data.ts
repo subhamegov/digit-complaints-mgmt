@@ -140,7 +140,7 @@ function build(
 export const COMPLAINTS: Complaint[] = [
   build("PGR-2026-04812", "SWM_GARBAGE", "ASSIGNED", 18, "W-12", "Civil Lines", { name: "Harjeet Singh", mobile: "98xxxxxx21" }, "Garbage has not been lifted from the corner of Lawrence Road for 3 days. Heap is overflowing onto the footpath.", { assignedOfficerId: "EMP-1042", attachments: 2, priority: "HIGH", workflow: [
     { at: isoMinus(18), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
-    { at: isoMinus(16), actor: "Manjit Singh", role: "GRO", action: "ASSIGNED", from: "OPEN", to: "ASSIGNED", note: "Routed to Sanitary Inspector — Ward 12" },
+    { at: isoMinus(16), actor: "Manjit Singh", role: "GRO", action: "ASSIGNED", from: "OPEN", to: "ASSIGNED", note: "Routed to Sanitary Inspector — Civil Lines" },
   ]}),
   build("PGR-2026-04813", "STR_STREETLIGHT", "IN_PROGRESS", 30, "W-18", "Ranjit Avenue", { name: "Simran Kaur", mobile: "98xxxxxx32" }, "Streetlight pole no. RA-118 has been non-functional for over a week. Causing safety concerns at night.", { assignedOfficerId: "EMP-1071", channel: "WEB", workflow: [
     { at: isoMinus(30), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
