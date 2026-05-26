@@ -133,30 +133,19 @@ function DashboardPage() {
         </div>
 
         <Panel title="SLA at risk — next 24 hours" padded={false}>
-          <table className="w-full text-[13px]">
-            <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_NO")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_TYPE")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("COMMON_WARD")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_DEPARTMENT")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_SLA_STATUS")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_STATUS")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 5).map((c) => (
-                <tr key={c.id} className="hover:bg-muted/40">
-                  <td className="px-4 py-2 font-mono text-[12px]"><Link to="/inbox/$id" params={{ id: c.id }} className="text-primary hover:underline">{c.id}</Link></td>
-                  <td className="px-4 py-2">{complaintTypeOf(c.typeCode)?.name}</td>
-                  <td className="px-4 py-2">{c.ward}</td>
-                  <td className="px-4 py-2">{c.department}</td>
-                  <td className="px-4 py-2"><SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /></td>
-                  <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable<Complaint>
+            emptyMessage={t("EMPTY_INBOX")}
+            rows={COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
+            columns={[
+              { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
+              { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
+              { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
+              { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
+              { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
+              { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
+              { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
+            ]}
+          />
         </Panel>
       </div>
     </div>
