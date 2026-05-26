@@ -27,7 +27,7 @@ function SlaPage() {
     <div>
       <PageHeader title={t("CS_SLA_STATUS")} subtitle="Service-level adherence across active complaints" />
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Overall compliance" value={`${compliance}%`} intent="positive" delta="Target ≥ 90%" />
           <StatCard label={t("SLA_WITHIN")} value={within} intent="positive" />

@@ -35,7 +35,7 @@ function AuditPage() {
         </div>
       </PageHeader>
 
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         <Panel padded={false}>
           <table className="w-full text-[13px]">
             <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">

@@ -39,7 +39,7 @@ function TasksPage() {
         </div>
       </PageHeader>
 
-      <div className="p-6 space-y-4">
+      <div className="p-4 lg:p-6 space-y-4">
         {buckets.map((b) => (
           <Panel key={b.key} title={b.label} action={<span className="text-[11px] text-muted-foreground">{b.rows.length} items</span>} padded={false}>
             {b.rows.length === 0 ? <EmptyState message={t("EMPTY_TASKS")} /> : (

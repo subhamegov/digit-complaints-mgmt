@@ -71,7 +71,7 @@ export function PageHeader({
 }) {
   return (
     <div className="border-b border-border bg-surface">
-      <div className="px-6 pt-5 pb-4">
+      <div className="px-4 lg:px-6 pt-4 pb-3 lg:pt-5 lg:pb-4">
         {breadcrumbs && (
           <nav className="mb-2 flex items-center gap-1.5 text-[12px] text-muted-foreground">
             {breadcrumbs.map((b, i) => (
@@ -82,14 +82,14 @@ export function PageHeader({
             ))}
           </nav>
         )}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-[20px] font-semibold leading-tight text-foreground">{title}</h1>
-            {subtitle && <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h1 className="text-[18px] lg:text-[20px] font-semibold leading-tight text-foreground">{title}</h1>
+            {subtitle && <p className="mt-1 text-[12px] lg:text-[13px] text-muted-foreground">{subtitle}</p>}
           </div>
-          {primaryAction}
+          {primaryAction && <div className="shrink-0">{primaryAction}</div>}
         </div>
-        {children && <div className="mt-4">{children}</div>}
+        {children && <div className="mt-3 lg:mt-4">{children}</div>}
       </div>
     </div>
   );
@@ -278,37 +278,39 @@ export function DataTable<T extends { id: string }>({
   const visible = columns.filter((c) => !c.requires || hasPermission(c.requires));
   if (rows.length === 0) return <EmptyState message={emptyMessage} />;
   return (
-    <table className="w-full text-[13px]">
-      <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-        <tr>
-          {visible.map((c) => (
-            <th
-              key={c.key}
-              className={cn(
-                "px-3 py-2 font-medium",
-                c.align === "right" ? "text-right" : "text-left",
-                c.className,
-              )}
-            >
-              {c.header}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-border">
-        {rows.map((r) => (
-          <tr key={r.id} className="hover:bg-muted/40">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[720px] text-[13px]">
+        <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+          <tr>
             {visible.map((c) => (
-              <td
+              <th
                 key={c.key}
-                className={cn("px-3 py-2", c.align === "right" ? "text-right" : "text-left", c.className)}
+                className={cn(
+                  "px-3 py-2 font-medium whitespace-nowrap",
+                  c.align === "right" ? "text-right" : "text-left",
+                  c.className,
+                )}
               >
-                {c.cell(r)}
-              </td>
+                {c.header}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map((r) => (
+            <tr key={r.id} className="hover:bg-muted/40">
+              {visible.map((c) => (
+                <td
+                  key={c.key}
+                  className={cn("px-3 py-2 align-top", c.align === "right" ? "text-right" : "text-left", c.className)}
+                >
+                  {c.cell(r)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

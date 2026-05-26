@@ -38,7 +38,7 @@ function ReportsPage() {
         }
       />
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Filed" value="293" delta="+8.4% vs previous" intent="neutral" />
           <StatCard label="Resolved" value="261" delta="89% within SLA" intent="positive" />
