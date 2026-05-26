@@ -144,9 +144,9 @@ export function TopBar() {
         />
 
         {/* Role switcher — prototype only */}
-        <div className="flex items-center gap-1.5 rounded-sm border border-primary/30 bg-primary/5 px-2 py-1">
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span className="text-[10px] font-medium uppercase tracking-wider text-primary">{t("COMMON_ROLE")}</span>
+        <label className="flex items-center gap-1.5 rounded-sm border border-border bg-background px-2 py-1">
+          <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t("COMMON_ROLE")}</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as Role)}
@@ -157,11 +157,11 @@ export function TopBar() {
               <option key={r} value={r}>{ROLE_LABEL[r]}</option>
             ))}
           </select>
-        </div>
+        </label>
 
         <button className="relative flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted" aria-label="Notifications">
           <Bell className="h-4 w-4" />
-          <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-status-breach" />
         </button>
 
         <div className="flex items-center gap-2 border-l border-border pl-3">
