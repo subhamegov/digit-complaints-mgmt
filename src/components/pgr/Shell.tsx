@@ -60,16 +60,14 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             className={cn(
-              "group flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-[13px] transition-colors",
+              "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
               active
-                ? "bg-primary/15 text-primary-foreground font-medium"
-                : "text-chrome-foreground/75 hover:bg-white/5 hover:text-chrome-foreground",
+                ? "border-primary bg-white/[0.06] font-medium text-white"
+                : "border-transparent text-chrome-foreground/75 hover:bg-white/[0.04] hover:text-chrome-foreground",
             )}
-            style={active ? { backgroundColor: "color-mix(in oklab, var(--primary) 18%, transparent)", color: "white" } : undefined}
           >
             <Icon className="h-4 w-4 shrink-0" />
             <span className="truncate">{t(item.labelCode)}</span>
-            {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
           </Link>
         );
       });
