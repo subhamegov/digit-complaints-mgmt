@@ -36,14 +36,12 @@ function DashboardPage() {
         subtitle={`Operational view · ${jurisdiction.name} · Last 7 days`}
         primaryAction={
           <div className="flex gap-2">
-            <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium hover:bg-muted">
-              <Download className="h-3.5 w-3.5" /> {t("COMMON_DOWNLOAD")}
-            </button>
-            <Can perm="PGR_COMPLAINT_CREATE">
-              <Link to="/complaints/new" className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-primary px-3 text-[12px] font-medium text-primary-foreground hover:opacity-90">
-                <Plus className="h-3.5 w-3.5" /> {t("ACTION_REGISTER")}
-              </Link>
-            </Can>
+            <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+            <Link to="/complaints/new">
+              <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
+                {t("ACTION_REGISTER")}
+              </ActionButton>
+            </Link>
           </div>
         }
       />
