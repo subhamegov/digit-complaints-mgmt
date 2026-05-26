@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -142,6 +142,7 @@ export function MobileSidebar({ open, onClose }: { open: boolean; onClose: () =>
 
 export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction, userName } = useRbac();
+  const navigate = useNavigate();
   const [contextOpen, setContextOpen] = useState(false);
 
   return (
@@ -220,6 +221,16 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
             <div className="text-[10px] text-muted-foreground">{ROLE_LABEL[role]}</div>
           </div>
         </div>
+
+        <button
+          onClick={() => navigate({ to: "/login" })}
+          className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2 text-[12px] font-medium text-foreground hover:bg-muted"
+          aria-label={t("COMMON_SIGN_OUT")}
+          title={t("COMMON_SIGN_OUT")}
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">{t("COMMON_SIGN_OUT")}</span>
+        </button>
       </header>
 
       {/* Mobile context sheet */}
