@@ -15,7 +15,7 @@ function LoginPage() {
   const [userId, setUserId] = useState("manjit.singh");
   const [password, setPassword] = useState("••••••••");
   const [role, setLocalRole] = useState<Role>("GRO");
-  const [tenant, setTenant] = useState("pb.amritsar");
+  const [tenant, setTenant] = useState("acc.amritsar.mc");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,14 +32,14 @@ function LoginPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary font-bold text-primary-foreground">P</div>
             <div className="leading-tight">
               <div className="text-[14px] font-semibold">DIGIT Platform</div>
-              <div className="text-[11px] uppercase tracking-wider text-chrome-muted">Government of Punjab</div>
+              <div className="text-[11px] uppercase tracking-wider text-chrome-muted">SaaS for Public Services</div>
             </div>
           </div>
 
           <div>
             <h1 className="text-[26px] font-semibold leading-tight">Public Grievance Redressal</h1>
             <p className="mt-3 max-w-md text-[13px] leading-relaxed text-chrome-muted">
-              Operations console for municipal staff to receive, route, resolve, and monitor citizen complaints across departments and localities.
+              Operations console for public-service staff to receive, route, resolve, and monitor citizen complaints across departments and localities, on any account on the platform.
             </p>
           </div>
 
@@ -62,9 +62,10 @@ function LoginPage() {
             </Field>
             <Field label={t("COMMON_TENANT")}>
               <select value={tenant} onChange={(e) => setTenant(e.target.value)} className={inputCls}>
-                <option value="pb.amritsar">Amritsar Municipal Corp.</option>
-                <option value="pb.jalandhar">Jalandhar Municipal Corp.</option>
-                <option value="pb.ludhiana">Ludhiana Municipal Corp.</option>
+                <option value="acc.amritsar.mc">Amritsar Municipal Corp. — Municipal Corporation</option>
+                <option value="acc.ludhiana.scl">Ludhiana Smart City Ltd. — Smart City SPV</option>
+                <option value="acc.pb.water">Punjab Water Supply Board — Utility</option>
+                <option value="acc.amritsar.da">Amritsar Development Auth. — Development Authority</option>
               </select>
             </Field>
 

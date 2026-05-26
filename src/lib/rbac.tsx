@@ -111,13 +111,22 @@ export const ROLE_LABEL: Record<Role, string> = {
   ADMIN: "System Administrator",
 };
 
-export type Tenant = { code: string; name: string };
+/**
+ * Account = the customer entity on the SaaS platform.
+ * Generalised away from "ULB" so the same product can be sold to
+ * municipal corporations, smart-city SPVs, utilities, development
+ * authorities, sanitation boards, transit authorities, etc.
+ * The legacy field/key name `tenant` is retained at the data layer
+ * for DIGIT compatibility; UI labels use "Account".
+ */
+export type Tenant = { code: string; name: string; type: string };
 export type Jurisdiction = { code: string; name: string };
 
 export const TENANTS: Tenant[] = [
-  { code: "pb.amritsar", name: "Amritsar Municipal Corp." },
-  { code: "pb.jalandhar", name: "Jalandhar Municipal Corp." },
-  { code: "pb.ludhiana", name: "Ludhiana Municipal Corp." },
+  { code: "acc.amritsar.mc",    name: "Amritsar Municipal Corp.",     type: "Municipal Corporation" },
+  { code: "acc.ludhiana.scl",   name: "Ludhiana Smart City Ltd.",     type: "Smart City SPV" },
+  { code: "acc.pb.water",       name: "Punjab Water Supply Board",    type: "Utility" },
+  { code: "acc.amritsar.da",    name: "Amritsar Development Auth.",   type: "Development Authority" },
 ];
 
 export const JURISDICTIONS: Jurisdiction[] = [
