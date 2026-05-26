@@ -1,14 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, Download, ArrowRight } from "lucide-react";
-import { PageHeader, StatCard, Panel, StatusBadge, SlaBadge } from "@/components/pgr/primitives";
-import { Can, useRbac } from "@/lib/rbac";
+import {
+  PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
+  ActionButton, OwnerCell, DataTable, nextActionFor, type Column,
+} from "@/components/pgr/primitives";
+import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import {
   dashboardSummary, byDepartment, byWard, trend7d, COMPLAINTS, complaintTypeOf,
+  type Complaint,
 } from "@/lib/mock-data";
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell,
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
