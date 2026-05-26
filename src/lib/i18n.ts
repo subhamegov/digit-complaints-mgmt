@@ -18,7 +18,7 @@ export const messages: Record<string, string> = {
   COMMON_CONFIGURATION: "Configuration",
   COMMON_USERS: "Users & Roles",
   COMMON_AUDIT_LOG: "Audit Log",
-  COMMON_WARD: "Ward",
+  COMMON_WARD: "Locality",
   COMMON_LOCALITY: "Locality",
   COMMON_MOBILE_NUMBER: "Mobile Number",
   COMMON_NAME: "Name",

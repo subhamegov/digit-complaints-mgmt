@@ -121,11 +121,11 @@ export const TENANTS: Tenant[] = [
 ];
 
 export const JURISDICTIONS: Jurisdiction[] = [
-  { code: "ALL", name: "All Wards" },
-  { code: "W-12", name: "Ward 12 — Civil Lines" },
-  { code: "W-18", name: "Ward 18 — Ranjit Avenue" },
-  { code: "W-21", name: "Ward 21 — Hall Bazaar" },
-  { code: "W-27", name: "Ward 27 — Cantonment" },
+  { code: "ALL", name: "All Localities" },
+  { code: "W-12", name: "Civil Lines" },
+  { code: "W-18", name: "Ranjit Avenue" },
+  { code: "W-21", name: "Hall Bazaar" },
+  { code: "W-27", name: "Cantonment" },
 ];
 
 interface RbacState {

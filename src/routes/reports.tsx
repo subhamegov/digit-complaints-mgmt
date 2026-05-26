@@ -25,7 +25,7 @@ function ReportsPage() {
     <div>
       <PageHeader
         title={t("COMMON_REPORTS")}
-        subtitle="Operational MIS · 7-day window · Drill-down by department, ward, type"
+        subtitle="Operational MIS · 7-day window · Drill-down by department, locality, type"
         primaryAction={
           <div className="flex items-center gap-2">
             <select className="h-8 rounded-sm border border-border bg-surface px-2 text-[12px]">
@@ -88,7 +88,7 @@ function ReportsPage() {
             </div>
           </Panel>
 
-          <Panel title="By ward">
+          <Panel title="By locality">
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={wards} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>

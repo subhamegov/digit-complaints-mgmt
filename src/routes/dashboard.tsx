@@ -69,7 +69,7 @@ function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Complaints by ward">
+          <Panel title="Complaints by locality">
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

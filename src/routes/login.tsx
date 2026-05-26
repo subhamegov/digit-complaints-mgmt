@@ -39,7 +39,7 @@ function LoginPage() {
           <div>
             <h1 className="text-[28px] font-semibold leading-tight">Public Grievance Redressal</h1>
             <p className="mt-3 max-w-md text-[13px] leading-relaxed text-chrome-muted">
-              Operations console for municipal staff to receive, route, resolve, and monitor citizen complaints across departments and wards.
+              Operations console for municipal staff to receive, route, resolve, and monitor citizen complaints across departments and localities.
             </p>
 
             <ul className="mt-8 space-y-2.5 text-[12px] text-chrome-muted">
