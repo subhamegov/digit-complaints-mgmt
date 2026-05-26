@@ -11,7 +11,8 @@ import {
 
 import appCss from "../styles.css?url";
 import { RbacProvider } from "@/lib/rbac";
-import { Sidebar, TopBar } from "@/components/pgr/Shell";
+import { Sidebar, MobileSidebar, TopBar } from "@/components/pgr/Shell";
+import { useState } from "react";
 
 function NotFoundComponent() {
   return (
