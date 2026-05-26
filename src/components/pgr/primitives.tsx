@@ -278,37 +278,39 @@ export function DataTable<T extends { id: string }>({
   const visible = columns.filter((c) => !c.requires || hasPermission(c.requires));
   if (rows.length === 0) return <EmptyState message={emptyMessage} />;
   return (
-    <table className="w-full text-[13px]">
-      <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-        <tr>
-          {visible.map((c) => (
-            <th
-              key={c.key}
-              className={cn(
-                "px-3 py-2 font-medium",
-                c.align === "right" ? "text-right" : "text-left",
-                c.className,
-              )}
-            >
-              {c.header}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-border">
-        {rows.map((r) => (
-          <tr key={r.id} className="hover:bg-muted/40">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[720px] text-[13px]">
+        <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+          <tr>
             {visible.map((c) => (
-              <td
+              <th
                 key={c.key}
-                className={cn("px-3 py-2", c.align === "right" ? "text-right" : "text-left", c.className)}
+                className={cn(
+                  "px-3 py-2 font-medium whitespace-nowrap",
+                  c.align === "right" ? "text-right" : "text-left",
+                  c.className,
+                )}
               >
-                {c.cell(r)}
-              </td>
+                {c.header}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map((r) => (
+            <tr key={r.id} className="hover:bg-muted/40">
+              {visible.map((c) => (
+                <td
+                  key={c.key}
+                  className={cn("px-3 py-2 align-top", c.align === "right" ? "text-right" : "text-left", c.className)}
+                >
+                  {c.cell(r)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
