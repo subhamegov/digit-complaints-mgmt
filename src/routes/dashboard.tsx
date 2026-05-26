@@ -46,7 +46,7 @@ function DashboardPage() {
         }
       />
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
           <StatCard label={t("CS_TOTAL_COMPLAINTS")} value={s.total} delta="+12 vs last week" />
           <StatCard label={t("CS_OPEN_COMPLAINTS")} value={s.open} intent="warning" delta="4 nearing breach" />

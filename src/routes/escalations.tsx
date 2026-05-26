@@ -27,7 +27,7 @@ function EscalationPage() {
     <div>
       <PageHeader title={t("CS_ESCALATIONS")} subtitle="Complaints breaching SLA — routed by escalation matrix" />
 
-      <div className="p-6 space-y-4">
+      <div className="p-4 lg:p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {(Object.keys(byLevel) as Array<keyof typeof byLevel>).map((lvl) => {
             const tok = LEVEL_TOK[lvl];

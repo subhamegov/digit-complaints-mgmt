@@ -36,7 +36,7 @@ function WorkflowConfigPage() {
         subtitle="State machine, role-permitted transitions, and SLA escalation matrix"
       />
 
-      <div className="p-6 space-y-4">
+      <div className="p-4 lg:p-6 space-y-4">
         <Panel title="States">
           <div className="flex flex-wrap items-center gap-2">
             {STATES.map((s, i) => (
