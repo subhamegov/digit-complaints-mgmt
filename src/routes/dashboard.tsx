@@ -72,30 +72,23 @@ function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Complaints by locality">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={wards} dataKey="total" nameKey="ward" innerRadius={50} outerRadius={85} paddingAngle={2}>
-                    {wards.map((_, i) => (
-                      <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <ul className="mt-2 space-y-1 text-[12px]">
-              {wards.map((w, i) => (
-                <li key={w.ward} className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-sm" style={{ background: `var(--color-chart-${(i % 5) + 1})` }} />
-                    {w.ward}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground">{w.total}</span>
-                </li>
-              ))}
-            </ul>
+          <Panel title="By locality">
+            {(() => {
+              const max = Math.max(...wards.map((w) => w.total), 1);
+              return (
+                <ul className="space-y-2 text-[12px]">
+                  {wards.map((w) => (
+                    <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
+                      <span className="truncate text-foreground">{w.ward}</span>
+                      <span className="h-2 rounded-sm bg-muted">
+                        <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / max) * 100}%` }} />
+                      </span>
+                      <span className="text-right tabular-nums text-muted-foreground">{w.total}</span>
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </Panel>
         </div>
 
