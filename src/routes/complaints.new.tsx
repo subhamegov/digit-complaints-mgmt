@@ -126,7 +126,7 @@ function NewComplaintPage() {
           </Panel>
 
           <Panel title="Duplicates check">
-            <div className="text-[12px] text-muted-foreground">No similar complaints found in selected ward for the last 24 hours.</div>
+            <div className="text-[12px] text-muted-foreground">No similar complaints found in selected locality for the last 24 hours.</div>
           </Panel>
         </div>
       </div>
