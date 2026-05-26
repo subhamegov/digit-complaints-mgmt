@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import type { ReactNode, ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import type { ComplaintStatus, SlaState, Priority } from "@/lib/mock-data";
+import type { ComplaintStatus, SlaState, Priority, Complaint } from "@/lib/mock-data";
+import { officerOf } from "@/lib/mock-data";
 import { t } from "@/lib/i18n";
+import { useRbac, type Permission } from "@/lib/rbac";
 
 const STATUS_TOKEN: Record<ComplaintStatus, { bg: string; fg: string; label: string }> = {
   OPEN:        { bg: "bg-status-open-bg",     fg: "text-status-open",     label: "STATUS_OPEN" },
@@ -151,5 +153,162 @@ export function EmptyState({ message }: { message: string }) {
       <div className="mb-2 text-[13px] font-medium text-foreground">{t("COMMON_NO_DATA")}</div>
       <div className="text-[12px] text-muted-foreground">{message}</div>
     </div>
+  );
+}
+
+/* ---------- Reusable RBAC-aware primitives ---------- */
+
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+
+interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  permission?: Permission;
+  anyOf?: Permission[];
+  variant?: ButtonVariant;
+  icon?: ReactNode;
+}
+
+/**
+ * Permission-aware action button. Hides itself when the current role lacks
+ * the required permission(s). Use for every page-level / row-level action so
+ * RBAC stays at the component layer, not the page layer.
+ */
+export function ActionButton({
+  permission,
+  anyOf,
+  variant = "secondary",
+  icon,
+  className,
+  children,
+  ...rest
+}: ActionButtonProps) {
+  const { hasPermission, hasAnyPermission } = useRbac();
+  const allowed = permission
+    ? hasPermission(permission)
+    : anyOf
+    ? hasAnyPermission(anyOf)
+    : true;
+  if (!allowed) return null;
+
+  const variants: Record<ButtonVariant, string> = {
+    primary: "bg-primary text-primary-foreground hover:opacity-90",
+    secondary: "border border-border bg-surface text-foreground hover:bg-muted",
+    ghost: "text-muted-foreground hover:bg-muted",
+    danger: "border border-status-breach/40 bg-status-breach-bg text-status-breach hover:opacity-90",
+  };
+
+  return (
+    <button
+      {...rest}
+      className={cn(
+        "inline-flex h-8 items-center gap-1.5 rounded-sm px-3 text-[12px] font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none",
+        variants[variant],
+        className,
+      )}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+/** Filter / action strip used above tables — keeps every page consistent. */
+export function Toolbar({
+  children,
+  meta,
+}: {
+  children: ReactNode;
+  meta?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">{children}</div>
+      {meta && <div className="ml-auto flex items-center gap-3 text-[12px] text-muted-foreground">{meta}</div>}
+    </div>
+  );
+}
+
+/** Owner cell — shows assigned officer with designation, or Unassigned. */
+export function OwnerCell({ id }: { id?: string }) {
+  const o = officerOf(id);
+  if (!o)
+    return <span className="text-[12px] italic text-muted-foreground">{t("COMMON_UNASSIGNED")}</span>;
+  return (
+    <div className="leading-tight">
+      <div className="text-[12px] font-medium text-foreground">{o.name}</div>
+      <div className="text-[11px] text-muted-foreground">{o.designation}</div>
+    </div>
+  );
+}
+
+/** Computes the next action expected for a complaint, by status. */
+export function nextActionFor(c: Complaint): string {
+  switch (c.status) {
+    case "OPEN":        return t("ACTION_ROUTE");
+    case "ASSIGNED":    return t("ACTION_PICK_UP");
+    case "IN_PROGRESS": return t("ACTION_RESOLVE");
+    case "REOPENED":    return t("ACTION_RESOLVE");
+    case "RESOLVED":    return t("ACTION_VERIFY");
+    case "REJECTED":    return "—";
+    case "CLOSED":      return "—";
+  }
+}
+
+/** Table column type — supports component-level RBAC via `requires`. */
+export interface Column<T> {
+  key: string;
+  header: string;
+  cell: (row: T) => ReactNode;
+  align?: "left" | "right";
+  requires?: Permission;
+  className?: string;
+}
+
+/** Permission-aware data table. Columns with `requires` are hidden for roles
+ *  that lack the permission. Keeps RBAC out of page-level JSX. */
+export function DataTable<T extends { id: string }>({
+  columns,
+  rows,
+  emptyMessage,
+}: {
+  columns: Column<T>[];
+  rows: T[];
+  emptyMessage: string;
+}) {
+  const { hasPermission } = useRbac();
+  const visible = columns.filter((c) => !c.requires || hasPermission(c.requires));
+  if (rows.length === 0) return <EmptyState message={emptyMessage} />;
+  return (
+    <table className="w-full text-[13px]">
+      <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+        <tr>
+          {visible.map((c) => (
+            <th
+              key={c.key}
+              className={cn(
+                "px-3 py-2 font-medium",
+                c.align === "right" ? "text-right" : "text-left",
+                c.className,
+              )}
+            >
+              {c.header}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-border">
+        {rows.map((r) => (
+          <tr key={r.id} className="hover:bg-muted/40">
+            {visible.map((c) => (
+              <td
+                key={c.key}
+                className={cn("px-3 py-2", c.align === "right" ? "text-right" : "text-left", c.className)}
+              >
+                {c.cell(r)}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

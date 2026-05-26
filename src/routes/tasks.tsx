@@ -21,9 +21,9 @@ function TasksPage() {
   });
 
   const buckets = [
-    { key: "today", label: "Action required today", rows: mine.filter((c) => c.slaState !== "WITHIN").slice(0, 6) },
-    { key: "week",  label: "This week", rows: mine.filter((c) => c.slaState === "WITHIN").slice(0, 6) },
-    { key: "later", label: "Pending acknowledgement", rows: COMPLAINTS.filter((c) => c.status === "RESOLVED").slice(0, 3) },
+    { key: "today", label: t("TASK_BUCKET_TODAY"), rows: mine.filter((c) => c.slaState !== "WITHIN").slice(0, 6) },
+    { key: "week",  label: t("TASK_BUCKET_WEEK"), rows: mine.filter((c) => c.slaState === "WITHIN").slice(0, 6) },
+    { key: "later", label: t("TASK_BUCKET_PENDING"), rows: COMPLAINTS.filter((c) => c.status === "RESOLVED").slice(0, 3) },
   ];
 
   return (

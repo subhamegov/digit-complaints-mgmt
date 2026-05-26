@@ -60,16 +60,14 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             className={cn(
-              "group flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-[13px] transition-colors",
+              "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
               active
-                ? "bg-primary/15 text-primary-foreground font-medium"
-                : "text-chrome-foreground/75 hover:bg-white/5 hover:text-chrome-foreground",
+                ? "border-primary bg-white/[0.06] font-medium text-white"
+                : "border-transparent text-chrome-foreground/75 hover:bg-white/[0.04] hover:text-chrome-foreground",
             )}
-            style={active ? { backgroundColor: "color-mix(in oklab, var(--primary) 18%, transparent)", color: "white" } : undefined}
           >
             <Icon className="h-4 w-4 shrink-0" />
             <span className="truncate">{t(item.labelCode)}</span>
-            {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
           </Link>
         );
       });
@@ -146,9 +144,9 @@ export function TopBar() {
         />
 
         {/* Role switcher — prototype only */}
-        <div className="flex items-center gap-1.5 rounded-sm border border-primary/30 bg-primary/5 px-2 py-1">
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span className="text-[10px] font-medium uppercase tracking-wider text-primary">{t("COMMON_ROLE")}</span>
+        <label className="flex items-center gap-1.5 rounded-sm border border-border bg-background px-2 py-1">
+          <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t("COMMON_ROLE")}</span>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as Role)}
@@ -159,11 +157,11 @@ export function TopBar() {
               <option key={r} value={r}>{ROLE_LABEL[r]}</option>
             ))}
           </select>
-        </div>
+        </label>
 
         <button className="relative flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted" aria-label="Notifications">
           <Bell className="h-4 w-4" />
-          <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-status-breach" />
         </button>
 
         <div className="flex items-center gap-2 border-l border-border pl-3">

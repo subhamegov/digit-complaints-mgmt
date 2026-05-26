@@ -1,14 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, Download, ArrowRight } from "lucide-react";
-import { PageHeader, StatCard, Panel, StatusBadge, SlaBadge } from "@/components/pgr/primitives";
-import { Can, useRbac } from "@/lib/rbac";
+import {
+  PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
+  ActionButton, OwnerCell, DataTable, nextActionFor, type Column,
+} from "@/components/pgr/primitives";
+import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import {
   dashboardSummary, byDepartment, byWard, trend7d, COMPLAINTS, complaintTypeOf,
+  type Complaint,
 } from "@/lib/mock-data";
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell,
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
@@ -31,14 +36,12 @@ function DashboardPage() {
         subtitle={`Operational view · ${jurisdiction.name} · Last 7 days`}
         primaryAction={
           <div className="flex gap-2">
-            <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium hover:bg-muted">
-              <Download className="h-3.5 w-3.5" /> {t("COMMON_DOWNLOAD")}
-            </button>
-            <Can perm="PGR_COMPLAINT_CREATE">
-              <Link to="/complaints/new" className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-primary px-3 text-[12px] font-medium text-primary-foreground hover:opacity-90">
-                <Plus className="h-3.5 w-3.5" /> {t("ACTION_REGISTER")}
-              </Link>
-            </Can>
+            <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+            <Link to="/complaints/new">
+              <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
+                {t("ACTION_REGISTER")}
+              </ActionButton>
+            </Link>
           </div>
         }
       />
@@ -69,30 +72,23 @@ function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Complaints by locality">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={wards} dataKey="total" nameKey="ward" innerRadius={50} outerRadius={85} paddingAngle={2}>
-                    {wards.map((_, i) => (
-                      <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <ul className="mt-2 space-y-1 text-[12px]">
-              {wards.map((w, i) => (
-                <li key={w.ward} className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-sm" style={{ background: `var(--color-chart-${(i % 5) + 1})` }} />
-                    {w.ward}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground">{w.total}</span>
-                </li>
-              ))}
-            </ul>
+          <Panel title="By locality">
+            {(() => {
+              const max = Math.max(...wards.map((w) => w.total), 1);
+              return (
+                <ul className="space-y-2 text-[12px]">
+                  {wards.map((w) => (
+                    <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
+                      <span className="truncate text-foreground">{w.ward}</span>
+                      <span className="h-2 rounded-sm bg-muted">
+                        <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / max) * 100}%` }} />
+                      </span>
+                      <span className="text-right tabular-nums text-muted-foreground">{w.total}</span>
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </Panel>
         </div>
 
@@ -137,30 +133,19 @@ function DashboardPage() {
         </div>
 
         <Panel title="SLA at risk — next 24 hours" padded={false}>
-          <table className="w-full text-[13px]">
-            <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_NO")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_TYPE")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("COMMON_WARD")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_DEPARTMENT")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_SLA_STATUS")}</th>
-                <th className="px-4 py-2 text-left font-medium">{t("CS_COMPLAINT_STATUS")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 5).map((c) => (
-                <tr key={c.id} className="hover:bg-muted/40">
-                  <td className="px-4 py-2 font-mono text-[12px]"><Link to="/inbox/$id" params={{ id: c.id }} className="text-primary hover:underline">{c.id}</Link></td>
-                  <td className="px-4 py-2">{complaintTypeOf(c.typeCode)?.name}</td>
-                  <td className="px-4 py-2">{c.ward}</td>
-                  <td className="px-4 py-2">{c.department}</td>
-                  <td className="px-4 py-2"><SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /></td>
-                  <td className="px-4 py-2"><StatusBadge status={c.status} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable<Complaint>
+            emptyMessage={t("EMPTY_INBOX")}
+            rows={COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
+            columns={[
+              { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
+              { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
+              { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
+              { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
+              { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
+              { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
+              { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
+            ]}
+          />
         </Panel>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Paperclip, MapPin, Phone, User, Send } from "lucide-react";
 import { useState } from "react";
-import { PageHeader, Panel, StatusBadge, SlaBadge, PriorityPill } from "@/components/pgr/primitives";
+import { PageHeader, Panel, StatusBadge, SlaBadge, PriorityPill, ActionButton } from "@/components/pgr/primitives";
 import { getComplaint, complaintTypeOf, officerOf, OFFICERS } from "@/lib/mock-data";
 import { Can, useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
@@ -28,21 +28,15 @@ function ComplaintDetail() {
       <PageHeader
         breadcrumbs={[{ label: t("COMMON_INBOX") }, { label: c.id }]}
         title={type.name}
-        subtitle={`${c.id} · ${type.department} · ${c.ward} · ${c.locality}`}
+        subtitle={`${c.id} · ${type.department} · ${c.locality}`}
         primaryAction={
           <div className="flex items-center gap-2">
-            <Link to="/inbox" className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium hover:bg-muted">
-              <ArrowLeft className="h-3.5 w-3.5" /> {t("COMMON_BACK")}
+            <Link to="/inbox">
+              <ActionButton variant="secondary" icon={<ArrowLeft className="h-3.5 w-3.5" />}>{t("COMMON_BACK")}</ActionButton>
             </Link>
-            <Can perm="PGR_COMPLAINT_REJECT">
-              <button className="h-8 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium hover:bg-muted">{t("ACTION_REJECT")}</button>
-            </Can>
-            <Can perm="PGR_COMPLAINT_ESCALATE">
-              <button className="h-8 rounded-sm border border-status-breach/40 bg-status-breach-bg px-3 text-[12px] font-medium text-status-breach hover:opacity-90">{t("ACTION_ESCALATE")}</button>
-            </Can>
-            <Can perm="PGR_COMPLAINT_RESOLVE">
-              <button className="h-8 rounded-sm bg-primary px-3 text-[12px] font-medium text-primary-foreground hover:opacity-90">{t("ACTION_RESOLVE")}</button>
-            </Can>
+            <ActionButton permission="PGR_COMPLAINT_REJECT" variant="secondary">{t("ACTION_REJECT")}</ActionButton>
+            <ActionButton permission="PGR_COMPLAINT_ESCALATE" variant="danger">{t("ACTION_ESCALATE")}</ActionButton>
+            <ActionButton permission="PGR_COMPLAINT_RESOLVE" variant="primary">{t("ACTION_RESOLVE")}</ActionButton>
           </div>
         }
       >
@@ -50,11 +44,12 @@ function ComplaintDetail() {
           <StatusBadge status={c.status} />
           <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} />
           <PriorityPill p={c.priority} />
-          <span className="text-[12px] text-muted-foreground">Channel: {c.channel.replace("_", " ").toLowerCase()}</span>
-          <span className="text-[12px] text-muted-foreground">Filed: {new Date(c.filedOn).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span>
+          <span className="text-[12px] text-muted-foreground">{t("CS_CHANNEL")}: {c.channel.replace("_", " ").toLowerCase()}</span>
+          <span className="text-[12px] text-muted-foreground">{t("CS_FILED_ON")}: {new Date(c.filedOn).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span>
           {c.reopenCount > 0 && <span className="text-[12px] text-status-overdue">Reopened ×{c.reopenCount}</span>}
         </div>
       </PageHeader>
+
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 p-6">
         {/* Main */}
