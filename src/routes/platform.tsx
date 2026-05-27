@@ -62,15 +62,18 @@ type Screen =
 
 function PlatformLanding() {
   const [language, setLanguage] = useState("en_IN");
+  const [email, setEmail] = useState("");
   const [screen, setScreen] = useState<Screen>({ kind: "email" });
 
-  const onContinueEmail = (email: string) => {
-    if (KNOWN_ADMIN_EMAILS.has(email.trim().toLowerCase())) {
-      setScreen({ kind: "login", email });
+  const onContinueEmail = (value: string) => {
+    setEmail(value);
+    if (KNOWN_ADMIN_EMAILS.has(value.trim().toLowerCase())) {
+      setScreen({ kind: "login", email: value });
     } else {
-      setScreen({ kind: "setup", email });
+      setScreen({ kind: "setup", email: value });
     }
   };
+
 
   return (
     <div className="min-h-screen w-full bg-[oklch(0.97_0.005_250)] text-foreground">
@@ -98,8 +101,9 @@ function PlatformLanding() {
 
           <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             {screen.kind === "email" && (
-              <EmailEntryCard onContinue={onContinueEmail} />
+              <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
             )}
+
             {screen.kind === "login" && (
               <LoginCard
                 email={screen.email}
@@ -253,11 +257,13 @@ function AuditFooter() {
 /* ---------------- Email entry ---------------- */
 
 function EmailEntryCard({
+  initialEmail = "",
   onContinue,
 }: {
+  initialEmail?: string;
   onContinue: (email: string) => void;
 }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const valid = /.+@.+\..+/.test(email);
   return (
     <form
