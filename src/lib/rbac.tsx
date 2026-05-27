@@ -21,7 +21,9 @@ export type Role =
   | "GRO" // Grievance Routing Officer — assigns / reassigns / rejects
   | "LME" // Last-Mile Employee — resolves
   | "DEPT_HEAD" // Department head — escalations, approvals
-  | "ADMIN"; // System admin — configuration, users, audit
+  | "ACCOUNT_ADMIN" // Account admin — per-account configuration, users, audit
+  | "PLATFORM_ADMIN"; // Platform admin — cross-account platform operations
+
 
 export type Permission =
   | "PGR_COMPLAINT_VIEW"
