@@ -402,7 +402,6 @@ function SetupStepper({
     platformCode: "digit-cms",
     domainName: "Complaint Management",
     domainCode: "complaints",
-    useCase: USE_CASES[0],
     fullName: "",
     email: initialEmail,
     password: "",
