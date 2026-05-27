@@ -154,23 +154,42 @@ function PageHeader() {
   );
 }
 
+const HELP_LINKS = [
+  { label: "Setup Guide", description: "Step-by-step instructions" },
+  { label: "Installation Checklist", description: "Verify prerequisites" },
+  { label: "Contact Support", description: "Reach the platform team" },
+];
+
 function HelpLinksPanel() {
   return (
-    <div className="w-full rounded-sm border border-border bg-background px-4 py-3">
-      <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-        Need help setting up?
+    <div className="w-full rounded-sm border border-border bg-background">
+      <div className="border-b border-border bg-muted/40 px-4 py-3">
+        <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Need help setting up?
+        </div>
       </div>
-      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
-        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-          Setup Guide
-        </a>
-        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-          Installation Checklist
-        </a>
-        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-          Contact Support
-        </a>
-      </div>
+      <ul className="divide-y divide-border">
+        {HELP_LINKS.map((link) => (
+          <li key={link.label}>
+            <a
+              href="#"
+              className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
+            >
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
+                {link.label.charAt(0)}
+              </span>
+              <div>
+                <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
+                  {link.label}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  {link.description}
+                </div>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -182,7 +201,7 @@ function HelpLinksAccordion() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        className="flex w-full items-center justify-between border-b border-border bg-muted/40 px-4 py-3 text-left"
       >
         <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
           Need help setting up?
@@ -194,19 +213,28 @@ function HelpLinksAccordion() {
         />
       </button>
       {open && (
-        <div className="border-t border-border px-4 py-3">
-          <div className="flex flex-col gap-2 text-[12px]">
-            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-              Setup Guide
-            </a>
-            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-              Installation Checklist
-            </a>
-            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
-              Contact Support
-            </a>
-          </div>
-        </div>
+        <ul className="divide-y divide-border">
+          {HELP_LINKS.map((link) => (
+            <li key={link.label}>
+              <a
+                href="#"
+                className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
+                  {link.label.charAt(0)}
+                </span>
+                <div>
+                  <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
+                    {link.label}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {link.description}
+                  </div>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
