@@ -830,11 +830,13 @@ function ReviewSetupCard({
     LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
   const rows: [string, string][] = [
     ["Language", languageLabel],
+    ["Administrator", data.fullName],
+    ["Administrator Email", data.email],
+    ["Recovery Email", data.recoveryEmail],
     ["Platform Name", data.platformName],
     ["Platform Code", data.platformCode],
     ["Domain Name", data.domainName],
     ["Domain Code", data.domainCode],
-    ["Administrator Email", data.email],
   ];
   return (
     <div className="space-y-4">
