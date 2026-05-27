@@ -101,11 +101,13 @@ export function StatCard({
   value,
   delta,
   intent = "neutral",
+  onRemove,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
+  onRemove?: () => void;
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -114,7 +116,16 @@ export function StatCard({
     negative: "text-status-breach",
   };
   return (
-    <div className="rounded border border-border bg-surface p-4">
+    <div className="relative rounded border border-border bg-surface p-4 group">
+      {onRemove && (
+        <button
+          onClick={onRemove}
+          className="absolute top-1.5 left-1.5 rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-status-breach group-hover:opacity-100 focus:opacity-100"
+          aria-label={`Remove ${label}`}
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
       {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
