@@ -22,7 +22,9 @@ const USERS = OFFICERS.map((o, i): { id: string; name: string; designation: stri
 })).concat([
   { id: "EMP-1201", name: "Manjit Singh", designation: "Grievance Routing Officer", department: "Public Affairs", ward: "ALL", mobile: "98xxxxxx00", role: "GRO", active: true },
   { id: "EMP-1300", name: "Dr. Anita Sharma", designation: "Joint Commissioner", department: "Office of Commissioner", ward: "ALL", mobile: "98xxxxxx01", role: "DEPT_HEAD", active: true },
-  { id: "EMP-1400", name: "Vikram Mehta", designation: "System Administrator", department: "IT", ward: "ALL", mobile: "98xxxxxx02", role: "ADMIN", active: true },
+  { id: "EMP-1400", name: "Vikram Mehta", designation: "Account Administrator", department: "IT", ward: "ALL", mobile: "98xxxxxx02", role: "ACCOUNT_ADMIN", active: true },
+  { id: "EMP-1401", name: "Priya Nair", designation: "Platform Administrator", department: "Platform", ward: "ALL", mobile: "98xxxxxx03", role: "PLATFORM_ADMIN", active: true },
+
   { id: "EMP-1500", name: "Harpreet Kaur", designation: "Citizen Services Rep.", department: "Front Office", ward: "ALL", mobile: "98xxxxxx03", role: "CSR", active: true },
 ]);
 

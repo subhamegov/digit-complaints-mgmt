@@ -21,7 +21,9 @@ export type Role =
   | "GRO" // Grievance Routing Officer — assigns / reassigns / rejects
   | "LME" // Last-Mile Employee — resolves
   | "DEPT_HEAD" // Department head — escalations, approvals
-  | "ADMIN"; // System admin — configuration, users, audit
+  | "ACCOUNT_ADMIN" // Account admin — per-account configuration, users, audit
+  | "PLATFORM_ADMIN"; // Platform admin — cross-account platform operations
+
 
 export type Permission =
   | "PGR_COMPLAINT_VIEW"
@@ -88,7 +90,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "PGR_CITIZEN_PII_VIEW",
     "AUDIT_LOG_VIEW",
   ],
-  ADMIN: [
+  ACCOUNT_ADMIN: [
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",
     "PGR_TASKS_VIEW",
@@ -101,6 +103,20 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "HRMS_USER_MANAGE",
     "AUDIT_LOG_VIEW",
   ],
+  PLATFORM_ADMIN: [
+    "PGR_DASHBOARD_VIEW",
+    "PGR_INBOX_VIEW",
+    "PGR_TASKS_VIEW",
+    "PGR_COMPLAINT_VIEW",
+    "PGR_REPORTS_VIEW",
+    "PGR_SLA_VIEW",
+    "PGR_ESCALATION_VIEW",
+    "MDMS_COMPLAINT_TYPE_MANAGE",
+    "MDMS_WORKFLOW_MANAGE",
+    "HRMS_USER_MANAGE",
+    "AUDIT_LOG_VIEW",
+  ],
+
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -108,7 +124,9 @@ export const ROLE_LABEL: Record<Role, string> = {
   GRO: "Grievance Routing Officer",
   LME: "Field Employee",
   DEPT_HEAD: "Department Head",
-  ADMIN: "System Administrator",
+  ACCOUNT_ADMIN: "Account Administrator",
+  PLATFORM_ADMIN: "Platform Administrator",
+
 };
 
 /**
@@ -184,7 +202,9 @@ function roleUser(role: Role): string {
     case "GRO": return "Manjit Singh";
     case "LME": return "Ramesh Kumar";
     case "DEPT_HEAD": return "Dr. Anita Sharma";
-    case "ADMIN": return "Vikram Mehta";
+    case "ACCOUNT_ADMIN": return "Vikram Mehta";
+    case "PLATFORM_ADMIN": return "Priya Nair";
+
   }
 }
 
