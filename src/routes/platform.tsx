@@ -156,7 +156,7 @@ function PageHeader() {
 
 function HelpLinksPanel() {
   return (
-    <div className="mt-5 w-full max-w-[460px] rounded-sm border border-border bg-background px-4 py-3">
+    <div className="w-full rounded-sm border border-border bg-background px-4 py-3">
       <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         Need help setting up?
       </div>
@@ -171,6 +171,43 @@ function HelpLinksPanel() {
           Contact Support
         </a>
       </div>
+    </div>
+  );
+}
+
+function HelpLinksAccordion() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="w-full rounded-sm border border-border bg-background">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Need help setting up?
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <div className="border-t border-border px-4 py-3">
+          <div className="flex flex-col gap-2 text-[12px]">
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Setup Guide
+            </a>
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Installation Checklist
+            </a>
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Contact Support
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
