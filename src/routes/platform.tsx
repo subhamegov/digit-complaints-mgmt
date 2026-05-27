@@ -35,13 +35,6 @@ const LANGUAGES = [
   { code: "sw_KE", label: "Swahili", native: "Kiswahili" },
 ];
 
-const USE_CASES = [
-  "Grievance Redressal",
-  "Case Management",
-  "Incident Management",
-  "Emergency Response",
-  "Pilot Setup",
-];
 
 /**
  * Mock directory probe. Toggle to demo first-time install.
