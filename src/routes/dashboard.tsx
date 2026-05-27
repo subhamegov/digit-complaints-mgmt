@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2 } from "lucide-react";
 import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
@@ -27,6 +27,15 @@ type KpiOption = {
   icon: React.ComponentType<{ className?: string }>;
 };
 
+const DEFAULT_KPIS: KpiOption[] = [
+  { id: "total", label: t("CS_TOTAL_COMPLAINTS"), value: "", intent: "neutral", delta: "+12 vs last week", description: "Total complaints registered in the selected period.", icon: TrendingUp },
+  { id: "open", label: t("CS_OPEN_COMPLAINTS"), value: "", intent: "warning", delta: "4 nearing breach", description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle },
+  { id: "resolved", label: t("CS_RESOLVED_COMPLAINTS"), value: "", intent: "positive", delta: "87% within SLA", description: "Complaints resolved in the selected period.", icon: ThumbsUp },
+  { id: "breached", label: t("CS_SLA_BREACHED"), value: "", intent: "negative", delta: "Escalation L2 active", description: "Complaints where SLA has been breached.", icon: AlertTriangle },
+  { id: "avg-resolution", label: t("CS_AVG_RESOLUTION"), value: "", intent: "neutral", delta: "Target: 36h", description: "Average time taken to resolve a complaint.", icon: Clock },
+  { id: "reopen", label: t("CS_REOPEN_RATE"), value: "", intent: "neutral", delta: "", description: "Percentage of complaints reopened after resolution.", icon: Repeat },
+];
+
 const ADDITIONAL_KPIS: KpiOption[] = [
   { id: "first-response", label: "Avg. first response", value: "2.4h", intent: "positive", delta: "−18% WoW", description: "Mean time from complaint registration to first officer acknowledgement.", icon: Clock },
   { id: "escalation-rate", label: "Escalation rate", value: "9.2%", intent: "warning", delta: "+1.1 pts", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp },
@@ -51,13 +60,39 @@ function DashboardPage() {
   const { jurisdiction } = useRbac();
 
   const recent = COMPLAINTS.slice(0, 6);
-  const [addedKpis, setAddedKpis] = useState<string[]>([]);
+
+  // Default KPIs are always visible on first mount; added ones start empty.
+  // This naturally resets every time the dashboard is opened.
+  const defaultIds = useMemo(() => DEFAULT_KPIS.map((k) => k.id), []);
+  const [visibleKpiIds, setVisibleKpiIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const allKpis: KpiOption[] = useMemo(() => {
+    const dynamicDefaults = DEFAULT_KPIS.map((k) => {
+      let value = k.value;
+      if (k.id === "total") value = String(s.total);
+      if (k.id === "open") value = String(s.open);
+      if (k.id === "resolved") value = String(s.resolved);
+      if (k.id === "breached") value = String(s.breached);
+      if (k.id === "avg-resolution") value = `${s.avgResolutionHrs}h`;
+      if (k.id === "reopen") value = `${s.reopenRate}%`;
+      let delta = k.delta;
+      if (k.id === "reopen") delta = `CSAT ${s.satisfaction}/5`;
+      return { ...k, value, delta };
+    });
+    return [...dynamicDefaults, ...ADDITIONAL_KPIS];
+  }, [s]);
+
+  const removeKpi = (id: string) => {
+    setVisibleKpiIds((prev) => prev.filter((x) => x !== id));
+  };
+
   const addKpi = (id: string) => {
-    setAddedKpis((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setVisibleKpiIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
     setPickerOpen(false);
   };
+
+  const availableToAdd = allKpis.filter((k) => !visibleKpiIds.includes(k.id));
 
   return (
     <div>
@@ -75,7 +110,7 @@ function DashboardPage() {
               <PopoverContent align="end" className="w-72 p-1">
                 <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
                 <ul className="max-h-80 overflow-auto">
-                  {ADDITIONAL_KPIS.filter((k) => !addedKpis.includes(k.id)).map((k) => {
+                  {availableToAdd.map((k) => {
                     const Icon = k.icon;
                     return (
                       <li key={k.id}>
@@ -100,7 +135,7 @@ function DashboardPage() {
                       </li>
                     );
                   })}
-                  {ADDITIONAL_KPIS.every((k) => addedKpis.includes(k.id)) && (
+                  {availableToAdd.length === 0 && (
                     <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
                   )}
                 </ul>
@@ -120,15 +155,19 @@ function DashboardPage() {
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
-          <StatCard label={t("CS_TOTAL_COMPLAINTS")} value={s.total} delta="+12 vs last week" />
-          <StatCard label={t("CS_OPEN_COMPLAINTS")} value={s.open} intent="warning" delta="4 nearing breach" />
-          <StatCard label={t("CS_RESOLVED_COMPLAINTS")} value={s.resolved} intent="positive" delta="87% within SLA" />
-          <StatCard label={t("CS_SLA_BREACHED")} value={s.breached} intent="negative" delta="Escalation L2 active" />
-          <StatCard label={t("CS_AVG_RESOLUTION")} value={`${s.avgResolutionHrs}h`} delta="Target: 36h" />
-          <StatCard label={t("CS_REOPEN_RATE")} value={`${s.reopenRate}%`} delta={`CSAT ${s.satisfaction}/5`} />
-          {addedKpis.map((id) => {
-            const k = ADDITIONAL_KPIS.find((x) => x.id === id)!;
-            return <StatCard key={id} label={k.label} value={k.value} intent={k.intent} delta={k.delta} />;
+          {visibleKpiIds.map((id) => {
+            const k = allKpis.find((x) => x.id === id);
+            if (!k) return null;
+            return (
+              <StatCard
+                key={id}
+                label={k.label}
+                value={k.value}
+                intent={k.intent}
+                delta={k.delta}
+                onRemove={() => removeKpi(id)}
+              />
+            );
           })}
         </div>
 
