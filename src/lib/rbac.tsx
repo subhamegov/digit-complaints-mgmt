@@ -123,10 +123,14 @@ export type Tenant = { code: string; name: string; type: string };
 export type Jurisdiction = { code: string; name: string };
 
 export const TENANTS: Tenant[] = [
-  { code: "acc.amritsar.mc",    name: "Amritsar Municipal Corp.",     type: "Municipal Corporation" },
-  { code: "acc.ludhiana.scl",   name: "Ludhiana Smart City Ltd.",     type: "Smart City SPV" },
-  { code: "acc.pb.water",       name: "Punjab Water Supply Board",    type: "Utility" },
-  { code: "acc.amritsar.da",    name: "Amritsar Development Auth.",   type: "Development Authority" },
+  { code: "acc.makueni.cg",    name: "Makueni County Government, Kenya",              type: "County Government" },
+  { code: "acc.bomet.cg",      name: "Bomet County Government, Kenya",                  type: "County Government" },
+  { code: "acc.ethekwini.mm",  name: "eThekwini Metropolitan Municipality, South Africa", type: "Metropolitan Municipality" },
+  { code: "acc.diredawa.ca",   name: "Dire Dawa City Administration, Ethiopia",       type: "City Administration" },
+  { code: "acc.enugu.sg",      name: "Enugu State Government, Nigeria",                type: "State Government" },
+  { code: "acc.maputo.mc",     name: "Maputo Municipal Council, Mozambique",           type: "Municipal Council" },
+  { code: "acc.banyuwangi.rg", name: "Banyuwangi Regency Government, Indonesia",        type: "Regency Government" },
+  { code: "acc.amritsar.mc",   name: "Amritsar Municipal Corporation, India",          type: "Municipal Corporation" },
 ];
 
 export const JURISDICTIONS: Jurisdiction[] = [
