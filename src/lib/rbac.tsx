@@ -124,7 +124,9 @@ export const ROLE_LABEL: Record<Role, string> = {
   GRO: "Grievance Routing Officer",
   LME: "Field Employee",
   DEPT_HEAD: "Department Head",
-  ADMIN: "System Administrator",
+  ACCOUNT_ADMIN: "Account Administrator",
+  PLATFORM_ADMIN: "Platform Administrator",
+
 };
 
 /**
