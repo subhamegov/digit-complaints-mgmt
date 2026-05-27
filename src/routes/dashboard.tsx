@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Download, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2 } from "lucide-react";
 import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor, type Column,
 } from "@/components/pgr/primitives";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import {
@@ -13,6 +16,26 @@ import {
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
+
+type KpiOption = {
+  id: string;
+  label: string;
+  value: string;
+  intent?: "positive" | "negative" | "warning" | "neutral";
+  delta: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+const ADDITIONAL_KPIS: KpiOption[] = [
+  { id: "first-response", label: "Avg. first response", value: "2.4h", intent: "positive", delta: "−18% WoW", description: "Mean time from complaint registration to first officer acknowledgement.", icon: Clock },
+  { id: "escalation-rate", label: "Escalation rate", value: "9.2%", intent: "warning", delta: "+1.1 pts", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp },
+  { id: "active-officers", label: "Active field officers", value: "142", intent: "neutral", delta: "12 on leave", description: "Officers with at least one assignment touched in the last 24 hours.", icon: Users },
+  { id: "repeat-citizens", label: "Repeat complainants", value: "63", intent: "warning", delta: "+8 vs last week", description: "Unique citizens filing more than one complaint in the last 30 days.", icon: Repeat },
+  { id: "ageing", label: "Ageing > 7 days", value: "37", intent: "negative", delta: "5 cross-dept", description: "Open complaints with age greater than 7 days, awaiting closure.", icon: AlertTriangle },
+  { id: "csat-trend", label: "CSAT trend (7d)", value: "+0.3", intent: "positive", delta: "vs 4.1 baseline", description: "Rolling change in citizen satisfaction score over the last 7 days.", icon: ThumbsUp },
+  { id: "dept-load", label: "Dept. load index", value: "1.18", intent: "neutral", delta: "PWD highest", description: "Open-complaint to officer ratio across departments; 1.0 = balanced.", icon: Building2 },
+];
 
 
 export const Route = createFileRoute("/dashboard")({
