@@ -10,9 +10,10 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { RbacProvider } from "@/lib/rbac";
+import { RbacProvider, useRbac } from "@/lib/rbac";
 import { Sidebar, MobileSidebar, TopBar } from "@/components/pgr/Shell";
 import { useState } from "react";
+
 
 function NotFoundComponent() {
   return (
