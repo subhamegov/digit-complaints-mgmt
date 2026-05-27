@@ -559,7 +559,7 @@ function PlatformSetupForm({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 40);
-  const [codeEdited, setCodeEdited] = React.useState(
+  const [codeEdited, setCodeEdited] = useState(
     () => data.platformCode !== "" && data.platformCode !== slugify(data.platformName),
   );
   return (
