@@ -4,6 +4,7 @@ import type { ComplaintStatus, SlaState, Priority, Complaint } from "@/lib/mock-
 import { officerOf } from "@/lib/mock-data";
 import { t } from "@/lib/i18n";
 import { useRbac, type Permission } from "@/lib/rbac";
+import { X } from "lucide-react";
 
 const STATUS_TOKEN: Record<ComplaintStatus, { bg: string; fg: string; label: string }> = {
   OPEN:        { bg: "bg-status-open-bg",     fg: "text-status-open",     label: "STATUS_OPEN" },
