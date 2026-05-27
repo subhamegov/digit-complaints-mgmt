@@ -61,7 +61,7 @@ type Screen =
 /* ---------------- Page ---------------- */
 
 function PlatformLanding() {
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState("en_IN");
   const [screen, setScreen] = useState<Screen>({ kind: "email" });
 
   const onContinueEmail = (email: string) => {
