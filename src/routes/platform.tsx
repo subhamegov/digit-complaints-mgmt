@@ -956,7 +956,7 @@ function LanguageSelector({
     >
       {LANGUAGES.map((l) => (
         <option key={l.code} value={l.code}>
-          {l.label}
+          {l.native}
         </option>
       ))}
     </select>
