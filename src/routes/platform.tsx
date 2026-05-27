@@ -368,9 +368,9 @@ function LoginCard({
 
 const SETUP_STEPS = [
   "Language",
+  "Administration Essentials",
   "Platform",
   "Domain",
-  "Administrator",
   "Review",
 ] as const;
 
@@ -382,8 +382,10 @@ type SetupData = {
   domainCode: string;
   fullName: string;
   email: string;
-  password: string;
-  confirm: string;
+  recoveryEmail: string;
+  confirmRecoveryEmail: string;
+  magicLink: string;
+  magicLinkCopied: boolean;
 };
 
 function SetupStepper({
@@ -406,8 +408,10 @@ function SetupStepper({
     domainCode: "complaints",
     fullName: "",
     email: initialEmail,
-    password: "",
-    confirm: "",
+    recoveryEmail: "",
+    confirmRecoveryEmail: "",
+    magicLink: "",
+    magicLinkCopied: false,
   });
 
   const set = <K extends keyof SetupData>(k: K, v: SetupData[K]) =>
@@ -436,7 +440,7 @@ function SetupStepper({
           />
         )}
         {step === 1 && (
-          <PlatformSetupForm
+          <AdministratorSetupForm
             data={data}
             set={set}
             onNext={next}
@@ -444,7 +448,7 @@ function SetupStepper({
           />
         )}
         {step === 2 && (
-          <DomainSetupForm
+          <PlatformSetupForm
             data={data}
             set={set}
             onNext={next}
@@ -452,7 +456,7 @@ function SetupStepper({
           />
         )}
         {step === 3 && (
-          <AdministratorSetupForm
+          <DomainSetupForm
             data={data}
             set={set}
             onNext={next}
