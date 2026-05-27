@@ -10,9 +10,10 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { RbacProvider } from "@/lib/rbac";
+import { RbacProvider, useRbac } from "@/lib/rbac";
 import { Sidebar, MobileSidebar, TopBar } from "@/components/pgr/Shell";
 import { useState } from "react";
+
 
 function NotFoundComponent() {
   return (
@@ -98,20 +99,29 @@ function RootComponent() {
 
 function AppLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isChromeless = pathname === "/login" || pathname === "/";
+  const { role } = useRbac();
+  const isChromeless = pathname === "/login" || pathname === "/" || pathname === "/platform";
+
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   if (isChromeless) {
     return <Outlet />;
   }
 
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const isPlatformAdmin = role === "PLATFORM_ADMIN";
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <Sidebar />
-      <MobileSidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+      {!isPlatformAdmin && <Sidebar />}
+      {!isPlatformAdmin && (
+        <MobileSidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+      )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onMenuClick={() => setMobileNavOpen(true)} />
+        <TopBar
+          onMenuClick={() => setMobileNavOpen(true)}
+          showSearch={!isPlatformAdmin}
+          showMenu={!isPlatformAdmin}
+        />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
@@ -119,3 +129,4 @@ function AppLayout() {
     </div>
   );
 }
+

@@ -196,27 +196,47 @@ export function MobileSidebar({ open, onClose }: { open: boolean; onClose: () =>
   );
 }
 
-export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
+export function TopBar({
+  onMenuClick,
+  showSearch = true,
+  showMenu = true,
+}: {
+  onMenuClick?: () => void;
+  showSearch?: boolean;
+  showMenu?: boolean;
+}) {
   const navigate = useNavigate();
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-4">
-      <button
-        onClick={onMenuClick}
-        className="lg:hidden flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted"
-        aria-label="Open menu"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
+      {showMenu && (
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted"
+          aria-label="Open menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+      )}
 
-      <div className="relative flex-1 max-w-md min-w-0">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Search…"
-          aria-label={t("COMMON_SEARCH")}
-          className="h-8 w-full rounded-sm border border-border bg-background pl-8 pr-3 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
-        />
-      </div>
+      {showSearch ? (
+        <div className="relative flex-1 max-w-md min-w-0">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            placeholder="Search…"
+            aria-label={t("COMMON_SEARCH")}
+            className="h-8 w-full rounded-sm border border-border bg-background pl-8 pr-3 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+          />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary text-[12px] font-bold text-primary-foreground">P</div>
+          <div className="leading-tight">
+            <div className="text-[12px] font-semibold">DIGIT Platform</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin Console</div>
+          </div>
+        </div>
+      )}
 
       <button className="ml-auto relative flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted" aria-label="Notifications">
         <Bell className="h-4 w-4" />
@@ -224,7 +244,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
       </button>
 
       <button
-        onClick={() => navigate({ to: "/login" })}
+        onClick={() => navigate({ to: "/platform" })}
         className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2 text-[12px] font-medium text-foreground hover:bg-muted"
         aria-label={t("COMMON_SIGN_OUT")}
         title={t("COMMON_SIGN_OUT")}
@@ -238,5 +258,6 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
     </header>
   );
 }
+
 
 export { Plus, LogOut };
