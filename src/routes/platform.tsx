@@ -191,8 +191,11 @@ function EmailEntryCard({
         if (valid) onContinue(email);
       }}
     >
-      <CardHeading title="Continue" subtitle="Enter your work email to continue." />
-      <div className="mt-5 space-y-4">
+      <CardHeading
+        title="Enter Work Email"
+        subtitle="We'll check whether this platform is already set up."
+      />
+      <div className="mt-5 space-y-3">
         <Field label="Work Email">
           <input
             type="email"
@@ -204,11 +207,24 @@ function EmailEntryCard({
             autoFocus
           />
         </Field>
-        <PrimaryButton type="submit" disabled={!valid}>
+        <button
+          type="submit"
+          disabled={!valid}
+          className={
+            "flex h-9 w-full items-center justify-center gap-1.5 rounded-sm text-[13px] font-medium transition-colors " +
+            (valid
+              ? "bg-[oklch(0.62_0.12_195)] text-white hover:bg-[oklch(0.56_0.12_195)]"
+              : "bg-muted text-muted-foreground cursor-not-allowed")
+          }
+        >
           Continue
           <ArrowRight className="h-3.5 w-3.5" />
-        </PrimaryButton>
+        </button>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          New installation? Setup starts automatically if no administrator exists.
+        </p>
       </div>
+
     </form>
   );
 }
