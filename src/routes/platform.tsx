@@ -35,13 +35,6 @@ const LANGUAGES = [
   { code: "sw_KE", label: "Swahili", native: "Kiswahili" },
 ];
 
-const USE_CASES = [
-  "Grievance Redressal",
-  "Case Management",
-  "Incident Management",
-  "Emergency Response",
-  "Pilot Setup",
-];
 
 /**
  * Mock directory probe. Toggle to demo first-time install.
@@ -385,7 +378,6 @@ type SetupData = {
   platformCode: string;
   domainName: string;
   domainCode: string;
-  useCase: string;
   fullName: string;
   email: string;
   password: string;
@@ -410,7 +402,6 @@ function SetupStepper({
     platformCode: "digit-cms",
     domainName: "Complaint Management",
     domainCode: "complaints",
-    useCase: USE_CASES[0],
     fullName: "",
     email: initialEmail,
     password: "",
@@ -626,19 +617,6 @@ function DomainSetupForm({
           onChange={(e) => set("domainCode", e.target.value)}
           className={inputCls}
         />
-      </Field>
-      <Field label="Default Use Case">
-        <select
-          value={data.useCase}
-          onChange={(e) => set("useCase", e.target.value)}
-          className={inputCls}
-        >
-          {USE_CASES.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
       </Field>
       <StepActions onBack={onBack} disabled={!valid}>
         Continue
