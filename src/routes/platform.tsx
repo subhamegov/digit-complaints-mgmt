@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Globe,
   Info,
   ShieldCheck,
@@ -91,37 +92,47 @@ function PlatformLanding() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-6xl flex-col items-center px-6 py-10 sm:py-14">
-        <PageHeader />
+      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-10 sm:py-14 lg:grid-cols-[460px_1fr] lg:gap-10">
+        <div className="flex flex-col items-center">
+          <PageHeader />
 
-        <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          {screen.kind === "email" && (
-            <EmailEntryCard onContinue={onContinueEmail} />
-          )}
-          {screen.kind === "login" && (
-            <LoginCard
-              email={screen.email}
-              onBack={() => setScreen({ kind: "email" })}
-            />
-          )}
-          {screen.kind === "setup" && (
-            <SetupStepper
-              initialEmail={screen.email}
-              initialLanguage={language}
-              onCancel={() => setScreen({ kind: "email" })}
-              onComplete={(email) =>
-                setScreen({ kind: "success", email })
-              }
-            />
-          )}
-          {screen.kind === "success" && (
-            <SuccessStateCard email={screen.email} />
-          )}
-        </section>
+          <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            {screen.kind === "email" && (
+              <EmailEntryCard onContinue={onContinueEmail} />
+            )}
+            {screen.kind === "login" && (
+              <LoginCard
+                email={screen.email}
+                onBack={() => setScreen({ kind: "email" })}
+              />
+            )}
+            {screen.kind === "setup" && (
+              <SetupStepper
+                initialEmail={screen.email}
+                initialLanguage={language}
+                onCancel={() => setScreen({ kind: "email" })}
+                onComplete={(email) =>
+                  setScreen({ kind: "success", email })
+                }
+              />
+            )}
+            {screen.kind === "success" && (
+              <SuccessStateCard email={screen.email} />
+            )}
+          </section>
 
-        {screen.kind === "email" && <HelpLinksPanel />}
+          <div className="mt-5 w-full max-w-[460px] lg:hidden">
+            <HelpLinksAccordion />
+          </div>
 
-        <AuditFooter />
+          <AuditFooter />
+        </div>
+
+        <div className="hidden lg:block">
+          <div className="sticky top-10">
+            <HelpLinksPanel />
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -145,7 +156,7 @@ function PageHeader() {
 
 function HelpLinksPanel() {
   return (
-    <div className="mt-5 w-full max-w-[460px] rounded-sm border border-border bg-background px-4 py-3">
+    <div className="w-full rounded-sm border border-border bg-background px-4 py-3">
       <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         Need help setting up?
       </div>
@@ -160,6 +171,43 @@ function HelpLinksPanel() {
           Contact Support
         </a>
       </div>
+    </div>
+  );
+}
+
+function HelpLinksAccordion() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="w-full rounded-sm border border-border bg-background">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Need help setting up?
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <div className="border-t border-border px-4 py-3">
+          <div className="flex flex-col gap-2 text-[12px]">
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Setup Guide
+            </a>
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Installation Checklist
+            </a>
+            <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+              Contact Support
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -845,7 +893,8 @@ function LanguageSelector({
   onChange: (v: string) => void;
   compact?: boolean;
 }) {
-  const id = useMemo(() => `lang-${Math.random().toString(36).slice(2, 7)}`, []);
+  const reactId = useId();
+  const id = `lang-${reactId}`;
   if (compact) {
     return (
       <label
