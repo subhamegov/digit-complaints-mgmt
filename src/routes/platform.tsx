@@ -378,7 +378,6 @@ type SetupData = {
   platformCode: string;
   domainName: string;
   domainCode: string;
-  useCase: string;
   fullName: string;
   email: string;
   password: string;
