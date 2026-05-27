@@ -893,7 +893,8 @@ function LanguageSelector({
   onChange: (v: string) => void;
   compact?: boolean;
 }) {
-  const id = useMemo(() => `lang-${Math.random().toString(36).slice(2, 7)}`, []);
+  const reactId = useId();
+  const id = `lang-${reactId}`;
   if (compact) {
     return (
       <label
