@@ -5,8 +5,10 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronDown,
+  Copy,
   Globe,
   Info,
+  RefreshCw,
   ShieldCheck,
 } from "lucide-react";
 import { useRbac } from "@/lib/rbac";
