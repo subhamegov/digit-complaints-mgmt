@@ -120,6 +120,10 @@ function PlatformLanding() {
             )}
           </section>
 
+          <div className="mt-5 w-full max-w-[460px] lg:hidden">
+            <HelpLinksPanel />
+          </div>
+
           <AuditFooter />
         </div>
 
