@@ -551,6 +551,17 @@ function PlatformSetupForm({
 }) {
   const valid =
     data.platformName.trim().length > 1 && /^[a-z0-9-]+$/.test(data.platformCode);
+  const slugify = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40);
+  const [codeEdited, setCodeEdited] = useState(
+    () => data.platformCode !== "" && data.platformCode !== slugify(data.platformName),
+  );
   return (
     <form
       className="space-y-4"
@@ -563,14 +574,21 @@ function PlatformSetupForm({
       <Field label="Platform Name">
         <input
           value={data.platformName}
-          onChange={(e) => set("platformName", e.target.value)}
+          onChange={(e) => {
+            const name = e.target.value;
+            set("platformName", name);
+            if (!codeEdited) set("platformCode", slugify(name));
+          }}
           className={inputCls}
         />
       </Field>
-      <Field label="Platform Code" hint="Lowercase, no spaces.">
+      <Field label="Platform Code" hint="Auto-suggested from name. Lowercase, no spaces.">
         <input
           value={data.platformCode}
-          onChange={(e) => set("platformCode", e.target.value)}
+          onChange={(e) => {
+            setCodeEdited(true);
+            set("platformCode", e.target.value);
+          }}
           className={inputCls}
         />
       </Field>
