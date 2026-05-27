@@ -13,6 +13,7 @@ import { Route as UsersRouteImport } from './routes/users'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SlaRouteImport } from './routes/sla'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EscalationsRouteImport } from './routes/escalations'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -42,6 +43,11 @@ const SlaRoute = SlaRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRoute = PlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/platform'
     | '/reports'
     | '/sla'
     | '/tasks'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/platform'
     | '/reports'
     | '/sla'
     | '/tasks'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/platform'
     | '/reports'
     | '/sla'
     | '/tasks'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   EscalationsRoute: typeof EscalationsRoute
   LoginRoute: typeof LoginRoute
+  PlatformRoute: typeof PlatformRoute
   ReportsRoute: typeof ReportsRoute
   SlaRoute: typeof SlaRoute
   TasksRoute: typeof TasksRoute
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   EscalationsRoute: EscalationsRoute,
   LoginRoute: LoginRoute,
+  PlatformRoute: PlatformRoute,
   ReportsRoute: ReportsRoute,
   SlaRoute: SlaRoute,
   TasksRoute: TasksRoute,
