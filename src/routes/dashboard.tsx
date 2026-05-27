@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2 } from "lucide-react";
 import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
@@ -26,6 +26,15 @@ type KpiOption = {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
 };
+
+const DEFAULT_KPIS: KpiOption[] = [
+  { id: "total", label: t("CS_TOTAL_COMPLAINTS"), value: "", intent: "neutral", delta: "+12 vs last week", description: "Total complaints registered in the selected period.", icon: TrendingUp },
+  { id: "open", label: t("CS_OPEN_COMPLAINTS"), value: "", intent: "warning", delta: "4 nearing breach", description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle },
+  { id: "resolved", label: t("CS_RESOLVED_COMPLAINTS"), value: "", intent: "positive", delta: "87% within SLA", description: "Complaints resolved in the selected period.", icon: ThumbsUp },
+  { id: "breached", label: t("CS_SLA_BREACHED"), value: "", intent: "negative", delta: "Escalation L2 active", description: "Complaints where SLA has been breached.", icon: AlertTriangle },
+  { id: "avg-resolution", label: t("CS_AVG_RESOLUTION"), value: "", intent: "neutral", delta: "Target: 36h", description: "Average time taken to resolve a complaint.", icon: Clock },
+  { id: "reopen", label: t("CS_REOPEN_RATE"), value: "", intent: "neutral", delta: "", description: "Percentage of complaints reopened after resolution.", icon: Repeat },
+];
 
 const ADDITIONAL_KPIS: KpiOption[] = [
   { id: "first-response", label: "Avg. first response", value: "2.4h", intent: "positive", delta: "−18% WoW", description: "Mean time from complaint registration to first officer acknowledgement.", icon: Clock },
