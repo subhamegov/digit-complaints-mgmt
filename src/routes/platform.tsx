@@ -257,11 +257,13 @@ function AuditFooter() {
 /* ---------------- Email entry ---------------- */
 
 function EmailEntryCard({
+  initialEmail = "",
   onContinue,
 }: {
+  initialEmail?: string;
   onContinue: (email: string) => void;
 }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const valid = /.+@.+\..+/.test(email);
   return (
     <form
