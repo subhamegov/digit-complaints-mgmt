@@ -649,7 +649,7 @@ function DomainSetupForm({
   );
 }
 
-/* ---- Step 4: Administrator ---- */
+/* ---- Administration Essentials ---- */
 function AdministratorSetupForm({
   data,
   set,
@@ -661,11 +661,40 @@ function AdministratorSetupForm({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const generateMagicLink = () => {
+    const token =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID().replace(/-/g, "")
+        : Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://platform.example";
+    set("magicLink", `${origin}/platform/activate?token=${token}`);
+    set("magicLinkCopied", false);
+  };
+
+  const copyLink = async () => {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(data.magicLink);
+      }
+      set("magicLinkCopied", true);
+    } catch {
+      set("magicLinkCopied", true);
+    }
+  };
+
+  const recoveryValid =
+    /.+@.+\..+/.test(data.recoveryEmail) &&
+    data.recoveryEmail.trim().toLowerCase() ===
+      data.confirmRecoveryEmail.trim().toLowerCase();
+
   const valid =
     data.fullName.trim().length > 1 &&
     /.+@.+\..+/.test(data.email) &&
-    data.password.length >= 8 &&
-    data.password === data.confirm;
+    recoveryValid &&
+    data.magicLink.length > 0 &&
+    data.magicLinkCopied;
+
   return (
     <form
       className="space-y-4"
@@ -674,7 +703,10 @@ function AdministratorSetupForm({
         if (valid) onNext();
       }}
     >
-      <CardHeading title="Create Administrator" />
+      <CardHeading
+        title="Administration Essentials"
+        subtitle="Identify the first administrator and issue their activation link."
+      />
       <Field label="Full Name">
         <input
           value={data.fullName}
@@ -691,24 +723,92 @@ function AdministratorSetupForm({
           className={inputCls}
         />
       </Field>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Password" hint="Min. 8 characters.">
-          <input
-            type="password"
-            value={data.password}
-            onChange={(e) => set("password", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
-        <Field label="Confirm Password">
-          <input
-            type="password"
-            value={data.confirm}
-            onChange={(e) => set("confirm", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
+      <Field label="Recovery Email" hint="Used to regain access if the work email is lost.">
+        <input
+          type="email"
+          value={data.recoveryEmail}
+          onChange={(e) => set("recoveryEmail", e.target.value)}
+          placeholder="recovery@your-org.org"
+          className={inputCls}
+        />
+      </Field>
+      <Field
+        label="Confirm Recovery Email"
+        hint={
+          data.confirmRecoveryEmail.length > 0 && !recoveryValid
+            ? "Recovery emails do not match."
+            : undefined
+        }
+      >
+        <input
+          type="email"
+          value={data.confirmRecoveryEmail}
+          onChange={(e) => set("confirmRecoveryEmail", e.target.value)}
+          placeholder="recovery@your-org.org"
+          className={inputCls}
+        />
+      </Field>
+
+      <div className="rounded-sm border border-border bg-muted/30 p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            Administrator Magic Link
+          </span>
+          <button
+            type="button"
+            onClick={generateMagicLink}
+            className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          >
+            <RefreshCw className="h-3 w-3" />
+            {data.magicLink ? "Regenerate" : "Generate"}
+          </button>
+        </div>
+
+        {data.magicLink ? (
+          <>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                value={data.magicLink}
+                readOnly
+                className={readOnlyInputCls + " font-mono text-[11.5px]"}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+              <button
+                type="button"
+                onClick={copyLink}
+                className={
+                  "flex h-9 shrink-0 items-center gap-1.5 rounded-sm px-3 text-[12px] font-medium transition-colors " +
+                  (data.magicLinkCopied
+                    ? "border border-primary/30 bg-primary/10 text-primary"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90")
+                }
+              >
+                {data.magicLinkCopied ? (
+                  <>
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              {data.magicLinkCopied
+                ? "Link copied. Share it securely with the administrator — you can continue."
+                : "Copy this link before continuing. It will not be shown again after setup."}
+            </p>
+          </>
+        ) : (
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            Generate a one-time activation link for the administrator. You must copy it before continuing.
+          </p>
+        )}
       </div>
+
       <StepActions onBack={onBack} disabled={!valid}>
         Continue
       </StepActions>
