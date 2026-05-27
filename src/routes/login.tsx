@@ -15,7 +15,7 @@ function LoginPage() {
   const [userId, setUserId] = useState("manjit.singh");
   const [password, setPassword] = useState("••••••••");
   const [role, setLocalRole] = useState<Role>("GRO");
-  const [tenant, setTenant] = useState("acc.amritsar.mc");
+  const [tenant, setTenant] = useState("acc.makueni.cg");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,10 +62,14 @@ function LoginPage() {
             </Field>
             <Field label={t("COMMON_TENANT")}>
               <select value={tenant} onChange={(e) => setTenant(e.target.value)} className={inputCls}>
-                <option value="acc.amritsar.mc">Amritsar Municipal Corp. — Municipal Corporation</option>
-                <option value="acc.ludhiana.scl">Ludhiana Smart City Ltd. — Smart City SPV</option>
-                <option value="acc.pb.water">Punjab Water Supply Board — Utility</option>
-                <option value="acc.amritsar.da">Amritsar Development Auth. — Development Authority</option>
+                <option value="acc.makueni.cg">Makueni County Government, Kenya</option>
+                <option value="acc.bomet.cg">Bomet County Government, Kenya</option>
+                <option value="acc.ethekwini.mm">eThekwini Metropolitan Municipality, South Africa</option>
+                <option value="acc.diredawa.ca">Dire Dawa City Administration, Ethiopia</option>
+                <option value="acc.enugu.sg">Enugu State Government, Nigeria</option>
+                <option value="acc.maputo.mc">Maputo Municipal Council, Mozambique</option>
+                <option value="acc.banyuwangi.rg">Banyuwangi Regency Government, Indonesia</option>
+                <option value="acc.amritsar.mc">Amritsar Municipal Corporation, India</option>
               </select>
             </Field>
 
