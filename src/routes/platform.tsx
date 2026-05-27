@@ -289,7 +289,7 @@ function EmailEntryCard({
           className={
             "flex h-9 w-full items-center justify-center gap-1.5 rounded-sm text-[13px] font-medium transition-colors " +
             (valid
-              ? "bg-[oklch(0.62_0.12_195)] text-white hover:bg-[oklch(0.56_0.12_195)]"
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
               : "bg-muted text-muted-foreground cursor-not-allowed")
           }
         >
