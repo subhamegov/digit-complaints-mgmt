@@ -28,11 +28,11 @@ export const Route = createFileRoute("/platform")({
 /* ---------------- Constants ---------------- */
 
 const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "Hindi" },
-  { code: "fr", label: "French" },
-  { code: "pt", label: "Portuguese" },
-  { code: "sw", label: "Swahili" },
+  { code: "en_IN", label: "English", native: "English" },
+  { code: "hi_IN", label: "Hindi", native: "हिन्दी" },
+  { code: "fr_FR", label: "French", native: "Français" },
+  { code: "pt_PT", label: "Portuguese", native: "Português" },
+  { code: "sw_KE", label: "Swahili", native: "Kiswahili" },
 ];
 
 const USE_CASES = [
