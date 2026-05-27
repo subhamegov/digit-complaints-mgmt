@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Download, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2 } from "lucide-react";
 import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor, type Column,
 } from "@/components/pgr/primitives";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import {
@@ -13,6 +16,26 @@ import {
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
+
+type KpiOption = {
+  id: string;
+  label: string;
+  value: string;
+  intent?: "positive" | "negative" | "warning" | "neutral";
+  delta: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+const ADDITIONAL_KPIS: KpiOption[] = [
+  { id: "first-response", label: "Avg. first response", value: "2.4h", intent: "positive", delta: "−18% WoW", description: "Mean time from complaint registration to first officer acknowledgement.", icon: Clock },
+  { id: "escalation-rate", label: "Escalation rate", value: "9.2%", intent: "warning", delta: "+1.1 pts", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp },
+  { id: "active-officers", label: "Active field officers", value: "142", intent: "neutral", delta: "12 on leave", description: "Officers with at least one assignment touched in the last 24 hours.", icon: Users },
+  { id: "repeat-citizens", label: "Repeat complainants", value: "63", intent: "warning", delta: "+8 vs last week", description: "Unique citizens filing more than one complaint in the last 30 days.", icon: Repeat },
+  { id: "ageing", label: "Ageing > 7 days", value: "37", intent: "negative", delta: "5 cross-dept", description: "Open complaints with age greater than 7 days, awaiting closure.", icon: AlertTriangle },
+  { id: "csat-trend", label: "CSAT trend (7d)", value: "+0.3", intent: "positive", delta: "vs 4.1 baseline", description: "Rolling change in citizen satisfaction score over the last 7 days.", icon: ThumbsUp },
+  { id: "dept-load", label: "Dept. load index", value: "1.18", intent: "neutral", delta: "PWD highest", description: "Open-complaint to officer ratio across departments; 1.0 = balanced.", icon: Building2 },
+];
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -28,6 +51,13 @@ function DashboardPage() {
   const { jurisdiction } = useRbac();
 
   const recent = COMPLAINTS.slice(0, 6);
+  const [addedKpis, setAddedKpis] = useState<string[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const addKpi = (id: string) => {
+    setAddedKpis((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPickerOpen(false);
+  };
 
   return (
     <div>
@@ -35,13 +65,55 @@ function DashboardPage() {
         title={t("CS_DASHBOARD_TITLE")}
         subtitle={`Operational view · ${jurisdiction.name} · Last 7 days`}
         primaryAction={
-          <div className="flex gap-2">
-            <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
-            <Link to="/complaints/new">
-              <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
-                {t("ACTION_REGISTER")}
-              </ActionButton>
-            </Link>
+          <div className="flex flex-col items-end gap-2">
+            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                  <Plus className="h-3.5 w-3.5" /> Add KPI
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-1">
+                <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
+                <ul className="max-h-80 overflow-auto">
+                  {ADDITIONAL_KPIS.filter((k) => !addedKpis.includes(k.id)).map((k) => {
+                    const Icon = k.icon;
+                    return (
+                      <li key={k.id}>
+                        <HoverCard openDelay={120} closeDelay={60}>
+                          <HoverCardTrigger asChild>
+                            <button
+                              onClick={() => addKpi(k.id)}
+                              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                            >
+                              <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="flex-1 truncate">{k.label}</span>
+                              <Plus className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent side="left" align="start" className="w-64 p-3">
+                            <div className="mb-2 w-fit">
+                              <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
+                            </div>
+                            <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </li>
+                    );
+                  })}
+                  {ADDITIONAL_KPIS.every((k) => addedKpis.includes(k.id)) && (
+                    <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
+                  )}
+                </ul>
+              </PopoverContent>
+            </Popover>
+            <div className="flex gap-2">
+              <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+              <Link to="/complaints/new">
+                <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
+                  {t("ACTION_REGISTER")}
+                </ActionButton>
+              </Link>
+            </div>
           </div>
         }
       />
@@ -54,6 +126,10 @@ function DashboardPage() {
           <StatCard label={t("CS_SLA_BREACHED")} value={s.breached} intent="negative" delta="Escalation L2 active" />
           <StatCard label={t("CS_AVG_RESOLUTION")} value={`${s.avgResolutionHrs}h`} delta="Target: 36h" />
           <StatCard label={t("CS_REOPEN_RATE")} value={`${s.reopenRate}%`} delta={`CSAT ${s.satisfaction}/5`} />
+          {addedKpis.map((id) => {
+            const k = ADDITIONAL_KPIS.find((x) => x.id === id)!;
+            return <StatCard key={id} label={k.label} value={k.value} intent={k.intent} delta={k.delta} />;
+          })}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
