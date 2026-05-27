@@ -119,7 +119,9 @@ function PlatformLanding() {
           )}
         </section>
 
-        <FooterNote />
+        {screen.kind === "email" && <HelpLinksPanel />}
+
+        <AuditFooter />
       </main>
     </div>
   );
@@ -135,20 +137,42 @@ function PageHeader() {
         Admin Console
       </h1>
       <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-        Manage platform setup, accounts, and configuration.
+        Set up or access your platform administration workspace.
       </p>
     </div>
   );
 }
 
-function FooterNote() {
+function HelpLinksPanel() {
   return (
-    <div className="mt-5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-      <ShieldCheck className="h-3 w-3" />
-      All console actions are audited.
+    <div className="mt-5 w-full max-w-[460px] rounded-sm border border-border bg-background px-4 py-3">
+      <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        Need help setting up?
+      </div>
+      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+          Setup Guide
+        </a>
+        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+          Installation Checklist
+        </a>
+        <a href="#" className="text-foreground/80 hover:text-primary hover:underline">
+          Contact Support
+        </a>
+      </div>
     </div>
   );
 }
+
+function AuditFooter() {
+  return (
+    <div className="mt-5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <ShieldCheck className="h-3 w-3" />
+      Console access is audited.
+    </div>
+  );
+}
+
 
 /* ---------------- Email entry ---------------- */
 
@@ -167,8 +191,11 @@ function EmailEntryCard({
         if (valid) onContinue(email);
       }}
     >
-      <CardHeading title="Continue" subtitle="Enter your work email to continue." />
-      <div className="mt-5 space-y-4">
+      <CardHeading
+        title="Enter Work Email"
+        subtitle="We'll check whether this platform is already set up."
+      />
+      <div className="mt-5 space-y-3">
         <Field label="Work Email">
           <input
             type="email"
@@ -180,11 +207,24 @@ function EmailEntryCard({
             autoFocus
           />
         </Field>
-        <PrimaryButton type="submit" disabled={!valid}>
+        <button
+          type="submit"
+          disabled={!valid}
+          className={
+            "flex h-9 w-full items-center justify-center gap-1.5 rounded-sm text-[13px] font-medium transition-colors " +
+            (valid
+              ? "bg-[oklch(0.62_0.12_195)] text-white hover:bg-[oklch(0.56_0.12_195)]"
+              : "bg-muted text-muted-foreground cursor-not-allowed")
+          }
+        >
           Continue
           <ArrowRight className="h-3.5 w-3.5" />
-        </PrimaryButton>
+        </button>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          New installation? Setup starts automatically if no administrator exists.
+        </p>
       </div>
+
     </form>
   );
 }
