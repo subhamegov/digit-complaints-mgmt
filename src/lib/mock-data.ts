@@ -249,11 +249,11 @@ export interface AuditEntry {
 export const AUDIT_LOG: AuditEntry[] = [
   { at: isoMinus(1), actor: "Manjit Singh", role: "GRO", action: "ASSIGNED", entity: "Complaint", entityId: "PGR-2026-04815", meta: "→ EMP-1103" },
   { at: isoMinus(2), actor: "Gurmeet Singh", role: "LME", action: "STATUS_UPDATED", entity: "Complaint", entityId: "PGR-2026-04813", meta: "ASSIGNED → IN_PROGRESS" },
-  { at: isoMinus(3), actor: "Vikram Mehta", role: "ADMIN", action: "CONFIG_UPDATED", entity: "ComplaintType", entityId: "SEW_OVERFLOW", meta: "SLA 12h → 8h" },
+  { at: isoMinus(3), actor: "Vikram Mehta", role: "ACCOUNT_ADMIN", action: "CONFIG_UPDATED", entity: "ComplaintType", entityId: "SEW_OVERFLOW", meta: "SLA 12h → 8h" },
   { at: isoMinus(5), actor: "Harpreet Kaur", role: "CSR", action: "CREATED", entity: "Complaint", entityId: "PGR-2026-04825" },
   { at: isoMinus(6), actor: "Manjit Singh", role: "GRO", action: "REJECTED", entity: "Complaint", entityId: "PGR-2026-04821", meta: "Duplicate" },
   { at: isoMinus(8), actor: "Dr. Anita Sharma", role: "DEPT_HEAD", action: "ESCALATED", entity: "Complaint", entityId: "PGR-2026-04812", meta: "To Commissioner" },
-  { at: isoMinus(12), actor: "Vikram Mehta", role: "ADMIN", action: "USER_CREATED", entity: "Employee", entityId: "EMP-1124" },
+  { at: isoMinus(12), actor: "Vikram Mehta", role: "ACCOUNT_ADMIN", action: "USER_CREATED", entity: "Employee", entityId: "EMP-1124" },
   { at: isoMinus(20), actor: "Surinder Pal", role: "LME", action: "RESOLVED", entity: "Complaint", entityId: "PGR-2026-04816" },
 ];
 
