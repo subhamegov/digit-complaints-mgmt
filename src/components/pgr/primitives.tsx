@@ -120,7 +120,7 @@ export function StatCard({
       {onRemove && (
         <button
           onClick={onRemove}
-          className="absolute top-1.5 left-1.5 rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-status-breach group-hover:opacity-100 focus:opacity-100"
+          className="absolute top-1.5 right-1.5 rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-status-breach group-hover:opacity-100 focus:opacity-100"
           aria-label={`Remove ${label}`}
         >
           <X className="h-3 w-3" />
