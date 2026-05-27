@@ -618,19 +618,6 @@ function DomainSetupForm({
           className={inputCls}
         />
       </Field>
-      <Field label="Default Use Case">
-        <select
-          value={data.useCase}
-          onChange={(e) => set("useCase", e.target.value)}
-          className={inputCls}
-        >
-          {USE_CASES.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
-      </Field>
       <StepActions onBack={onBack} disabled={!valid}>
         Continue
       </StepActions>
