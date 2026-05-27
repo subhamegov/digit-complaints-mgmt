@@ -90,7 +90,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "PGR_CITIZEN_PII_VIEW",
     "AUDIT_LOG_VIEW",
   ],
-  ADMIN: [
+  ACCOUNT_ADMIN: [
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",
     "PGR_TASKS_VIEW",
@@ -103,6 +103,20 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "HRMS_USER_MANAGE",
     "AUDIT_LOG_VIEW",
   ],
+  PLATFORM_ADMIN: [
+    "PGR_DASHBOARD_VIEW",
+    "PGR_INBOX_VIEW",
+    "PGR_TASKS_VIEW",
+    "PGR_COMPLAINT_VIEW",
+    "PGR_REPORTS_VIEW",
+    "PGR_SLA_VIEW",
+    "PGR_ESCALATION_VIEW",
+    "MDMS_COMPLAINT_TYPE_MANAGE",
+    "MDMS_WORKFLOW_MANAGE",
+    "HRMS_USER_MANAGE",
+    "AUDIT_LOG_VIEW",
+  ],
+
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
