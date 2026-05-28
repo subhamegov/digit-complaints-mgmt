@@ -154,6 +154,9 @@ function DashboardPage() {
   };
 
   const availableToAdd = allKpis.filter((k) => !visibleKpiIds.includes(k.id));
+  const availablePanelsToAdd: string[] = ALL_PANEL_IDS.filter((pid) => !visiblePanelIds.includes(pid));
+
+
 
 
   return (
