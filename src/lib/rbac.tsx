@@ -22,7 +22,9 @@ export type Role =
   | "LME" // Last-Mile Employee — resolves
   | "DEPT_HEAD" // Department head — escalations, approvals
   | "ACCOUNT_ADMIN" // Account admin — per-account configuration, users, audit
-  | "PLATFORM_ADMIN"; // Platform admin — cross-account platform operations
+  | "PLATFORM_ADMIN" // Platform admin — cross-account platform operations
+  | "TEST_USER"; // Test user — sandbox role for dashboard customization
+
 
 
 export type Permission =
