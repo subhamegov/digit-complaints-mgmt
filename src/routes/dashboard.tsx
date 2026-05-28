@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
@@ -212,6 +212,41 @@ function DashboardPage() {
     setDragId(null);
   };
 
+  // Per-tile resize. Width snaps to grid columns (1..3); height is free-form for panels.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; height?: number }>>({});
+  const [resizingId, setResizingId] = useState<string | null>(null);
+
+  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizingId(id);
+    const onMove = (ev: PointerEvent) => {
+      const grid = gridRef.current;
+      const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
+      if (!grid || !tile) return;
+      const gridRect = grid.getBoundingClientRect();
+      const tileRect = tile.getBoundingClientRect();
+      const colWidth = gridRect.width / 3;
+      const widthFromLeft = ev.clientX - tileRect.left;
+      const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
+      const next: { colSpan?: 1 | 2 | 3; height?: number } = { colSpan: cols };
+      if (kind === "panel") {
+        const minH = 160;
+        const maxH = window.innerHeight - 120;
+        next.height = Math.max(minH, Math.min(maxH, ev.clientY - tileRect.top));
+      }
+      setSizes((p) => ({ ...p, [id]: next }));
+    };
+    const onUp = () => {
+      setResizingId(null);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
   const availableToAdd = KPI_REGISTRY.filter((k) => !visibleIds.includes(k.id));
 
   const colSpanClass = (n: 1 | 2 | 3) =>
@@ -329,20 +364,31 @@ function DashboardPage() {
         )}
 
         {canCustomize ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {visibleIds.map((id) => {
               const k = kpiById.get(id);
               if (!k) return null;
-              const span = k.kind === "panel" ? colSpanClass(k.colSpan ?? 1) : "";
+              const userSize = sizes[id];
+              const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? (k.kind === "panel" ? (k.colSpan ?? 1) : 1);
+              const spanClass = colSpanClass(effectiveSpan);
+              const heightStyle = k.kind === "panel" && userSize?.height ? { height: `${userSize.height}px` } : undefined;
+              const isResizing = resizingId === id;
               return (
                 <div
                   key={id}
-                  draggable
+                  data-kpi-id={id}
+                  draggable={!isResizing}
                   onDragStart={() => setDragId(id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(id)}
                   onDragEnd={() => setDragId(null)}
-                  className={cn(span, "cursor-move transition-opacity", dragId === id && "opacity-40")}
+                  style={heightStyle}
+                  className={cn(
+                    spanClass,
+                    "relative group cursor-move transition-opacity",
+                    dragId === id && "opacity-40",
+                    isResizing && "ring-2 ring-primary/40",
+                  )}
                 >
                   {k.kind === "stat" ? (
                     <StatCard
@@ -353,15 +399,26 @@ function DashboardPage() {
                       onRemove={() => removeKpi(id)}
                     />
                   ) : (
-                    <Panel
-                      title={k.title}
-                      action={k.action}
-                      padded={k.padded}
-                      onRemove={() => removeKpi(id)}
-                    >
-                      {k.render?.()}
-                    </Panel>
+                    <div className="h-full [&>*]:h-full [&_.recharts-responsive-container]:!h-full">
+                      <Panel
+                        title={k.title}
+                        action={k.action}
+                        padded={k.padded}
+                        onRemove={() => removeKpi(id)}
+                      >
+                        {k.render?.()}
+                      </Panel>
+                    </div>
                   )}
+                  <div
+                    onPointerDown={(e) => startResize(id, k.kind, e)}
+                    title="Drag to resize"
+                    className="absolute bottom-0 right-0 h-4 w-4 cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, transparent 0 50%, var(--muted-foreground) 50% 60%, transparent 60% 70%, var(--muted-foreground) 70% 80%, transparent 80%)",
+                    }}
+                  />
                 </div>
               );
             })}
