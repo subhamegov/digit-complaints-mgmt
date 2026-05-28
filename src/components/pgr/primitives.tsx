@@ -119,11 +119,12 @@ export function StatCard({
     <div className="relative rounded border border-border bg-surface p-4 group">
       {onRemove && (
         <button
-          onClick={onRemove}
-          className="absolute top-1.5 right-1.5 rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-status-breach group-hover:opacity-100 focus:opacity-100"
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30"
           aria-label={`Remove ${label}`}
         >
-          <X className="h-3 w-3" />
+          <X className="h-3.5 w-3.5" />
         </button>
       )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
