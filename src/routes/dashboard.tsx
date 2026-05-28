@@ -319,6 +319,42 @@ function DashboardPage() {
         {(() => {
           const wardsMax = Math.max(...wards.map((w) => w.total), 1);
           const panelDefs: Record<string, { title?: string; colSpan: 1 | 2 | 3; padded?: boolean; action?: React.ReactNode; render: () => React.ReactNode }> = {
+            "overview": {
+              title: "Overview",
+              colSpan: 3,
+              render: () => (
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                  {visibleKpiIds.map((id) => {
+                    const k = allKpis.find((x) => x.id === id);
+                    if (!k) return null;
+                    return (
+                      <div
+                        key={id}
+                        draggable
+                        onDragStart={() => setDragId(id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDrop(id)}
+                        onDragEnd={() => setDragId(null)}
+                        className={cn("cursor-move transition-opacity", dragId === id && "opacity-40")}
+                      >
+                        <StatCard
+                          label={k.label}
+                          value={k.value}
+                          intent={k.intent}
+                          delta={k.delta}
+                          onRemove={() => removeKpi(id)}
+                        />
+                      </div>
+                    );
+                  })}
+                  {visibleKpiIds.length === 0 && (
+                    <div className="col-span-full text-center text-[12px] text-muted-foreground py-4">
+                      No KPIs visible. Use “Add KPI” to add one.
+                    </div>
+                  )}
+                </div>
+              ),
+            },
             "trend": {
               title: "Complaints filed vs resolved — last 7 days",
               colSpan: 2,
