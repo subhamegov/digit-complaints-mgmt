@@ -201,97 +201,148 @@ function DashboardPage() {
         </div>
 
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <Panel title="Complaints filed vs resolved — last 7 days" className="xl:col-span-2">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trend} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-                  <Line type="monotone" dataKey="filed" stroke="var(--color-chart-1)" strokeWidth={2} dot={{ r: 3 }} name="Filed" />
-                  <Line type="monotone" dataKey="resolved" stroke="var(--color-chart-3)" strokeWidth={2} dot={{ r: 3 }} name="Resolved" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-
-          <Panel title="By locality">
-            {(() => {
-              const max = Math.max(...wards.map((w) => w.total), 1);
-              return (
+        {(() => {
+          const wardsMax = Math.max(...wards.map((w) => w.total), 1);
+          const panelDefs: Record<string, { title?: string; colSpan: 1 | 2 | 3; padded?: boolean; action?: React.ReactNode; render: () => React.ReactNode }> = {
+            "trend": {
+              title: "Complaints filed vs resolved — last 7 days",
+              colSpan: 2,
+              render: () => (
+                <div className="h-[240px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trend} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+                      <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
+                      <Line type="monotone" dataKey="filed" stroke="var(--color-chart-1)" strokeWidth={2} dot={{ r: 3 }} name="Filed" />
+                      <Line type="monotone" dataKey="resolved" stroke="var(--color-chart-3)" strokeWidth={2} dot={{ r: 3 }} name="Resolved" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ),
+            },
+            "wards": {
+              title: "By locality",
+              colSpan: 1,
+              render: () => (
                 <ul className="space-y-2 text-[12px]">
                   {wards.map((w) => (
                     <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
                       <span className="truncate text-foreground">{w.ward}</span>
                       <span className="h-2 rounded-sm bg-muted">
-                        <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / max) * 100}%` }} />
+                        <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / wardsMax) * 100}%` }} />
                       </span>
                       <span className="text-right tabular-nums text-muted-foreground">{w.total}</span>
                     </li>
                   ))}
                 </ul>
-              );
-            })()}
-          </Panel>
-        </div>
+              ),
+            },
+            "dept": {
+              title: "By department — open vs resolved",
+              colSpan: 2,
+              render: () => (
+                <div className="h-[240px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dept} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+                      <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="department" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
+                      <Bar dataKey="open" fill="var(--color-chart-1)" name="Open" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="breached" fill="var(--color-chart-4)" name="Breached" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ),
+            },
+            "recent": {
+              title: "Recent activity",
+              colSpan: 1,
+              padded: false,
+              action: <Link to="/inbox" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">View inbox <ArrowRight className="h-3 w-3" /></Link>,
+              render: () => (
+                <ul className="divide-y divide-border">
+                  {recent.map((c) => (
+                    <li key={c.id}>
+                      <Link to="/inbox/$id" params={{ id: c.id }} className="flex items-start gap-3 px-4 py-2.5 hover:bg-muted/50">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                            <span className="font-mono">{c.id}</span>
+                            <span>·</span>
+                            <span>{c.ward}</span>
+                          </div>
+                          <div className="mt-0.5 truncate text-[13px] font-medium text-foreground">
+                            {complaintTypeOf(c.typeCode)?.name}
+                          </div>
+                        </div>
+                        <StatusBadge status={c.status} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+            "sla": {
+              title: "SLA at risk — next 24 hours",
+              colSpan: 3,
+              padded: false,
+              render: () => (
+                <DataTable<Complaint>
+                  emptyMessage={t("EMPTY_INBOX")}
+                  rows={COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
+                  columns={[
+                    { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
+                    { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
+                    { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
+                    { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
+                    { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
+                    { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
+                    { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
+                  ]}
+                />
+              ),
+            },
+          };
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <Panel title="By department — open vs resolved" className="xl:col-span-2">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dept} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="department" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-                  <Bar dataKey="open" fill="var(--color-chart-1)" name="Open" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} />
-                  <Bar dataKey="breached" fill="var(--color-chart-4)" name="Breached" radius={[2, 2, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+          const colSpanClass = { 1: "", 2: "xl:col-span-2", 3: "xl:col-span-3" } as const;
+
+          return (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+              {visiblePanelIds.map((id) => {
+                const p = panelDefs[id];
+                if (!p) return null;
+                return (
+                  <div
+                    key={id}
+                    draggable={canCustomize}
+                    onDragStart={canCustomize ? () => setPanelDragId(id) : undefined}
+                    onDragOver={canCustomize ? (e) => e.preventDefault() : undefined}
+                    onDrop={canCustomize ? () => handlePanelDrop(id) : undefined}
+                    onDragEnd={canCustomize ? () => setPanelDragId(null) : undefined}
+                    className={cn(
+                      colSpanClass[p.colSpan],
+                      canCustomize && "cursor-move transition-opacity",
+                      canCustomize && panelDragId === id && "opacity-40",
+                    )}
+                  >
+                    <Panel
+                      title={p.title}
+                      action={p.action}
+                      padded={p.padded}
+                      onRemove={canCustomize ? () => removePanel(id) : undefined}
+                    >
+                      {p.render()}
+                    </Panel>
+                  </div>
+                );
+              })}
             </div>
-          </Panel>
+          );
+        })()}
 
-          <Panel title="Recent activity" action={<Link to="/inbox" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">View inbox <ArrowRight className="h-3 w-3" /></Link>} padded={false}>
-            <ul className="divide-y divide-border">
-              {recent.map((c) => (
-                <li key={c.id}>
-                  <Link to="/inbox/$id" params={{ id: c.id }} className="flex items-start gap-3 px-4 py-2.5 hover:bg-muted/50">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                        <span className="font-mono">{c.id}</span>
-                        <span>·</span>
-                        <span>{c.ward}</span>
-                      </div>
-                      <div className="mt-0.5 truncate text-[13px] font-medium text-foreground">
-                        {complaintTypeOf(c.typeCode)?.name}
-                      </div>
-                    </div>
-                    <StatusBadge status={c.status} />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        </div>
-
-        <Panel title="SLA at risk — next 24 hours" padded={false}>
-          <DataTable<Complaint>
-            emptyMessage={t("EMPTY_INBOX")}
-            rows={COMPLAINTS.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
-            columns={[
-              { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
-              { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
-              { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
-              { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
-              { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
-              { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
-              { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
-            ]}
-          />
-        </Panel>
       </div>
     </div>
   );
