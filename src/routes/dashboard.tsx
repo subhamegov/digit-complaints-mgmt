@@ -153,46 +153,76 @@ function DashboardPage() {
         primaryAction={
           <div className="flex flex-col items-end gap-2">
             {canCustomize && (
-              <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
-                    <Plus className="h-3.5 w-3.5" /> Add KPI
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-72 p-1">
-                  <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
-                  <ul className="max-h-80 overflow-auto">
-                    {availableToAdd.map((k) => {
-                      const Icon = k.icon;
-                      return (
-                        <li key={k.id}>
-                          <HoverCard openDelay={120} closeDelay={60}>
-                            <HoverCardTrigger asChild>
-                              <button
-                                onClick={() => addKpi(k.id)}
-                                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
-                              >
-                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="flex-1 truncate">{k.label}</span>
-                                <Plus className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                            </HoverCardTrigger>
-                            <HoverCardContent side="left" align="start" className="w-64 p-3">
-                              <div className="mb-2 w-fit">
-                                <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
-                              </div>
-                              <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
-                            </HoverCardContent>
-                          </HoverCard>
+              <div className="flex flex-wrap items-center gap-2">
+                <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                      <Plus className="h-3.5 w-3.5" /> Add KPI
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72 p-1">
+                    <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available KPIs</div>
+                    <ul className="max-h-80 overflow-auto">
+                      {availableToAdd.map((k) => {
+                        const Icon = k.icon;
+                        return (
+                          <li key={k.id}>
+                            <HoverCard openDelay={120} closeDelay={60}>
+                              <HoverCardTrigger asChild>
+                                <button
+                                  onClick={() => addKpi(k.id)}
+                                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                                >
+                                  <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="flex-1 truncate">{k.label}</span>
+                                  <Plus className="h-3 w-3 text-muted-foreground" />
+                                </button>
+                              </HoverCardTrigger>
+                              <HoverCardContent side="left" align="start" className="w-64 p-3">
+                                <div className="mb-2 w-fit">
+                                  <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
+                                </div>
+                                <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                              </HoverCardContent>
+                            </HoverCard>
+                          </li>
+                        );
+                      })}
+                      {availableToAdd.length === 0 && (
+                        <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
+                      )}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+
+                <Popover open={panelPickerOpen} onOpenChange={setPanelPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                      <LayoutGrid className="h-3.5 w-3.5" /> Add panel
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-1">
+                    <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available panels</div>
+                    <ul className="max-h-80 overflow-auto">
+                      {availablePanelsToAdd.map((pid) => (
+                        <li key={pid}>
+                          <button
+                            onClick={() => addPanel(pid)}
+                            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                          >
+                            <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="flex-1 truncate">{PANEL_LABELS[pid] ?? pid}</span>
+                            <Plus className="h-3 w-3 text-muted-foreground" />
+                          </button>
                         </li>
-                      );
-                    })}
-                    {availableToAdd.length === 0 && (
-                      <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
-                    )}
-                  </ul>
-                </PopoverContent>
-              </Popover>
+                      ))}
+                      {availablePanelsToAdd.length === 0 && (
+                        <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All panels added</li>
+                      )}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+              </div>
             )}
             <div className="flex gap-2">
               <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
@@ -206,6 +236,7 @@ function DashboardPage() {
         }
 
       />
+
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
