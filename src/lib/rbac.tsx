@@ -220,6 +220,8 @@ function roleUser(role: Role): string {
     case "DEPT_HEAD": return "Dr. Anita Sharma";
     case "ACCOUNT_ADMIN": return "Vikram Mehta";
     case "PLATFORM_ADMIN": return "Priya Nair";
+    case "TEST_USER": return "Test User";
+
 
   }
 }
