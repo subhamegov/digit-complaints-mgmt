@@ -70,6 +70,25 @@ function DashboardPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
 
+  const DEFAULT_PANEL_IDS = ["trend", "wards", "dept", "recent", "sla"];
+  const [visiblePanelIds, setVisiblePanelIds] = useState<string[]>(DEFAULT_PANEL_IDS);
+  const [panelDragId, setPanelDragId] = useState<string | null>(null);
+
+  const removePanel = (id: string) => setVisiblePanelIds((prev) => prev.filter((x) => x !== id));
+  const handlePanelDrop = (targetId: string) => {
+    if (!panelDragId || panelDragId === targetId) return;
+    setVisiblePanelIds((prev) => {
+      const next = [...prev];
+      const from = next.indexOf(panelDragId);
+      const to = next.indexOf(targetId);
+      if (from === -1 || to === -1) return prev;
+      next.splice(from, 1);
+      next.splice(to, 0, panelDragId);
+      return next;
+    });
+    setPanelDragId(null);
+  };
+
   const allKpis: KpiOption[] = useMemo(() => {
     const dynamicDefaults = DEFAULT_KPIS.map((k) => {
       let value = k.value;
