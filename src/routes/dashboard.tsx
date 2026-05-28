@@ -253,31 +253,67 @@ function DashboardPage() {
 
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
-          {visibleKpiIds.map((id) => {
-            const k = allKpis.find((x) => x.id === id);
-            if (!k) return null;
-            return (
-              <div
-                key={id}
-                draggable={canCustomize}
-                onDragStart={canCustomize ? () => setDragId(id) : undefined}
-                onDragOver={canCustomize ? (e) => e.preventDefault() : undefined}
-                onDrop={canCustomize ? () => handleDrop(id) : undefined}
-                onDragEnd={canCustomize ? () => setDragId(null) : undefined}
-                className={canCustomize ? `cursor-move transition-opacity ${dragId === id ? "opacity-40" : ""}` : ""}
+        {canCustomize && (
+          <div className="rounded border border-border bg-surface p-3 flex flex-wrap items-end gap-3">
+            <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground" /> Filters
+            </div>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              From
+              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              To
+              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              Geography
+              <select value={geoFilter} onChange={(e) => setGeoFilter(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[140px]">
+                <option value="">All wards</option>
+                {wards.map((w) => <option key={w.ward} value={w.ward}>{w.ward}</option>)}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              Complaint type
+              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[180px]">
+                <option value="">All types</option>
+                {COMPLAINT_TYPES.filter((c) => c.active).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+              </select>
+            </label>
+            {(fromDate || toDate || geoFilter || typeFilter) && (
+              <button
+                onClick={() => { setFromDate(""); setToDate(""); setGeoFilter(""); setTypeFilter(""); }}
+                className="h-8 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium text-muted-foreground hover:text-foreground"
               >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {!canCustomize && (
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
+            {visibleKpiIds.map((id) => {
+              const k = allKpis.find((x) => x.id === id);
+              if (!k) return null;
+              return (
                 <StatCard
+                  key={id}
                   label={k.label}
                   value={k.value}
                   intent={k.intent}
                   delta={k.delta}
-                  onRemove={canCustomize ? () => removeKpi(id) : undefined}
                 />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+
 
 
         {(() => {
