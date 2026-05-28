@@ -283,18 +283,25 @@ function DashboardPage() {
     setResizingId(id);
 
     const grid = gridRef.current;
-    const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
-    if (!grid || !tile) return;
-    const gridRect = grid.getBoundingClientRect();
+    const tile = document.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
+    const parentGrid = tile?.parentElement as HTMLElement | null;
+    if (!tile || !parentGrid) return;
+    const gridRect = parentGrid.getBoundingClientRect();
     const tileRect = tile.getBoundingClientRect();
-    const gap = 12; // matches gap-3
-    const colWidth = (gridRect.width + gap) / 3;
+    const gap = 12;
+    // Detect column count from computed grid-template-columns
+    const styles = window.getComputedStyle(parentGrid);
+    const cols = styles.gridTemplateColumns.split(" ").filter(Boolean).length || 3;
+    const maxSpan = Math.min(cols, 3) as 1 | 2 | 3;
+    const colWidth = (gridRect.width + gap) / cols;
 
     const onMove = (ev: PointerEvent) => {
       const widthFromLeft = ev.clientX - tileRect.left;
-      const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
-      setSizes((p) => ({ ...p, [id]: { colSpan: cols } }));
+      const span = Math.max(1, Math.min(maxSpan, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
+      setSizes((p) => ({ ...p, [id]: { colSpan: span } }));
     };
+    void grid;
+
     const onUp = (ev: PointerEvent) => {
       handleEl.releasePointerCapture?.(ev.pointerId);
       setResizingId(null);
