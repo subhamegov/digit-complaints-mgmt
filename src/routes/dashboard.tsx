@@ -8,6 +8,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
+import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
   dashboardSummary, byDepartment, byWard, trend7d, COMPLAINTS, complaintTypeOf,
