@@ -212,39 +212,58 @@ function DashboardPage() {
     setDragId(null);
   };
 
-  // Per-tile resize. Width snaps to grid columns (1..3); height is free-form for panels.
+  // Per-tile resize. Width snaps to grid columns (1..3); panels also resize vertically.
   const gridRef = useRef<HTMLDivElement>(null);
   const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; height?: number }>>({});
   const [resizingId, setResizingId] = useState<string | null>(null);
+  // Disable native drag while pointer is on a resize handle so HTML5 drag doesn't
+  // race with our pointer-based resize.
+  const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
-  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent) => {
+  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    const handleEl = e.currentTarget;
+    handleEl.setPointerCapture(e.pointerId);
     setResizingId(id);
+
+    const grid = gridRef.current;
+    const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
+    if (!grid || !tile) return;
+    const gridRect = grid.getBoundingClientRect();
+    const tileRect = tile.getBoundingClientRect();
+    const gap = 12; // matches gap-3
+    const colWidth = (gridRect.width + gap) / 3;
+
     const onMove = (ev: PointerEvent) => {
-      const grid = gridRef.current;
-      const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
-      if (!grid || !tile) return;
-      const gridRect = grid.getBoundingClientRect();
-      const tileRect = tile.getBoundingClientRect();
-      const colWidth = gridRect.width / 3;
       const widthFromLeft = ev.clientX - tileRect.left;
       const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
       const next: { colSpan?: 1 | 2 | 3; height?: number } = { colSpan: cols };
       if (kind === "panel") {
-        const minH = 160;
+        const minH = 180;
         const maxH = window.innerHeight - 120;
         next.height = Math.max(minH, Math.min(maxH, ev.clientY - tileRect.top));
       }
       setSizes((p) => ({ ...p, [id]: next }));
     };
-    const onUp = () => {
+    const onUp = (ev: PointerEvent) => {
+      handleEl.releasePointerCapture?.(ev.pointerId);
       setResizingId(null);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      handleEl.removeEventListener("pointermove", onMove);
+      handleEl.removeEventListener("pointerup", onUp);
+      handleEl.removeEventListener("pointercancel", onUp);
     };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
+    handleEl.addEventListener("pointermove", onMove);
+    handleEl.addEventListener("pointerup", onUp);
+    handleEl.addEventListener("pointercancel", onUp);
+  };
+
+  const resetSize = (id: string) => {
+    setSizes((p) => {
+      const next = { ...p };
+      delete next[id];
+      return next;
+    });
   };
 
   const availableToAdd = KPI_REGISTRY.filter((k) => !visibleIds.includes(k.id));
@@ -377,48 +396,67 @@ function DashboardPage() {
                 <div
                   key={id}
                   data-kpi-id={id}
-                  draggable={!isResizing}
-                  onDragStart={() => setDragId(id)}
+                  draggable={!isResizing && handleHoverId !== id}
+                  onDragStart={(e) => {
+                    if (handleHoverId === id || isResizing) { e.preventDefault(); return; }
+                    setDragId(id);
+                  }}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(id)}
                   onDragEnd={() => setDragId(null)}
                   style={heightStyle}
                   className={cn(
                     spanClass,
-                    "relative group cursor-move transition-opacity",
+                    "relative group transition-all",
+                    handleHoverId !== id && "cursor-move",
                     dragId === id && "opacity-40",
-                    isResizing && "ring-2 ring-primary/40",
+                    isResizing && "ring-2 ring-primary outline-none",
                   )}
                 >
-                  {k.kind === "stat" ? (
-                    <StatCard
-                      label={k.label}
-                      value={k.getValue?.() ?? ""}
-                      intent={k.intent}
-                      delta={k.getDelta?.() ?? ""}
-                      onRemove={() => removeKpi(id)}
-                    />
-                  ) : (
-                    <div className="h-full [&>*]:h-full [&_.recharts-responsive-container]:!h-full">
+                  <div className="h-full flex flex-col [&>*]:flex-1 [&_.recharts-responsive-container]:!h-full">
+                    {k.kind === "stat" ? (
+                      <StatCard
+                        label={k.label}
+                        value={k.getValue?.() ?? ""}
+                        intent={k.intent}
+                        delta={k.getDelta?.() ?? ""}
+                        onRemove={() => removeKpi(id)}
+                      />
+                    ) : (
                       <Panel
                         title={k.title}
                         action={k.action}
                         padded={k.padded}
                         onRemove={() => removeKpi(id)}
+                        className="flex flex-col [&>div:last-child]:flex-1 [&>div:last-child]:min-h-0"
                       >
                         {k.render?.()}
                       </Panel>
+                    )}
+                  </div>
+
+                  {isResizing && (
+                    <div className="pointer-events-none absolute top-1 left-1 z-20 rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
+                      {effectiveSpan}/3{k.kind === "panel" && userSize?.height ? ` · ${Math.round(userSize.height)}px` : ""}
                     </div>
                   )}
+
                   <div
                     onPointerDown={(e) => startResize(id, k.kind, e)}
-                    title="Drag to resize"
-                    className="absolute bottom-0 right-0 h-4 w-4 cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, transparent 0 50%, var(--muted-foreground) 50% 60%, transparent 60% 70%, var(--muted-foreground) 70% 80%, transparent 80%)",
-                    }}
-                  />
+                    onPointerEnter={() => setHandleHoverId(id)}
+                    onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
+                    onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
+                    title="Drag to resize · double-click to reset"
+                    className={cn(
+                      "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-se-resize rounded-bl-sm",
+                      "opacity-50 hover:opacity-100 hover:bg-primary/10 transition-opacity",
+                      isResizing && "opacity-100",
+                    )}
+                  >
+                    <svg viewBox="0 0 10 10" className="h-3.5 w-3.5 text-muted-foreground">
+                      <path d="M9 1 L1 9 M9 5 L5 9 M9 9 L9 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" fill="none" />
+                    </svg>
+                  </div>
                 </div>
               );
             })}
