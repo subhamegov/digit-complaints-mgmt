@@ -212,6 +212,41 @@ function DashboardPage() {
     setDragId(null);
   };
 
+  // Per-tile resize. Width snaps to grid columns (1..3); height is free-form for panels.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; height?: number }>>({});
+  const [resizingId, setResizingId] = useState<string | null>(null);
+
+  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizingId(id);
+    const onMove = (ev: PointerEvent) => {
+      const grid = gridRef.current;
+      const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
+      if (!grid || !tile) return;
+      const gridRect = grid.getBoundingClientRect();
+      const tileRect = tile.getBoundingClientRect();
+      const colWidth = gridRect.width / 3;
+      const widthFromLeft = ev.clientX - tileRect.left;
+      const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
+      const next: { colSpan?: 1 | 2 | 3; height?: number } = { colSpan: cols };
+      if (kind === "panel") {
+        const minH = 160;
+        const maxH = window.innerHeight - 120;
+        next.height = Math.max(minH, Math.min(maxH, ev.clientY - tileRect.top));
+      }
+      setSizes((p) => ({ ...p, [id]: next }));
+    };
+    const onUp = () => {
+      setResizingId(null);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
   const availableToAdd = KPI_REGISTRY.filter((k) => !visibleIds.includes(k.id));
 
   const colSpanClass = (n: 1 | 2 | 3) =>
