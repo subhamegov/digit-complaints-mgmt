@@ -283,18 +283,25 @@ function DashboardPage() {
     setResizingId(id);
 
     const grid = gridRef.current;
-    const tile = grid?.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
-    if (!grid || !tile) return;
-    const gridRect = grid.getBoundingClientRect();
+    const tile = document.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
+    const parentGrid = tile?.parentElement as HTMLElement | null;
+    if (!tile || !parentGrid) return;
+    const gridRect = parentGrid.getBoundingClientRect();
     const tileRect = tile.getBoundingClientRect();
-    const gap = 12; // matches gap-3
-    const colWidth = (gridRect.width + gap) / 3;
+    const gap = 12;
+    // Detect column count from computed grid-template-columns
+    const styles = window.getComputedStyle(parentGrid);
+    const cols = styles.gridTemplateColumns.split(" ").filter(Boolean).length || 3;
+    const maxSpan = Math.min(cols, 3) as 1 | 2 | 3;
+    const colWidth = (gridRect.width + gap) / cols;
 
     const onMove = (ev: PointerEvent) => {
       const widthFromLeft = ev.clientX - tileRect.left;
-      const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
-      setSizes((p) => ({ ...p, [id]: { colSpan: cols } }));
+      const span = Math.max(1, Math.min(maxSpan, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
+      setSizes((p) => ({ ...p, [id]: { colSpan: span } }));
     };
+    void grid;
+
     const onUp = (ev: PointerEvent) => {
       handleEl.releasePointerCapture?.(ev.pointerId);
       setResizingId(null);
@@ -431,86 +438,111 @@ function DashboardPage() {
           </div>
         )}
 
-        {canCustomize ? (
-          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start">
-            {visibleIds.map((id) => {
-              const k = kpiById.get(id);
-              if (!k) return null;
-              const userSize = sizes[id];
-              const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? (k.kind === "panel" ? (k.colSpan ?? 1) : 1);
-              const spanClass = colSpanClass(effectiveSpan);
-              const isResizing = resizingId === id;
-              return (
+        {canCustomize ? (() => {
+          const visibleStats = visibleIds.filter((id) => kpiById.get(id)?.kind === "stat");
+          const visiblePanels = visibleIds.filter((id) => kpiById.get(id)?.kind === "panel");
+
+          const renderTile = (id: string, gridCols: 3 | 6) => {
+            const k = kpiById.get(id);
+            if (!k) return null;
+            const userSize = sizes[id];
+            const defaultSpan: 1 | 2 | 3 = k.kind === "panel" ? (k.colSpan ?? 1) : 1;
+            const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? defaultSpan;
+            const spanClass =
+              gridCols === 6
+                ? effectiveSpan === 3
+                  ? "col-span-2 md:col-span-3 xl:col-span-3"
+                  : effectiveSpan === 2
+                    ? "col-span-2 md:col-span-2"
+                    : ""
+                : colSpanClass(effectiveSpan);
+            const isResizing = resizingId === id;
+            return (
+              <div
+                key={id}
+                data-kpi-id={id}
+                draggable={!isResizing && handleHoverId !== id}
+                onDragStart={(e) => {
+                  if (handleHoverId === id || isResizing) { e.preventDefault(); return; }
+                  setDragId(id);
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(id)}
+                onDragEnd={() => setDragId(null)}
+                className={cn(
+                  spanClass,
+                  "relative group transition-all",
+                  handleHoverId !== id && "cursor-move",
+                  dragId === id && "opacity-40",
+                  isResizing && "ring-2 ring-primary outline-none rounded",
+                )}
+              >
+                {k.kind === "stat" ? (
+                  <StatCard
+                    label={k.label}
+                    value={k.getValue?.() ?? ""}
+                    intent={k.intent}
+                    delta={k.getDelta?.() ?? ""}
+                    onRemove={() => removeKpi(id)}
+                  />
+                ) : (
+                  <Panel
+                    title={k.title}
+                    action={k.action}
+                    padded={k.padded}
+                    onRemove={() => removeKpi(id)}
+                  >
+                    {k.render?.()}
+                  </Panel>
+                )}
+
+                {isResizing && (
+                  <div className="pointer-events-none absolute top-1 left-1 z-20 rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
+                    {effectiveSpan}/{gridCols === 6 ? 6 : 3}
+                  </div>
+                )}
+
                 <div
-                  key={id}
-                  data-kpi-id={id}
-                  draggable={!isResizing && handleHoverId !== id}
-                  onDragStart={(e) => {
-                    if (handleHoverId === id || isResizing) { e.preventDefault(); return; }
-                    setDragId(id);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(id)}
-                  onDragEnd={() => setDragId(null)}
+                  onPointerDown={(e) => startResize(id, k.kind, e)}
+                  onPointerEnter={() => setHandleHoverId(id)}
+                  onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
+                  onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
+                  title="Drag to resize width · double-click to reset"
                   className={cn(
-                    spanClass,
-                    "relative group transition-all",
-                    handleHoverId !== id && "cursor-move",
-                    dragId === id && "opacity-40",
-                    isResizing && "ring-2 ring-primary outline-none rounded",
+                    "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-ew-resize rounded-bl-sm",
+                    "opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
+                    isResizing && "opacity-100",
                   )}
                 >
-                  {k.kind === "stat" ? (
-                    <StatCard
-                      label={k.label}
-                      value={k.getValue?.() ?? ""}
-                      intent={k.intent}
-                      delta={k.getDelta?.() ?? ""}
-                      onRemove={() => removeKpi(id)}
-                    />
-                  ) : (
-                    <Panel
-                      title={k.title}
-                      action={k.action}
-                      padded={k.padded}
-                      onRemove={() => removeKpi(id)}
-                    >
-                      {k.render?.()}
-                    </Panel>
-                  )}
-
-                  {isResizing && (
-                    <div className="pointer-events-none absolute top-1 left-1 z-20 rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
-                      {effectiveSpan}/3
-                    </div>
-                  )}
-
-                  <div
-                    onPointerDown={(e) => startResize(id, k.kind, e)}
-                    onPointerEnter={() => setHandleHoverId(id)}
-                    onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
-                    onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
-                    title="Drag to resize width · double-click to reset"
-                    className={cn(
-                      "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-ew-resize rounded-bl-sm",
-                      "opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
-                      isResizing && "opacity-100",
-                    )}
-                  >
-                    <svg viewBox="0 0 10 10" className="h-3.5 w-3.5 text-muted-foreground">
-                      <path d="M9 1 L1 9 M9 5 L5 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" fill="none" />
-                    </svg>
-                  </div>
+                  <svg viewBox="0 0 10 10" className="h-3.5 w-3.5 text-muted-foreground">
+                    <path d="M9 1 L1 9 M9 5 L5 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" fill="none" />
+                  </svg>
                 </div>
-              );
-            })}
-            {visibleIds.length === 0 && (
-              <div className="col-span-full text-center text-[12px] text-muted-foreground py-8">
-                No KPIs visible. Use "Add KPI" to add one.
               </div>
-            )}
-          </div>
-        ) : (
+            );
+          };
+
+          return (
+            <>
+              {visibleStats.length > 0 && (
+                <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 items-start">
+                  {visibleStats.map((id) => renderTile(id, 6))}
+                </div>
+              )}
+              {visiblePanels.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+                  {visiblePanels.map((id) => renderTile(id, 3))}
+                </div>
+              )}
+              {visibleIds.length === 0 && (
+                <div className="text-center text-[12px] text-muted-foreground py-8">
+                  No KPIs visible. Use "Add KPI" to add one.
+                </div>
+              )}
+            </>
+          );
+        })() : (
+
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
               {KPI_REGISTRY.filter((k) => k.kind === "stat").slice(0, 6).map((k) => (
