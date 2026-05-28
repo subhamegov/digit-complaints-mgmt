@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2 } from "lucide-react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, LayoutGrid } from "lucide-react";
+import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor, type Column,
@@ -48,6 +49,17 @@ const ADDITIONAL_KPIS: KpiOption[] = [
 ];
 
 
+const PANEL_LABELS: Record<string, string> = {
+  overview: "Overview (KPIs)",
+  trend: "Complaints filed vs resolved",
+  wards: "By locality",
+  dept: "By department",
+  recent: "Recent activity",
+  sla: "SLA at risk",
+};
+
+const ALL_PANEL_IDS = ["overview", "trend", "wards", "dept", "recent", "sla"];
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
   component: DashboardPage,
@@ -70,11 +82,24 @@ function DashboardPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
 
-  const DEFAULT_PANEL_IDS = ["trend", "wards", "dept", "recent", "sla"];
+  const DEFAULT_PANEL_IDS = canCustomize
+    ? ["overview", "trend", "wards", "dept", "recent", "sla"]
+    : ["trend", "wards", "dept", "recent", "sla"];
   const [visiblePanelIds, setVisiblePanelIds] = useState<string[]>(DEFAULT_PANEL_IDS);
   const [panelDragId, setPanelDragId] = useState<string | null>(null);
+  const [panelPickerOpen, setPanelPickerOpen] = useState(false);
+
+  // Filter state (TEST_USER only)
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [geoFilter, setGeoFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   const removePanel = (id: string) => setVisiblePanelIds((prev) => prev.filter((x) => x !== id));
+  const addPanel = (id: string) => {
+    setVisiblePanelIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPanelPickerOpen(false);
+  };
   const handlePanelDrop = (targetId: string) => {
     if (!panelDragId || panelDragId === targetId) return;
     setVisiblePanelIds((prev) => {
@@ -129,6 +154,9 @@ function DashboardPage() {
   };
 
   const availableToAdd = allKpis.filter((k) => !visibleKpiIds.includes(k.id));
+  const availablePanelsToAdd: string[] = ALL_PANEL_IDS.filter((pid) => !visiblePanelIds.includes(pid));
+
+
 
 
   return (
@@ -139,46 +167,76 @@ function DashboardPage() {
         primaryAction={
           <div className="flex flex-col items-end gap-2">
             {canCustomize && (
-              <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
-                    <Plus className="h-3.5 w-3.5" /> Add KPI
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-72 p-1">
-                  <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
-                  <ul className="max-h-80 overflow-auto">
-                    {availableToAdd.map((k) => {
-                      const Icon = k.icon;
-                      return (
-                        <li key={k.id}>
-                          <HoverCard openDelay={120} closeDelay={60}>
-                            <HoverCardTrigger asChild>
-                              <button
-                                onClick={() => addKpi(k.id)}
-                                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
-                              >
-                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="flex-1 truncate">{k.label}</span>
-                                <Plus className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                            </HoverCardTrigger>
-                            <HoverCardContent side="left" align="start" className="w-64 p-3">
-                              <div className="mb-2 w-fit">
-                                <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
-                              </div>
-                              <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
-                            </HoverCardContent>
-                          </HoverCard>
+              <div className="flex flex-wrap items-center gap-2">
+                <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                      <Plus className="h-3.5 w-3.5" /> Add KPI
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72 p-1">
+                    <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available KPIs</div>
+                    <ul className="max-h-80 overflow-auto">
+                      {availableToAdd.map((k) => {
+                        const Icon = k.icon;
+                        return (
+                          <li key={k.id}>
+                            <HoverCard openDelay={120} closeDelay={60}>
+                              <HoverCardTrigger asChild>
+                                <button
+                                  onClick={() => addKpi(k.id)}
+                                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                                >
+                                  <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="flex-1 truncate">{k.label}</span>
+                                  <Plus className="h-3 w-3 text-muted-foreground" />
+                                </button>
+                              </HoverCardTrigger>
+                              <HoverCardContent side="left" align="start" className="w-64 p-3">
+                                <div className="mb-2 w-fit">
+                                  <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
+                                </div>
+                                <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                              </HoverCardContent>
+                            </HoverCard>
+                          </li>
+                        );
+                      })}
+                      {availableToAdd.length === 0 && (
+                        <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
+                      )}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+
+                <Popover open={panelPickerOpen} onOpenChange={setPanelPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                      <LayoutGrid className="h-3.5 w-3.5" /> Add panel
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-1">
+                    <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available panels</div>
+                    <ul className="max-h-80 overflow-auto">
+                      {availablePanelsToAdd.map((pid) => (
+                        <li key={pid}>
+                          <button
+                            onClick={() => addPanel(pid)}
+                            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                          >
+                            <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="flex-1 truncate">{PANEL_LABELS[pid] ?? pid}</span>
+                            <Plus className="h-3 w-3 text-muted-foreground" />
+                          </button>
                         </li>
-                      );
-                    })}
-                    {availableToAdd.length === 0 && (
-                      <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
-                    )}
-                  </ul>
-                </PopoverContent>
-              </Popover>
+                      ))}
+                      {availablePanelsToAdd.length === 0 && (
+                        <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All panels added</li>
+                      )}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+              </div>
             )}
             <div className="flex gap-2">
               <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
@@ -193,37 +251,110 @@ function DashboardPage() {
 
       />
 
+
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
-          {visibleKpiIds.map((id) => {
-            const k = allKpis.find((x) => x.id === id);
-            if (!k) return null;
-            return (
-              <div
-                key={id}
-                draggable={canCustomize}
-                onDragStart={canCustomize ? () => setDragId(id) : undefined}
-                onDragOver={canCustomize ? (e) => e.preventDefault() : undefined}
-                onDrop={canCustomize ? () => handleDrop(id) : undefined}
-                onDragEnd={canCustomize ? () => setDragId(null) : undefined}
-                className={canCustomize ? `cursor-move transition-opacity ${dragId === id ? "opacity-40" : ""}` : ""}
+        {canCustomize && (
+          <div className="rounded border border-border bg-surface p-3 flex flex-wrap items-end gap-3">
+            <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground" /> Filters
+            </div>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              From
+              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              To
+              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              Geography
+              <select value={geoFilter} onChange={(e) => setGeoFilter(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[140px]">
+                <option value="">All wards</option>
+                {wards.map((w) => <option key={w.ward} value={w.ward}>{w.ward}</option>)}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+              Complaint type
+              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
+                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[180px]">
+                <option value="">All types</option>
+                {COMPLAINT_TYPES.filter((c) => c.active).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+              </select>
+            </label>
+            {(fromDate || toDate || geoFilter || typeFilter) && (
+              <button
+                onClick={() => { setFromDate(""); setToDate(""); setGeoFilter(""); setTypeFilter(""); }}
+                className="h-8 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium text-muted-foreground hover:text-foreground"
               >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {!canCustomize && (
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
+            {visibleKpiIds.map((id) => {
+              const k = allKpis.find((x) => x.id === id);
+              if (!k) return null;
+              return (
                 <StatCard
+                  key={id}
                   label={k.label}
                   value={k.value}
                   intent={k.intent}
                   delta={k.delta}
-                  onRemove={canCustomize ? () => removeKpi(id) : undefined}
                 />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
+
+
 
 
         {(() => {
           const wardsMax = Math.max(...wards.map((w) => w.total), 1);
           const panelDefs: Record<string, { title?: string; colSpan: 1 | 2 | 3; padded?: boolean; action?: React.ReactNode; render: () => React.ReactNode }> = {
+            "overview": {
+              title: "Overview",
+              colSpan: 3,
+              render: () => (
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                  {visibleKpiIds.map((id) => {
+                    const k = allKpis.find((x) => x.id === id);
+                    if (!k) return null;
+                    return (
+                      <div
+                        key={id}
+                        draggable
+                        onDragStart={() => setDragId(id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDrop(id)}
+                        onDragEnd={() => setDragId(null)}
+                        className={cn("cursor-move transition-opacity", dragId === id && "opacity-40")}
+                      >
+                        <StatCard
+                          label={k.label}
+                          value={k.value}
+                          intent={k.intent}
+                          delta={k.delta}
+                          onRemove={() => removeKpi(id)}
+                        />
+                      </div>
+                    );
+                  })}
+                  {visibleKpiIds.length === 0 && (
+                    <div className="col-span-full text-center text-[12px] text-muted-foreground py-4">
+                      No KPIs visible. Use “Add KPI” to add one.
+                    </div>
+                  )}
+                </div>
+              ),
+            },
             "trend": {
               title: "Complaints filed vs resolved — last 7 days",
               colSpan: 2,
