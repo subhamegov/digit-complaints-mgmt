@@ -409,7 +409,7 @@ function DashboardPage() {
               <select value={geoFilter} onChange={(e) => setGeoFilter(e.target.value)}
                 className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[140px]">
                 <option value="">All wards</option>
-                {wards.map((w) => <option key={w.ward} value={w.ward}>{w.ward}</option>)}
+                {allWards.map((w) => <option key={w} value={w}>{w}</option>)}
               </select>
             </label>
             <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
