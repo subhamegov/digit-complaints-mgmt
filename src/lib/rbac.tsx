@@ -22,7 +22,9 @@ export type Role =
   | "LME" // Last-Mile Employee — resolves
   | "DEPT_HEAD" // Department head — escalations, approvals
   | "ACCOUNT_ADMIN" // Account admin — per-account configuration, users, audit
-  | "PLATFORM_ADMIN"; // Platform admin — cross-account platform operations
+  | "PLATFORM_ADMIN" // Platform admin — cross-account platform operations
+  | "TEST_USER"; // Test user — sandbox role for dashboard customization
+
 
 
 export type Permission =
@@ -116,7 +118,20 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "HRMS_USER_MANAGE",
     "AUDIT_LOG_VIEW",
   ],
-
+  TEST_USER: [
+    "PGR_DASHBOARD_VIEW",
+    "PGR_INBOX_VIEW",
+    "PGR_TASKS_VIEW",
+    "PGR_COMPLAINT_VIEW",
+    "PGR_COMPLAINT_ASSIGN",
+    "PGR_COMPLAINT_REASSIGN",
+    "PGR_COMPLAINT_REJECT",
+    "PGR_COMPLAINT_COMMENT",
+    "PGR_SLA_VIEW",
+    "PGR_ESCALATION_VIEW",
+    "PGR_REPORTS_VIEW",
+    "PGR_CITIZEN_PII_VIEW",
+  ],
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -126,8 +141,9 @@ export const ROLE_LABEL: Record<Role, string> = {
   DEPT_HEAD: "Department Head",
   ACCOUNT_ADMIN: "Account Administrator",
   PLATFORM_ADMIN: "Platform Administrator",
-
+  TEST_USER: "Test User",
 };
+
 
 /**
  * Account = the customer entity on the SaaS platform.
@@ -204,6 +220,8 @@ function roleUser(role: Role): string {
     case "DEPT_HEAD": return "Dr. Anita Sharma";
     case "ACCOUNT_ADMIN": return "Vikram Mehta";
     case "PLATFORM_ADMIN": return "Priya Nair";
+    case "TEST_USER": return "Test User";
+
 
   }
 }

@@ -57,7 +57,8 @@ function DashboardPage() {
   const dept = byDepartment();
   const wards = byWard();
   const trend = trend7d();
-  const { jurisdiction } = useRbac();
+  const { jurisdiction, role } = useRbac();
+  const canCustomize = role === "TEST_USER";
 
   const recent = COMPLAINTS.slice(0, 6);
 
@@ -66,6 +67,7 @@ function DashboardPage() {
   const defaultIds = useMemo(() => DEFAULT_KPIS.map((k) => k.id), []);
   const [visibleKpiIds, setVisibleKpiIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
 
   const allKpis: KpiOption[] = useMemo(() => {
     const dynamicDefaults = DEFAULT_KPIS.map((k) => {
@@ -92,7 +94,22 @@ function DashboardPage() {
     setPickerOpen(false);
   };
 
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) return;
+    setVisibleKpiIds((prev) => {
+      const next = [...prev];
+      const from = next.indexOf(dragId);
+      const to = next.indexOf(targetId);
+      if (from === -1 || to === -1) return prev;
+      next.splice(from, 1);
+      next.splice(to, 0, dragId);
+      return next;
+    });
+    setDragId(null);
+  };
+
   const availableToAdd = allKpis.filter((k) => !visibleKpiIds.includes(k.id));
+
 
   return (
     <div>
@@ -101,46 +118,48 @@ function DashboardPage() {
         subtitle={`Operational view · ${jurisdiction.name} · Last 7 days`}
         primaryAction={
           <div className="flex flex-col items-end gap-2">
-            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-              <PopoverTrigger asChild>
-                <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
-                  <Plus className="h-3.5 w-3.5" /> Add KPI
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-72 p-1">
-                <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
-                <ul className="max-h-80 overflow-auto">
-                  {availableToAdd.map((k) => {
-                    const Icon = k.icon;
-                    return (
-                      <li key={k.id}>
-                        <HoverCard openDelay={120} closeDelay={60}>
-                          <HoverCardTrigger asChild>
-                            <button
-                              onClick={() => addKpi(k.id)}
-                              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
-                            >
-                              <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="flex-1 truncate">{k.label}</span>
-                              <Plus className="h-3 w-3 text-muted-foreground" />
-                            </button>
-                          </HoverCardTrigger>
-                          <HoverCardContent side="left" align="start" className="w-64 p-3">
-                            <div className="mb-2 w-fit">
-                              <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
-                            </div>
-                            <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
-                          </HoverCardContent>
-                        </HoverCard>
-                      </li>
-                    );
-                  })}
-                  {availableToAdd.length === 0 && (
-                    <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
-                  )}
-                </ul>
-              </PopoverContent>
-            </Popover>
+            {canCustomize && (
+              <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                <PopoverTrigger asChild>
+                  <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                    <Plus className="h-3.5 w-3.5" /> Add KPI
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-72 p-1">
+                  <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Additional KPIs</div>
+                  <ul className="max-h-80 overflow-auto">
+                    {availableToAdd.map((k) => {
+                      const Icon = k.icon;
+                      return (
+                        <li key={k.id}>
+                          <HoverCard openDelay={120} closeDelay={60}>
+                            <HoverCardTrigger asChild>
+                              <button
+                                onClick={() => addKpi(k.id)}
+                                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                              >
+                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="flex-1 truncate">{k.label}</span>
+                                <Plus className="h-3 w-3 text-muted-foreground" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent side="left" align="start" className="w-64 p-3">
+                              <div className="mb-2 w-fit">
+                                <StatCard label={k.label} value={k.value} intent={k.intent} delta={k.delta} />
+                              </div>
+                              <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                            </HoverCardContent>
+                          </HoverCard>
+                        </li>
+                      );
+                    })}
+                    {availableToAdd.length === 0 && (
+                      <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
+                    )}
+                  </ul>
+                </PopoverContent>
+              </Popover>
+            )}
             <div className="flex gap-2">
               <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
               <Link to="/complaints/new">
@@ -151,6 +170,7 @@ function DashboardPage() {
             </div>
           </div>
         }
+
       />
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
@@ -159,17 +179,27 @@ function DashboardPage() {
             const k = allKpis.find((x) => x.id === id);
             if (!k) return null;
             return (
-              <StatCard
+              <div
                 key={id}
-                label={k.label}
-                value={k.value}
-                intent={k.intent}
-                delta={k.delta}
-                onRemove={() => removeKpi(id)}
-              />
+                draggable={canCustomize}
+                onDragStart={canCustomize ? () => setDragId(id) : undefined}
+                onDragOver={canCustomize ? (e) => e.preventDefault() : undefined}
+                onDrop={canCustomize ? () => handleDrop(id) : undefined}
+                onDragEnd={canCustomize ? () => setDragId(null) : undefined}
+                className={canCustomize ? `cursor-move transition-opacity ${dragId === id ? "opacity-40" : ""}` : ""}
+              >
+                <StatCard
+                  label={k.label}
+                  value={k.value}
+                  intent={k.intent}
+                  delta={k.delta}
+                  onRemove={canCustomize ? () => removeKpi(id) : undefined}
+                />
+              </div>
             );
           })}
         </div>
+
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <Panel title="Complaints filed vs resolved — last 7 days" className="xl:col-span-2">
