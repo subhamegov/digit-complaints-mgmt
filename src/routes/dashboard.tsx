@@ -212,15 +212,15 @@ function DashboardPage() {
     setDragId(null);
   };
 
-  // Per-tile resize. Width snaps to grid columns (1..3); panels also resize vertically.
+  // Per-tile resize. Width snaps to grid columns (1..3).
   const gridRef = useRef<HTMLDivElement>(null);
-  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; height?: number }>>({});
+  const [sizes, setSizes] = useState<Record<string, { colSpan: 1 | 2 | 3 }>>({});
   const [resizingId, setResizingId] = useState<string | null>(null);
   // Disable native drag while pointer is on a resize handle so HTML5 drag doesn't
   // race with our pointer-based resize.
   const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
-  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
+  const startResize = (id: string, _kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const handleEl = e.currentTarget;
@@ -238,13 +238,7 @@ function DashboardPage() {
     const onMove = (ev: PointerEvent) => {
       const widthFromLeft = ev.clientX - tileRect.left;
       const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
-      const next: { colSpan?: 1 | 2 | 3; height?: number } = { colSpan: cols };
-      if (kind === "panel") {
-        const minH = 180;
-        const maxH = window.innerHeight - 120;
-        next.height = Math.max(minH, Math.min(maxH, ev.clientY - tileRect.top));
-      }
-      setSizes((p) => ({ ...p, [id]: next }));
+      setSizes((p) => ({ ...p, [id]: { colSpan: cols } }));
     };
     const onUp = (ev: PointerEvent) => {
       handleEl.releasePointerCapture?.(ev.pointerId);
