@@ -71,11 +71,24 @@ function DashboardPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
 
-  const DEFAULT_PANEL_IDS = ["trend", "wards", "dept", "recent", "sla"];
+  const DEFAULT_PANEL_IDS = canCustomize
+    ? ["overview", "trend", "wards", "dept", "recent", "sla"]
+    : ["trend", "wards", "dept", "recent", "sla"];
   const [visiblePanelIds, setVisiblePanelIds] = useState<string[]>(DEFAULT_PANEL_IDS);
   const [panelDragId, setPanelDragId] = useState<string | null>(null);
+  const [panelPickerOpen, setPanelPickerOpen] = useState(false);
+
+  // Filter state (TEST_USER only)
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [geoFilter, setGeoFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   const removePanel = (id: string) => setVisiblePanelIds((prev) => prev.filter((x) => x !== id));
+  const addPanel = (id: string) => {
+    setVisiblePanelIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPanelPickerOpen(false);
+  };
   const handlePanelDrop = (targetId: string) => {
     if (!panelDragId || panelDragId === targetId) return;
     setVisiblePanelIds((prev) => {
