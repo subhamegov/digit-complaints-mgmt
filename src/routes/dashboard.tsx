@@ -49,6 +49,17 @@ const ADDITIONAL_KPIS: KpiOption[] = [
 ];
 
 
+const PANEL_LABELS: Record<string, string> = {
+  overview: "Overview (KPIs)",
+  trend: "Complaints filed vs resolved",
+  wards: "By locality",
+  dept: "By department",
+  recent: "Recent activity",
+  sla: "SLA at risk",
+};
+
+const ALL_PANEL_IDS = ["overview", "trend", "wards", "dept", "recent", "sla"];
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
   component: DashboardPage,
