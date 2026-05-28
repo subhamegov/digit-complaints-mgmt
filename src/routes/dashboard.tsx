@@ -379,13 +379,16 @@ function DashboardPage() {
               ))}
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-              {KPI_REGISTRY.filter((k) => k.kind === "panel").map((k) => (
-                <div key={k.id} className={colSpanClass(k.colSpan ?? 1)}>
-                  <Panel title={k.title} action={k.action} padded={k.padded}>
-                    {k.render?.()}
-                  </Panel>
-                </div>
-              ))}
+              {KPI_REGISTRY.filter((k) => k.kind === "panel").map((k) => {
+                const span = k.colSpan === 3 ? "xl:col-span-3" : k.colSpan === 2 ? "xl:col-span-2" : "";
+                return (
+                  <div key={k.id} className={span}>
+                    <Panel title={k.title} action={k.action} padded={k.padded}>
+                      {k.render?.()}
+                    </Panel>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}
