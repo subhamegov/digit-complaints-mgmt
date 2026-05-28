@@ -364,20 +364,31 @@ function DashboardPage() {
         )}
 
         {canCustomize ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {visibleIds.map((id) => {
               const k = kpiById.get(id);
               if (!k) return null;
-              const span = k.kind === "panel" ? colSpanClass(k.colSpan ?? 1) : "";
+              const userSize = sizes[id];
+              const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? (k.kind === "panel" ? (k.colSpan ?? 1) : 1);
+              const spanClass = colSpanClass(effectiveSpan);
+              const heightStyle = k.kind === "panel" && userSize?.height ? { height: `${userSize.height}px` } : undefined;
+              const isResizing = resizingId === id;
               return (
                 <div
                   key={id}
-                  draggable
+                  data-kpi-id={id}
+                  draggable={!isResizing}
                   onDragStart={() => setDragId(id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(id)}
                   onDragEnd={() => setDragId(null)}
-                  className={cn(span, "cursor-move transition-opacity", dragId === id && "opacity-40")}
+                  style={heightStyle}
+                  className={cn(
+                    spanClass,
+                    "relative group cursor-move transition-opacity",
+                    dragId === id && "opacity-40",
+                    isResizing && "ring-2 ring-primary/40",
+                  )}
                 >
                   {k.kind === "stat" ? (
                     <StatCard
@@ -388,15 +399,26 @@ function DashboardPage() {
                       onRemove={() => removeKpi(id)}
                     />
                   ) : (
-                    <Panel
-                      title={k.title}
-                      action={k.action}
-                      padded={k.padded}
-                      onRemove={() => removeKpi(id)}
-                    >
-                      {k.render?.()}
-                    </Panel>
+                    <div className="h-full [&>*]:h-full [&_.recharts-responsive-container]:!h-full">
+                      <Panel
+                        title={k.title}
+                        action={k.action}
+                        padded={k.padded}
+                        onRemove={() => removeKpi(id)}
+                      >
+                        {k.render?.()}
+                      </Panel>
+                    </div>
                   )}
+                  <div
+                    onPointerDown={(e) => startResize(id, k.kind, e)}
+                    title="Drag to resize"
+                    className="absolute bottom-0 right-0 h-4 w-4 cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, transparent 0 50%, var(--muted-foreground) 50% 60%, transparent 60% 70%, var(--muted-foreground) 70% 80%, transparent 80%)",
+                    }}
+                  />
                 </div>
               );
             })}
