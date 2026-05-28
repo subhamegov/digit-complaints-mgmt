@@ -140,15 +140,27 @@ export function Panel({
   children,
   className,
   padded = true,
+  onRemove,
 }: {
   title?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
   padded?: boolean;
+  onRemove?: () => void;
 }) {
   return (
-    <section className={cn("rounded border border-border bg-surface", className)}>
+    <section className={cn("relative rounded border border-border bg-surface", className)}>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          className="absolute top-1 right-1 z-10 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30"
+          aria-label={title ? `Remove ${title}` : "Remove"}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
       {title && (
         <header className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <h2 className="text-[13px] font-semibold text-foreground">{title}</h2>
@@ -159,6 +171,7 @@ export function Panel({
     </section>
   );
 }
+
 
 export function EmptyState({ message }: { message: string }) {
   return (
