@@ -1,38 +1,34 @@
 ## Goal
 
-Introduce a new role `TEST_USER` ("Test User") cloned from GRO, and restrict the dashboard customization features to it. All other roles see the original static dashboard (no X buttons, no Add KPI button, no reorder handles).
+Treat every box on the TEST_USER dashboard — stat cards (Total, Open, Resolved, Breached) and chart boxes (Complaints Filed vs Resolved, By Locality, By Department, Recent, SLA, etc.) — as a single concept called a **KPI**. One flat grid, one picker, one drag/remove model.
 
-## Changes
+Scope: TEST_USER role only. All other roles keep their current static dashboard untouched.
 
-### 1. New role — `src/lib/rbac.tsx`
-- Add `TEST_USER` to the `Role` union.
-- Add `TEST_USER` entry to `ROLE_PERMISSIONS`, cloning GRO's permissions.
-- Add `ROLE_LABEL.TEST_USER = "Test User"`.
-- Add a demo user name in `roleUser()` (e.g. `"Test User"`).
+## Changes (all in `src/routes/dashboard.tsx`)
 
-### 2. Login dropdown — `src/routes/login.tsx`
-The dropdown already iterates `Object.keys(ROLE_LABEL)`, so the new role appears automatically. No change needed beyond verifying.
+1. **Collapse the two concepts into one registry**
+   - Replace the separate `KPI_*` and `panelDefs` / `PANEL_LABELS` structures with a single `KPI_REGISTRY` keyed by id. Each entry: `{ id, label, description, size: "stat" | "chart-sm" | "chart-lg", render() }`.
+   - Stat entries (`total`, `open`, `resolved`, `breached`) take 1 column. Chart entries take 2 or 3 columns via `col-span-*`.
 
-### 3. Users roster — `src/routes/users.tsx`
-Add one demo row for the Test User so the role shows up in the HRMS list.
+2. **Single flat 3-column grid**
+   - Remove the "Overview" wrapper panel and the panel/KPI split.
+   - One `visibleKpiIds: string[]` state drives a single `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` grid.
+   - Each tile uses the same card primitive with a top-right ✕ remove button and is draggable for reordering. Reorder uses the existing drag handler pattern (one set of handlers, not two).
 
-### 4. Dashboard scoping — `src/routes/dashboard.tsx`
-Gate all customization on `role === "TEST_USER"`:
-- `const canCustomize = role === "TEST_USER"`.
-- Render the **Add KPI** popover only when `canCustomize`.
-- Pass `onRemove` to `StatCard` only when `canCustomize` (so the X button is not shown for other roles — `StatCard` already hides it when `onRemove` is undefined? if not, the cross will be conditional via prop).
-- For non-`TEST_USER` roles, render the original full default KPI list and skip the `visibleKpiIds` state-driven filtering (i.e. always show all defaults, no removability).
+3. **Unified "Add KPI" picker**
+   - One button + popover listing every KPI not currently visible (both stats and charts), each with its `label` + `description` + a small preview thumbnail (reuse the render function at reduced scale, or a static mini preview).
+   - Clicking adds the id to `visibleKpiIds` and closes the popover.
 
-### 5. Reordering (new) — Test User only
-Add drag-to-reorder on the KPI grid for `TEST_USER`:
-- Use native HTML5 drag-and-drop (no new dependency): `draggable`, `onDragStart`, `onDragOver`, `onDrop` on each `StatCard` wrapper.
-- Maintain order in the existing `visibleKpiIds` state; reorder updates the array.
-- Show a subtle grip cursor (`cursor-move`) on KPI cards only when `canCustomize`.
-- Resets on every dashboard open (state already initializes from defaults on mount — preserved).
+4. **Filters bar** — unchanged (date range, ward, complaint type) stays above the grid, TEST_USER only.
 
-### Out of scope
-- No changes to other pages, permissions, or non-TEST_USER role behavior.
-- No backend or persistence — order/visibility reset on remount (matches existing behavior).
+5. **Gating** — keep `canCustomize = role === "TEST_USER"`. Non-TEST_USER roles render the original static layout exactly as today.
 
-## How to demo
-Sign out → sign in selecting **Test User** from the role dropdown → land on `/dashboard` → see X buttons on each KPI, the Add KPI button, and drag-to-reorder. Sign in as any other role → dashboard is the original static version.
+6. **Cleanup**
+   - Delete `DEFAULT_PANEL_IDS`, `ALL_PANEL_IDS`, `PANEL_LABELS`, `panelDefs`, `panelDragId`, `panelPickerOpen`, `addPanel`, `removePanel`, `handlePanelDrop`, and the second "Add panel" button.
+   - Default `visibleKpiIds` for TEST_USER = `["total", "open", "resolved", "breached", "trend", "wards"]` (or current default set), all flowing in one grid.
+
+## Out of scope
+- No changes to other roles, no backend changes, no new KPI content — just unifying the model and UI for existing boxes.
+
+## Result
+One mental model: every box is a KPI. One Add button, one remove ✕, one drag-to-reorder, one flat grid.
