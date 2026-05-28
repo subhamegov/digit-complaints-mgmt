@@ -179,17 +179,27 @@ function DashboardPage() {
             const k = allKpis.find((x) => x.id === id);
             if (!k) return null;
             return (
-              <StatCard
+              <div
                 key={id}
-                label={k.label}
-                value={k.value}
-                intent={k.intent}
-                delta={k.delta}
-                onRemove={() => removeKpi(id)}
-              />
+                draggable={canCustomize}
+                onDragStart={canCustomize ? () => setDragId(id) : undefined}
+                onDragOver={canCustomize ? (e) => e.preventDefault() : undefined}
+                onDrop={canCustomize ? () => handleDrop(id) : undefined}
+                onDragEnd={canCustomize ? () => setDragId(null) : undefined}
+                className={canCustomize ? `cursor-move transition-opacity ${dragId === id ? "opacity-40" : ""}` : ""}
+              >
+                <StatCard
+                  label={k.label}
+                  value={k.value}
+                  intent={k.intent}
+                  delta={k.delta}
+                  onRemove={canCustomize ? () => removeKpi(id) : undefined}
+                />
+              </div>
             );
           })}
         </div>
+
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <Panel title="Complaints filed vs resolved — last 7 days" className="xl:col-span-2">
