@@ -45,21 +45,75 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
-  const s = dashboardSummary();
-  const dept = byDepartment();
-  const wards = byWard();
-  const trend = trend7d();
   const { jurisdiction, role } = useRbac();
   const canCustomize = role === "TEST_USER";
-
-  const recent = COMPLAINTS.slice(0, 6);
-  const wardsMax = Math.max(...wards.map((w) => w.total), 1);
 
   // Filter state (TEST_USER only)
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [geoFilter, setGeoFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+
+  // Apply filters to the complaint dataset. Non-TEST_USER roles see the
+  // unfiltered numbers (their filter bar is hidden).
+  const filteredComplaints = useMemo(() => {
+    if (!canCustomize) return COMPLAINTS;
+    const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
+    const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
+    return COMPLAINTS.filter((c) => {
+      const filedTs = new Date(c.filedOn).getTime();
+      if (fromTs !== null && filedTs < fromTs) return false;
+      if (toTs !== null && filedTs > toTs) return false;
+      if (geoFilter && c.ward !== geoFilter) return false;
+      if (typeFilter && c.typeCode !== typeFilter) return false;
+      return true;
+    });
+  }, [canCustomize, fromDate, toDate, geoFilter, typeFilter]);
+
+  const s = useMemo(() => {
+    const total = filteredComplaints.length;
+    const open = filteredComplaints.filter((c) => ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)).length;
+    const resolved = filteredComplaints.filter((c) => c.status === "RESOLVED" || c.status === "CLOSED").length;
+    const breached = filteredComplaints.filter((c) => c.slaState === "BREACHED").length;
+    const reopens = filteredComplaints.filter((c) => c.reopenCount > 0).length;
+    return {
+      total, open, resolved, breached,
+      avgResolutionHrs: 42,
+      reopenRate: total ? Math.round((reopens / total) * 100) : 0,
+      satisfaction: 4.1,
+    };
+  }, [filteredComplaints]);
+
+  const dept = useMemo(() => {
+    const map = new Map<string, { open: number; resolved: number; breached: number }>();
+    for (const c of filteredComplaints) {
+      const m = map.get(c.department) ?? { open: 0, resolved: 0, breached: 0 };
+      if (c.status === "RESOLVED" || c.status === "CLOSED") m.resolved++;
+      else m.open++;
+      if (c.slaState === "BREACHED") m.breached++;
+      map.set(c.department, m);
+    }
+    return Array.from(map, ([department, v]) => ({ department, ...v }));
+  }, [filteredComplaints]);
+
+  const wards = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of filteredComplaints) map.set(c.ward, (map.get(c.ward) ?? 0) + 1);
+    return Array.from(map, ([ward, total]) => ({ ward, total }));
+  }, [filteredComplaints]);
+
+  // Full ward list for the geography selector so options don't disappear
+  // after filtering by ward.
+  const allWards = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of COMPLAINTS) set.add(c.ward);
+    return Array.from(set).sort();
+  }, []);
+
+  const trend = trend7d();
+  const recent = filteredComplaints.slice(0, 6);
+  const wardsMax = Math.max(...wards.map((w) => w.total), 1);
+
 
   // Unified KPI registry: every box (stat card or chart panel) is a KPI.
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
