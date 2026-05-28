@@ -212,15 +212,15 @@ function DashboardPage() {
     setDragId(null);
   };
 
-  // Per-tile resize. Width snaps to grid columns (1..3); panels also resize vertically.
+  // Per-tile resize. Width snaps to grid columns (1..3).
   const gridRef = useRef<HTMLDivElement>(null);
-  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; height?: number }>>({});
+  const [sizes, setSizes] = useState<Record<string, { colSpan: 1 | 2 | 3 }>>({});
   const [resizingId, setResizingId] = useState<string | null>(null);
   // Disable native drag while pointer is on a resize handle so HTML5 drag doesn't
   // race with our pointer-based resize.
   const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
-  const startResize = (id: string, kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
+  const startResize = (id: string, _kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const handleEl = e.currentTarget;
@@ -238,13 +238,7 @@ function DashboardPage() {
     const onMove = (ev: PointerEvent) => {
       const widthFromLeft = ev.clientX - tileRect.left;
       const cols = Math.max(1, Math.min(3, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
-      const next: { colSpan?: 1 | 2 | 3; height?: number } = { colSpan: cols };
-      if (kind === "panel") {
-        const minH = 180;
-        const maxH = window.innerHeight - 120;
-        next.height = Math.max(minH, Math.min(maxH, ev.clientY - tileRect.top));
-      }
-      setSizes((p) => ({ ...p, [id]: next }));
+      setSizes((p) => ({ ...p, [id]: { colSpan: cols } }));
     };
     const onUp = (ev: PointerEvent) => {
       handleEl.releasePointerCapture?.(ev.pointerId);
@@ -383,14 +377,13 @@ function DashboardPage() {
         )}
 
         {canCustomize ? (
-          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start">
             {visibleIds.map((id) => {
               const k = kpiById.get(id);
               if (!k) return null;
               const userSize = sizes[id];
               const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? (k.kind === "panel" ? (k.colSpan ?? 1) : 1);
               const spanClass = colSpanClass(effectiveSpan);
-              const heightStyle = k.kind === "panel" && userSize?.height ? { height: `${userSize.height}px` } : undefined;
               const isResizing = resizingId === id;
               return (
                 <div
@@ -404,40 +397,36 @@ function DashboardPage() {
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDrop(id)}
                   onDragEnd={() => setDragId(null)}
-                  style={heightStyle}
                   className={cn(
                     spanClass,
                     "relative group transition-all",
                     handleHoverId !== id && "cursor-move",
                     dragId === id && "opacity-40",
-                    isResizing && "ring-2 ring-primary outline-none",
+                    isResizing && "ring-2 ring-primary outline-none rounded",
                   )}
                 >
-                  <div className="h-full flex flex-col [&>*]:flex-1 [&_.recharts-responsive-container]:!h-full">
-                    {k.kind === "stat" ? (
-                      <StatCard
-                        label={k.label}
-                        value={k.getValue?.() ?? ""}
-                        intent={k.intent}
-                        delta={k.getDelta?.() ?? ""}
-                        onRemove={() => removeKpi(id)}
-                      />
-                    ) : (
-                      <Panel
-                        title={k.title}
-                        action={k.action}
-                        padded={k.padded}
-                        onRemove={() => removeKpi(id)}
-                        className="flex flex-col [&>div:last-child]:flex-1 [&>div:last-child]:min-h-0"
-                      >
-                        {k.render?.()}
-                      </Panel>
-                    )}
-                  </div>
+                  {k.kind === "stat" ? (
+                    <StatCard
+                      label={k.label}
+                      value={k.getValue?.() ?? ""}
+                      intent={k.intent}
+                      delta={k.getDelta?.() ?? ""}
+                      onRemove={() => removeKpi(id)}
+                    />
+                  ) : (
+                    <Panel
+                      title={k.title}
+                      action={k.action}
+                      padded={k.padded}
+                      onRemove={() => removeKpi(id)}
+                    >
+                      {k.render?.()}
+                    </Panel>
+                  )}
 
                   {isResizing && (
                     <div className="pointer-events-none absolute top-1 left-1 z-20 rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
-                      {effectiveSpan}/3{k.kind === "panel" && userSize?.height ? ` · ${Math.round(userSize.height)}px` : ""}
+                      {effectiveSpan}/3
                     </div>
                   )}
 
@@ -446,15 +435,15 @@ function DashboardPage() {
                     onPointerEnter={() => setHandleHoverId(id)}
                     onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
                     onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
-                    title="Drag to resize · double-click to reset"
+                    title="Drag to resize width · double-click to reset"
                     className={cn(
-                      "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-se-resize rounded-bl-sm",
-                      "opacity-50 hover:opacity-100 hover:bg-primary/10 transition-opacity",
+                      "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-ew-resize rounded-bl-sm",
+                      "opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
                       isResizing && "opacity-100",
                     )}
                   >
                     <svg viewBox="0 0 10 10" className="h-3.5 w-3.5 text-muted-foreground">
-                      <path d="M9 1 L1 9 M9 5 L5 9 M9 9 L9 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" fill="none" />
+                      <path d="M9 1 L1 9 M9 5 L5 9" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" fill="none" />
                     </svg>
                   </div>
                 </div>
