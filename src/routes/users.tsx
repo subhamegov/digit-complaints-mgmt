@@ -26,7 +26,9 @@ const USERS = OFFICERS.map((o, i): { id: string; name: string; designation: stri
   { id: "EMP-1401", name: "Priya Nair", designation: "Platform Administrator", department: "Platform", ward: "ALL", mobile: "98xxxxxx03", role: "PLATFORM_ADMIN", active: true },
 
   { id: "EMP-1500", name: "Harpreet Kaur", designation: "Citizen Services Rep.", department: "Front Office", ward: "ALL", mobile: "98xxxxxx03", role: "CSR", active: true },
+  { id: "EMP-1600", name: "Test User", designation: "Sandbox Tester", department: "QA", ward: "ALL", mobile: "98xxxxxx04", role: "TEST_USER", active: true },
 ]);
+
 
 function UsersPage() {
   return (
