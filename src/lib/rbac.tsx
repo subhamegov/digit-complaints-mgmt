@@ -132,7 +132,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "PGR_REPORTS_VIEW",
     "PGR_CITIZEN_PII_VIEW",
   ],
-
+};
 
 export const ROLE_LABEL: Record<Role, string> = {
   CSR: "Citizen Service Rep.",
@@ -141,8 +141,9 @@ export const ROLE_LABEL: Record<Role, string> = {
   DEPT_HEAD: "Department Head",
   ACCOUNT_ADMIN: "Account Administrator",
   PLATFORM_ADMIN: "Platform Administrator",
-
+  TEST_USER: "Test User",
 };
+
 
 /**
  * Account = the customer entity on the SaaS platform.
