@@ -57,7 +57,8 @@ function DashboardPage() {
   const dept = byDepartment();
   const wards = byWard();
   const trend = trend7d();
-  const { jurisdiction } = useRbac();
+  const { jurisdiction, role } = useRbac();
+  const canCustomize = role === "TEST_USER";
 
   const recent = COMPLAINTS.slice(0, 6);
 
@@ -66,6 +67,7 @@ function DashboardPage() {
   const defaultIds = useMemo(() => DEFAULT_KPIS.map((k) => k.id), []);
   const [visibleKpiIds, setVisibleKpiIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
 
   const allKpis: KpiOption[] = useMemo(() => {
     const dynamicDefaults = DEFAULT_KPIS.map((k) => {
@@ -92,7 +94,22 @@ function DashboardPage() {
     setPickerOpen(false);
   };
 
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) return;
+    setVisibleKpiIds((prev) => {
+      const next = [...prev];
+      const from = next.indexOf(dragId);
+      const to = next.indexOf(targetId);
+      if (from === -1 || to === -1) return prev;
+      next.splice(from, 1);
+      next.splice(to, 0, dragId);
+      return next;
+    });
+    setDragId(null);
+  };
+
   const availableToAdd = allKpis.filter((k) => !visibleKpiIds.includes(k.id));
+
 
   return (
     <div>
