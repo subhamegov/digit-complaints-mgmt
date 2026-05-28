@@ -12,9 +12,10 @@ import { useRbac } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
-  dashboardSummary, byDepartment, byWard, trend7d, COMPLAINTS, complaintTypeOf,
+  trend7d, COMPLAINTS, complaintTypeOf,
   type Complaint,
 } from "@/lib/mock-data";
+
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
 } from "recharts";
