@@ -118,8 +118,21 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "HRMS_USER_MANAGE",
     "AUDIT_LOG_VIEW",
   ],
+  TEST_USER: [
+    "PGR_DASHBOARD_VIEW",
+    "PGR_INBOX_VIEW",
+    "PGR_TASKS_VIEW",
+    "PGR_COMPLAINT_VIEW",
+    "PGR_COMPLAINT_ASSIGN",
+    "PGR_COMPLAINT_REASSIGN",
+    "PGR_COMPLAINT_REJECT",
+    "PGR_COMPLAINT_COMMENT",
+    "PGR_SLA_VIEW",
+    "PGR_ESCALATION_VIEW",
+    "PGR_REPORTS_VIEW",
+    "PGR_CITIZEN_PII_VIEW",
+  ],
 
-};
 
 export const ROLE_LABEL: Record<Role, string> = {
   CSR: "Citizen Service Rep.",
