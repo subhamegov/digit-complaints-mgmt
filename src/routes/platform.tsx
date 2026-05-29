@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useId, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -8,6 +8,7 @@ import {
   Copy,
   Globe,
   Info,
+  LogIn,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
