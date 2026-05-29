@@ -244,7 +244,7 @@ export function TopBar({
       </button>
 
       <button
-        onClick={() => navigate({ to: "/platform" })}
+        onClick={() => navigate({ to: "/login" })}
         className="flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2 text-[12px] font-medium text-foreground hover:bg-muted"
         aria-label={t("COMMON_SIGN_OUT")}
         title={t("COMMON_SIGN_OUT")}
