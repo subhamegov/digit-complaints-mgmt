@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useId, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -8,6 +8,7 @@ import {
   Copy,
   Globe,
   Info,
+  LogIn,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
@@ -86,7 +87,16 @@ function PlatformLanding() {
               </div>
             </div>
           </div>
-          <LanguageSelector value={language} onChange={setLanguage} compact />
+          <div className="flex items-center gap-3">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              Back to Sign In
+            </Link>
+            <LanguageSelector value={language} onChange={setLanguage} compact />
+          </div>
         </div>
       </header>
 
