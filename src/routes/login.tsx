@@ -28,7 +28,14 @@ function LoginPage() {
     <div className="min-h-screen w-full bg-chrome text-chrome-foreground">
       <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
         {/* Identity column */}
-        <div className="flex flex-col justify-between px-10 py-8">
+        <div
+          className="relative flex flex-col justify-between px-10 py-8"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(10,15,20,0.72) 0%, rgba(10,15,20,0.55) 50%, rgba(10,15,20,0.82) 100%), url(${loginBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary font-bold text-primary-foreground">P</div>
             <div className="leading-tight">
