@@ -12,10 +12,10 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { setRole } = useRbac();
+  const { role: currentRole, setRole } = useRbac();
   const [userId, setUserId] = useState("manjit.singh");
   const [password, setPassword] = useState("••••••••");
-  const [role, setLocalRole] = useState<Role>("GRO");
+  const [role, setLocalRole] = useState<Role>(currentRole);
   const [tenant, setTenant] = useState("acc.makueni.cg");
 
   const submit = (e: React.FormEvent) => {
