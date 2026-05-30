@@ -189,10 +189,47 @@ interface RbacState {
 
 const RbacContext = createContext<RbacState | null>(null);
 
+const STORAGE_KEY = "pgr.workingContext.v1";
+
+function loadPersisted(): { role?: Role; tenantCode?: string; jurisdictionCode?: string } {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export function RbacProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>("GRO");
-  const [tenant, setTenant] = useState<Tenant>(TENANTS[0]);
-  const [jurisdiction, setJurisdiction] = useState<Jurisdiction>(JURISDICTIONS[0]);
+  const persisted = loadPersisted();
+  const [role, setRoleState] = useState<Role>((persisted.role as Role) ?? "GRO");
+  const [tenant, setTenantState] = useState<Tenant>(
+    TENANTS.find((t) => t.code === persisted.tenantCode) ?? TENANTS[0],
+  );
+  const [jurisdiction, setJurisdictionState] = useState<Jurisdiction>(
+    JURISDICTIONS.find((j) => j.code === persisted.jurisdictionCode) ?? JURISDICTIONS[0],
+  );
+
+  const persist = (next: { role?: Role; tenant?: Tenant; jurisdiction?: Jurisdiction }) => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          role: next.role ?? role,
+          tenantCode: (next.tenant ?? tenant).code,
+          jurisdictionCode: (next.jurisdiction ?? jurisdiction).code,
+        }),
+      );
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const setRole = (r: Role) => { setRoleState(r); persist({ role: r }); };
+  const setTenant = (t: Tenant) => { setTenantState(t); persist({ tenant: t }); };
+  const setJurisdiction = (j: Jurisdiction) => { setJurisdictionState(j); persist({ jurisdiction: j }); };
 
   const value = useMemo<RbacState>(() => {
     const perms = new Set(ROLE_PERMISSIONS[role]);
@@ -207,6 +244,7 @@ export function RbacProvider({ children }: { children: ReactNode }) {
       hasAnyPermission: (ps) => ps.some((p) => perms.has(p)),
       userName: roleUser(role),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, tenant, jurisdiction]);
 
   return <RbacContext.Provider value={value}>{children}</RbacContext.Provider>;
