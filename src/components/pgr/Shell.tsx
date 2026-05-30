@@ -59,7 +59,7 @@ function SidebarContextSwitchers() {
         <select
           value={tenant.code}
           onChange={(e) => setTenant(TENANTS.find((tn) => tn.code === e.target.value)!)}
-          className="w-full bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
+          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
         >
           {TENANTS.map((tn) => <option key={tn.code} value={tn.code}>{tn.name}</option>)}
         </select>
@@ -68,7 +68,7 @@ function SidebarContextSwitchers() {
         <select
           value={jurisdiction.code}
           onChange={(e) => setJurisdiction(JURISDICTIONS.find((j) => j.code === e.target.value)!)}
-          className="w-full bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
+          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
         >
           {JURISDICTIONS.map((j) => <option key={j.code} value={j.code}>{j.name}</option>)}
         </select>
@@ -77,7 +77,7 @@ function SidebarContextSwitchers() {
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as Role)}
-          className="w-full bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
+          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
           aria-label="Role switcher (demo)"
         >
           {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
