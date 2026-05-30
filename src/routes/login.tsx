@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ROLE_LABEL, useRbac, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { ShieldCheck } from "lucide-react";
+import loginBg from "@/assets/login-crowd.jpg";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In — DIGIT PGR" }] }),
