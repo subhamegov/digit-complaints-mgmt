@@ -395,7 +395,8 @@ type SetupData = {
   fullName: string;
   email: string;
   recoveryEmail: string;
-  usagePurpose: UsagePurpose | "";
+  operationMode: OperationMode | "";
+  setupLocation: SetupLocation | "";
   accountScale: AccountScale | "";
 };
 
