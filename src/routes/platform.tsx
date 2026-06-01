@@ -382,7 +382,8 @@ const SETUP_STEPS = [
   "Review",
 ] as const;
 
-type UsagePurpose = "testing" | "training" | "production" | "demo";
+type OperationMode = "demonstrable" | "saas" | "own";
+type SetupLocation = "laptop" | "captive" | "hyperscaler" | "datacenter";
 type AccountScale = "1" | "lt5" | "lt10" | "gte10";
 
 type SetupData = {
