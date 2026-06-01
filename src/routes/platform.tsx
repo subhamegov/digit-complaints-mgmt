@@ -840,11 +840,16 @@ function ReviewSetupCard({
 }) {
   const languageLabel =
     LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
-  const usageLabel: Record<UsagePurpose, string> = {
-    testing: "Testing / Sandbox",
-    training: "Training",
-    production: "Production",
-    demo: "Demo",
+  const operationLabel: Record<OperationMode, string> = {
+    demonstrable: "Demonstrable",
+    saas: "SaaS",
+    own: "Own Deployment",
+  };
+  const locationLabel: Record<SetupLocation, string> = {
+    laptop: "Laptop",
+    captive: "Captive Cloud",
+    hyperscaler: "Hyperscaler Cloud",
+    datacenter: "Data Center",
   };
   const scaleLabel: Record<AccountScale, string> = {
     "1": "1",
@@ -854,10 +859,11 @@ function ReviewSetupCard({
   };
   const rows: [string, string][] = [
     ["Language", languageLabel],
+    ["Operation Mode", data.operationMode ? operationLabel[data.operationMode] : "—"],
+    ["Setup Location", data.setupLocation ? locationLabel[data.setupLocation] : "—"],
     ["Administrator", data.fullName],
     ["Administrator Email", data.email],
     ["Recovery Email", data.recoveryEmail || "—"],
-    ["Intended Use", data.usagePurpose ? usageLabel[data.usagePurpose] : "—"],
     ["Account Scale", data.accountScale ? scaleLabel[data.accountScale] : "—"],
     ["Platform Name", data.platformName],
     ["Platform Code", data.platformCode],
