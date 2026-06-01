@@ -376,15 +376,14 @@ function LoginCard({
 
 const SETUP_STEPS = [
   "Language",
-  "Administration Essentials",
+  "Essentials",
   "Platform",
-  "Domain",
   "Review",
 ] as const;
 
-type OperationMode = "demonstrable" | "saas" | "own";
+type OperationMode = "demo" | "saas" | "own";
 type SetupLocation = "laptop" | "captive" | "hyperscaler" | "datacenter";
-type AccountScale = "1" | "lt5" | "lt10" | "gte10";
+type AccountScale = "1" | "2-5" | "6-25" | "25+";
 
 type SetupData = {
   language: string;
