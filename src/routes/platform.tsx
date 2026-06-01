@@ -421,7 +421,8 @@ function SetupStepper({
     fullName: "",
     email: initialEmail,
     recoveryEmail: "",
-    usagePurpose: "",
+    operationMode: "",
+    setupLocation: "",
     accountScale: "",
   });
 
