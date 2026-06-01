@@ -681,7 +681,8 @@ function AdministratorSetupForm({
     data.fullName.trim().length > 1 &&
     emailValid &&
     recoveryValid &&
-    data.usagePurpose !== "" &&
+    data.operationMode !== "" &&
+    data.setupLocation !== "" &&
     data.accountScale !== "";
 
   return (
