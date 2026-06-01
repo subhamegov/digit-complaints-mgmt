@@ -697,6 +697,65 @@ function AdministratorSetupForm({
         title="Administration Essentials"
         subtitle="Identify the first administrator and how this installation will be used."
       />
+      <Field label="How do you want to operate this installation?">
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { value: "demonstrable", label: "Demonstrable" },
+              { value: "saas", label: "SaaS" },
+              { value: "own", label: "Own Deployment" },
+            ] as { value: OperationMode; label: string }[]
+          ).map((opt) => {
+            const active = data.operationMode === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set("operationMode", opt.value)}
+                className={
+                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
+                  (active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
+      <Field label="Where are you setting this up?">
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              { value: "laptop", label: "Laptop" },
+              { value: "captive", label: "Captive Cloud" },
+              { value: "hyperscaler", label: "Hyperscaler Cloud" },
+              { value: "datacenter", label: "Data Center" },
+            ] as { value: SetupLocation; label: string }[]
+          ).map((opt) => {
+            const active = data.setupLocation === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set("setupLocation", opt.value)}
+                className={
+                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
+                  (active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
       <Field label="Full Name">
         <input
           value={data.fullName}
@@ -731,35 +790,6 @@ function AdministratorSetupForm({
         />
       </Field>
 
-      <Field label="What would you like to use this installation for?">
-        <div className="grid grid-cols-2 gap-2">
-          {(
-            [
-              { value: "testing", label: "Testing / Sandbox" },
-              { value: "training", label: "Training" },
-              { value: "production", label: "Production" },
-              { value: "demo", label: "Demo" },
-            ] as { value: UsagePurpose; label: string }[]
-          ).map((opt) => {
-            const active = data.usagePurpose === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set("usagePurpose", opt.value)}
-                className={
-                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
-                  (active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
-                }
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
 
       <Field label="How many accounts are you planning on supporting out of this installation?">
         <div className="grid grid-cols-2 gap-2">
