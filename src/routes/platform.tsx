@@ -421,9 +421,8 @@ function SetupStepper({
     fullName: "",
     email: initialEmail,
     recoveryEmail: "",
-    confirmRecoveryEmail: "",
-    magicLink: "",
-    magicLinkCopied: false,
+    usagePurpose: "",
+    accountScale: "",
   });
 
   const set = <K extends keyof SetupData>(k: K, v: SetupData[K]) =>
