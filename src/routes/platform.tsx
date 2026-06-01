@@ -382,7 +382,8 @@ const SETUP_STEPS = [
   "Review",
 ] as const;
 
-type UsagePurpose = "testing" | "training" | "production" | "demo";
+type OperationMode = "demonstrable" | "saas" | "own";
+type SetupLocation = "laptop" | "captive" | "hyperscaler" | "datacenter";
 type AccountScale = "1" | "lt5" | "lt10" | "gte10";
 
 type SetupData = {
@@ -394,7 +395,8 @@ type SetupData = {
   fullName: string;
   email: string;
   recoveryEmail: string;
-  usagePurpose: UsagePurpose | "";
+  operationMode: OperationMode | "";
+  setupLocation: SetupLocation | "";
   accountScale: AccountScale | "";
 };
 
@@ -419,7 +421,8 @@ function SetupStepper({
     fullName: "",
     email: initialEmail,
     recoveryEmail: "",
-    usagePurpose: "",
+    operationMode: "",
+    setupLocation: "",
     accountScale: "",
   });
 
@@ -678,7 +681,8 @@ function AdministratorSetupForm({
     data.fullName.trim().length > 1 &&
     emailValid &&
     recoveryValid &&
-    data.usagePurpose !== "" &&
+    data.operationMode !== "" &&
+    data.setupLocation !== "" &&
     data.accountScale !== "";
 
   return (
@@ -693,6 +697,65 @@ function AdministratorSetupForm({
         title="Administration Essentials"
         subtitle="Identify the first administrator and how this installation will be used."
       />
+      <Field label="How do you want to operate this installation?">
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { value: "demonstrable", label: "Demonstrable" },
+              { value: "saas", label: "SaaS" },
+              { value: "own", label: "Own Deployment" },
+            ] as { value: OperationMode; label: string }[]
+          ).map((opt) => {
+            const active = data.operationMode === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set("operationMode", opt.value)}
+                className={
+                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
+                  (active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
+      <Field label="Where are you setting this up?">
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              { value: "laptop", label: "Laptop" },
+              { value: "captive", label: "Captive Cloud" },
+              { value: "hyperscaler", label: "Hyperscaler Cloud" },
+              { value: "datacenter", label: "Data Center" },
+            ] as { value: SetupLocation; label: string }[]
+          ).map((opt) => {
+            const active = data.setupLocation === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set("setupLocation", opt.value)}
+                className={
+                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
+                  (active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
       <Field label="Full Name">
         <input
           value={data.fullName}
@@ -727,35 +790,6 @@ function AdministratorSetupForm({
         />
       </Field>
 
-      <Field label="What would you like to use this installation for?">
-        <div className="grid grid-cols-2 gap-2">
-          {(
-            [
-              { value: "testing", label: "Testing / Sandbox" },
-              { value: "training", label: "Training" },
-              { value: "production", label: "Production" },
-              { value: "demo", label: "Demo" },
-            ] as { value: UsagePurpose; label: string }[]
-          ).map((opt) => {
-            const active = data.usagePurpose === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set("usagePurpose", opt.value)}
-                className={
-                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
-                  (active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
-                }
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
 
       <Field label="How many accounts are you planning on supporting out of this installation?">
         <div className="grid grid-cols-2 gap-2">
@@ -806,11 +840,16 @@ function ReviewSetupCard({
 }) {
   const languageLabel =
     LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
-  const usageLabel: Record<UsagePurpose, string> = {
-    testing: "Testing / Sandbox",
-    training: "Training",
-    production: "Production",
-    demo: "Demo",
+  const operationLabel: Record<OperationMode, string> = {
+    demonstrable: "Demonstrable",
+    saas: "SaaS",
+    own: "Own Deployment",
+  };
+  const locationLabel: Record<SetupLocation, string> = {
+    laptop: "Laptop",
+    captive: "Captive Cloud",
+    hyperscaler: "Hyperscaler Cloud",
+    datacenter: "Data Center",
   };
   const scaleLabel: Record<AccountScale, string> = {
     "1": "1",
@@ -820,10 +859,11 @@ function ReviewSetupCard({
   };
   const rows: [string, string][] = [
     ["Language", languageLabel],
+    ["Operation Mode", data.operationMode ? operationLabel[data.operationMode] : "—"],
+    ["Setup Location", data.setupLocation ? locationLabel[data.setupLocation] : "—"],
     ["Administrator", data.fullName],
     ["Administrator Email", data.email],
     ["Recovery Email", data.recoveryEmail || "—"],
-    ["Intended Use", data.usagePurpose ? usageLabel[data.usagePurpose] : "—"],
     ["Account Scale", data.accountScale ? scaleLabel[data.accountScale] : "—"],
     ["Platform Name", data.platformName],
     ["Platform Code", data.platformCode],
