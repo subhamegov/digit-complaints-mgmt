@@ -467,14 +467,6 @@ function SetupStepper({
           />
         )}
         {step === 3 && (
-          <DomainSetupForm
-            data={data}
-            set={set}
-            onNext={next}
-            onBack={back}
-          />
-        )}
-        {step === 4 && (
           <ReviewSetupCard
             data={data}
             onBack={back}
