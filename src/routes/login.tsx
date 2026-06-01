@@ -21,7 +21,7 @@ function LoginPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setRole(role);
-    navigate({ to: "/dashboard" });
+    navigate({ to: role === "PLATFORM_ADMIN" ? "/platform" : "/dashboard" });
   };
 
   return (
