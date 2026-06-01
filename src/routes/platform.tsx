@@ -653,6 +653,215 @@ function DomainSetupForm({
 }
 
 /* ---- Administration Essentials ---- */
+
+const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[] = [
+  { value: "demo", label: "Demo", hint: "For pilots and walkthroughs." },
+  { value: "saas", label: "SaaS", hint: "For managing multiple accounts." },
+  { value: "own", label: "Own Deployment", hint: "For a dedicated installation." },
+];
+
+const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
+  { value: "laptop", label: "Laptop" },
+  { value: "captive", label: "Captive Cloud" },
+  { value: "hyperscaler", label: "Hyperscaler Cloud" },
+  { value: "datacenter", label: "Data Center" },
+];
+
+const ACCOUNT_OPTIONS: { value: AccountScale; label: string }[] = [
+  { value: "1", label: "1" },
+  { value: "2-5", label: "2–5" },
+  { value: "6-25", label: "6–25" },
+  { value: "25+", label: "25+" },
+];
+
+const OPERATION_DEFAULTS: Record<
+  OperationMode,
+  { location: SetupLocation; scale: AccountScale }
+> = {
+  demo: { location: "laptop", scale: "1" },
+  saas: { location: "hyperscaler", scale: "6-25" },
+  own: { location: "datacenter", scale: "1" },
+};
+
+function InstallationUseSelector({
+  value,
+  onChange,
+}: {
+  value: OperationMode | "";
+  onChange: (v: OperationMode) => void;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {OPERATION_OPTIONS.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={
+              "flex flex-col items-start gap-0.5 rounded-sm border px-2.5 py-2 text-left transition-colors " +
+              (active
+                ? "border-primary bg-primary/10"
+                : "border-border bg-background hover:border-primary/40 hover:bg-muted/30")
+            }
+          >
+            <span
+              className={
+                "text-[12.5px] font-medium " +
+                (active ? "text-primary" : "text-foreground")
+              }
+            >
+              {opt.label}
+            </span>
+            <span className="text-[10.5px] leading-snug text-muted-foreground">
+              {opt.hint}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function SetupLocationDropdown({
+  value,
+  onChange,
+}: {
+  value: SetupLocation | "";
+  onChange: (v: SetupLocation) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as SetupLocation)}
+      className={inputCls}
+    >
+      <option value="" disabled>
+        Select a location
+      </option>
+      {LOCATION_OPTIONS.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function AccountVolumeSelector({
+  value,
+  onChange,
+}: {
+  value: AccountScale | "";
+  onChange: (v: AccountScale) => void;
+}) {
+  return (
+    <div className="inline-flex w-full rounded-sm border border-border bg-background p-0.5">
+      {ACCOUNT_OPTIONS.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={
+              "flex-1 rounded-sm px-2 py-1.5 text-[12.5px] font-medium transition-colors " +
+              (active
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground")
+            }
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FirstAdministratorForm({
+  data,
+  set,
+}: {
+  data: SetupData;
+  set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <Field label="Full name">
+        <input
+          value={data.fullName}
+          onChange={(e) => set("fullName", e.target.value)}
+          className={inputCls}
+        />
+      </Field>
+      <Field
+        label={
+          <span>
+            Work email <span className="text-destructive">*</span>
+          </span>
+        }
+        hint="Used for first platform administrator access."
+      >
+        <input
+          type="email"
+          value={data.email}
+          onChange={(e) => set("email", e.target.value)}
+          required
+          className={inputCls}
+        />
+      </Field>
+      <Field label="Recovery email" hint="Optional backup email.">
+        <input
+          type="email"
+          value={data.recoveryEmail}
+          onChange={(e) => set("recoveryEmail", e.target.value)}
+          placeholder="recovery@your-org.org"
+          className={inputCls}
+        />
+      </Field>
+    </div>
+  );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+      {children}
+    </h3>
+  );
+}
+
+function SetupStepFooter({
+  onBack,
+  disabled,
+}: {
+  onBack: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 pt-1">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Back
+      </button>
+      <button
+        type="submit"
+        disabled={disabled}
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Continue
+        <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 function AdministratorSetupForm({
   data,
   set,
@@ -669,16 +878,22 @@ function AdministratorSetupForm({
   const recoveryValid = !recoveryProvided || /.+@.+\..+/.test(data.recoveryEmail);
 
   const valid =
-    data.fullName.trim().length > 1 &&
-    emailValid &&
-    recoveryValid &&
     data.operationMode !== "" &&
     data.setupLocation !== "" &&
-    data.accountScale !== "";
+    data.accountScale !== "" &&
+    emailValid &&
+    recoveryValid;
+
+  const onOperationChange = (mode: OperationMode) => {
+    const defaults = OPERATION_DEFAULTS[mode];
+    set("operationMode", mode);
+    set("setupLocation", defaults.location);
+    set("accountScale", defaults.scale);
+  };
 
   return (
     <form
-      className="space-y-4"
+      className="space-y-5"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onNext();
@@ -686,135 +901,37 @@ function AdministratorSetupForm({
     >
       <CardHeading
         title="Administration Essentials"
-        subtitle="Identify the first administrator and how this installation will be used."
+        subtitle="Tell us how this installation will run and who will manage it first."
       />
-      <Field label="How do you want to operate this installation?">
-        <div className="grid grid-cols-3 gap-2">
-          {(
-            [
-              { value: "demonstrable", label: "Demonstrable" },
-              { value: "saas", label: "SaaS" },
-              { value: "own", label: "Own Deployment" },
-            ] as { value: OperationMode; label: string }[]
-          ).map((opt) => {
-            const active = data.operationMode === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set("operationMode", opt.value)}
-                className={
-                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
-                  (active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
-                }
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
 
-      <Field label="Where are you setting this up?">
-        <div className="grid grid-cols-2 gap-2">
-          {(
-            [
-              { value: "laptop", label: "Laptop" },
-              { value: "captive", label: "Captive Cloud" },
-              { value: "hyperscaler", label: "Hyperscaler Cloud" },
-              { value: "datacenter", label: "Data Center" },
-            ] as { value: SetupLocation; label: string }[]
-          ).map((opt) => {
-            const active = data.setupLocation === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set("setupLocation", opt.value)}
-                className={
-                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
-                  (active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
-                }
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
+      <section className="space-y-3">
+        <SectionHeading>Installation Context</SectionHeading>
+        <Field label="How will this installation be used?">
+          <InstallationUseSelector
+            value={data.operationMode}
+            onChange={onOperationChange}
+          />
+        </Field>
+        <Field label="Where will it run?">
+          <SetupLocationDropdown
+            value={data.setupLocation}
+            onChange={(v) => set("setupLocation", v)}
+          />
+        </Field>
+        <Field label="How many accounts do you expect to support?">
+          <AccountVolumeSelector
+            value={data.accountScale}
+            onChange={(v) => set("accountScale", v)}
+          />
+        </Field>
+      </section>
 
-      <Field label="Full Name">
-        <input
-          value={data.fullName}
-          onChange={(e) => set("fullName", e.target.value)}
-          placeholder="Priya Nair"
-          className={inputCls}
-        />
-      </Field>
-      <Field
-        label={
-          <span>
-            Work Email <span className="text-destructive">*</span>
-          </span>
-        }
-        hint="Required. Used to sign in to the platform."
-      >
-        <input
-          type="email"
-          value={data.email}
-          onChange={(e) => set("email", e.target.value)}
-          required
-          className={inputCls}
-        />
-      </Field>
-      <Field label="Recovery Email" hint="Optional. Used to regain access if the work email is lost.">
-        <input
-          type="email"
-          value={data.recoveryEmail}
-          onChange={(e) => set("recoveryEmail", e.target.value)}
-          placeholder="recovery@your-org.org"
-          className={inputCls}
-        />
-      </Field>
+      <section className="space-y-3">
+        <SectionHeading>First Administrator</SectionHeading>
+        <FirstAdministratorForm data={data} set={set} />
+      </section>
 
-
-      <Field label="How many accounts are you planning on supporting out of this installation?">
-        <div className="grid grid-cols-2 gap-2">
-          {(
-            [
-              { value: "1", label: "1" },
-              { value: "lt5", label: "Less than 5" },
-              { value: "lt10", label: "Less than 10" },
-              { value: "gte10", label: "10 or more" },
-            ] as { value: AccountScale; label: string }[]
-          ).map((opt) => {
-            const active = data.accountScale === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set("accountScale", opt.value)}
-                className={
-                  "flex h-9 items-center justify-center rounded-sm border px-3 text-[12.5px] font-medium transition-colors " +
-                  (active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted/30")
-                }
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Field>
-
-      <StepActions onBack={onBack} disabled={!valid}>
-        Continue
-      </StepActions>
+      <SetupStepFooter onBack={onBack} disabled={!valid} />
     </form>
   );
 }
