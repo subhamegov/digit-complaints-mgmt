@@ -808,11 +808,25 @@ function ReviewSetupCard({
 }) {
   const languageLabel =
     LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
+  const usageLabel: Record<UsagePurpose, string> = {
+    testing: "Testing / Sandbox",
+    training: "Training",
+    production: "Production",
+    demo: "Demo",
+  };
+  const scaleLabel: Record<AccountScale, string> = {
+    "1": "1",
+    lt5: "Less than 5",
+    lt10: "Less than 10",
+    gte10: "10 or more",
+  };
   const rows: [string, string][] = [
     ["Language", languageLabel],
     ["Administrator", data.fullName],
     ["Administrator Email", data.email],
-    ["Recovery Email", data.recoveryEmail],
+    ["Recovery Email", data.recoveryEmail || "—"],
+    ["Intended Use", data.usagePurpose ? usageLabel[data.usagePurpose] : "—"],
+    ["Account Scale", data.accountScale ? scaleLabel[data.accountScale] : "—"],
     ["Platform Name", data.platformName],
     ["Platform Code", data.platformCode],
     ["Domain Name", data.domainName],
