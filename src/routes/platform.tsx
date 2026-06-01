@@ -543,8 +543,8 @@ function StepLanguage({
         onNext();
       }}
     >
-      <CardHeading title="Select Language" />
-      <Field label="Preferred Language">
+      <CardHeading title="Confirm default display language for configuration" />
+      <Field label="Default display language">
         <LanguageSelector value={value} onChange={onChange} />
       </Field>
       <StepActions onBack={onBack}>Continue</StepActions>
