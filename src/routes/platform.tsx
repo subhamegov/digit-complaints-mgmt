@@ -949,7 +949,7 @@ function ReviewSetupCard({
   const languageLabel =
     LANGUAGES.find((l) => l.code === data.language)?.label ?? data.language;
   const operationLabel: Record<OperationMode, string> = {
-    demonstrable: "Demonstrable",
+    demo: "Demo",
     saas: "SaaS",
     own: "Own Deployment",
   };
@@ -961,22 +961,20 @@ function ReviewSetupCard({
   };
   const scaleLabel: Record<AccountScale, string> = {
     "1": "1",
-    lt5: "Less than 5",
-    lt10: "Less than 10",
-    gte10: "10 or more",
+    "2-5": "2–5",
+    "6-25": "6–25",
+    "25+": "25+",
   };
   const rows: [string, string][] = [
     ["Language", languageLabel],
-    ["Operation Mode", data.operationMode ? operationLabel[data.operationMode] : "—"],
+    ["Installation Use", data.operationMode ? operationLabel[data.operationMode] : "—"],
     ["Setup Location", data.setupLocation ? locationLabel[data.setupLocation] : "—"],
-    ["Administrator", data.fullName],
-    ["Administrator Email", data.email],
+    ["Account Volume", data.accountScale ? scaleLabel[data.accountScale] : "—"],
+    ["Administrator", data.fullName || "—"],
+    ["Work Email", data.email],
     ["Recovery Email", data.recoveryEmail || "—"],
-    ["Account Scale", data.accountScale ? scaleLabel[data.accountScale] : "—"],
     ["Platform Name", data.platformName],
     ["Platform Code", data.platformCode],
-    ["Domain Name", data.domainName],
-    ["Domain Code", data.domainCode],
   ];
   return (
     <div className="space-y-4">
