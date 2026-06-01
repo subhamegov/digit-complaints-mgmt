@@ -904,7 +904,7 @@ function Field({
   trailing,
   children,
 }: {
-  label: string;
+  label: React.ReactNode;
   hint?: string;
   trailing?: React.ReactNode;
   children: React.ReactNode;
