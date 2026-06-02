@@ -1195,5 +1195,8 @@ function LanguageSelector({
 const inputCls =
   "h-9 w-full rounded-sm border border-border bg-background px-2.5 text-[13px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15";
 
+const compactInputCls =
+  "h-8 w-full rounded-sm border border-border bg-background px-2.5 text-[13px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15";
+
 const readOnlyInputCls =
   "h-9 w-full rounded-sm border border-border bg-[oklch(0.985_0.003_250)] px-2.5 text-[13px] text-muted-foreground outline-none";
