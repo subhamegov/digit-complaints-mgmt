@@ -134,9 +134,9 @@ function PlatformLanding() {
           )}
         </section>
 
-        <SetupHelpLinks />
-        <AuditNote />
+        <SetupAuditFooter />
       </main>
+
     </div>
   );
 }
