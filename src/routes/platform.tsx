@@ -745,11 +745,11 @@ const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[]
   { value: "own", label: "Own deployment", hint: "Dedicated installation" },
 ];
 
-const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
-  { value: "laptop", label: "Laptop" },
-  { value: "captive", label: "Captive Cloud" },
-  { value: "hyperscaler", label: "Hyperscaler Cloud" },
-  { value: "datacenter", label: "Data Center" },
+const LOCATION_OPTIONS: { value: SetupLocation; label: string; hint: string }[] = [
+  { value: "laptop", label: "Laptop", hint: "Local setup" },
+  { value: "captive", label: "Captive cloud", hint: "Private managed cloud" },
+  { value: "hyperscaler", label: "Hyperscaler cloud", hint: "AWS, Azure, GCP, OCI" },
+  { value: "datacenter", label: "Data center", hint: "Dedicated infrastructure" },
 ];
 
 const ACCOUNT_OPTIONS: { value: AccountScale; label: string }[] = [
