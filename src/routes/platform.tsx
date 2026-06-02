@@ -363,11 +363,12 @@ function SetupStepper({
         No administrator found. Complete setup to create the first administrator.
       </Banner>
 
-      <div className="mt-4">
+      <div className="mt-5">
         <StepStrip current={step} />
       </div>
 
-      <div className="mt-5">
+      <div className="mt-8">
+
         {step === 0 && (
           <StepLanguage
             value={data.language}
