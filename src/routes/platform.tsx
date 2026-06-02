@@ -494,8 +494,12 @@ function SetupStepper({
   const next = () => setStep((s) => Math.min(s + 1, SETUP_STEPS.length - 1));
   const back = () => (step === 0 ? onCancel() : setStep((s) => s - 1));
 
+  const stepKeys: HelpStepKey[] = ["language", "essentials", "platform", "review"];
+
   return (
     <div className="px-6 py-6">
+      <SetupHelpRail stepKey={stepKeys[step]} />
+
       <Banner>
         No administrator found. Complete setup to create the first administrator.
       </Banner>
