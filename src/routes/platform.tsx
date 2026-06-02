@@ -715,7 +715,7 @@ function FirstAdministratorForm({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-5">
       <PlainField label="Full name">
         <input
           value={data.fullName}
