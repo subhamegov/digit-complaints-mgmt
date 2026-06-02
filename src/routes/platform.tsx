@@ -227,7 +227,7 @@ function SetupHelpRail({ stepKey }: { stepKey: HelpStepKey }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open help"
-        className="absolute right-[-44px] top-4 hidden h-auto w-9 flex-col items-center gap-1.5 rounded-sm border border-border bg-background py-3 text-[11px] font-medium text-muted-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/40 hover:text-primary md:inline-flex"
+        className="group absolute right-[-44px] top-4 hidden h-auto w-9 flex-col items-center gap-1.5 rounded-sm border border-border bg-background py-3 text-[11px] font-medium text-muted-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:inline-flex"
       >
         <HelpCircle className="h-4 w-4" />
         <span className="[writing-mode:vertical-rl] rotate-180 tracking-wide">
