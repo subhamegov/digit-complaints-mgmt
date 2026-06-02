@@ -845,11 +845,11 @@ function SetupFooterActions({
   disabled: boolean;
 }) {
   return (
-    <div className="-mx-6 mt-5 flex items-center justify-between gap-2 border-t border-border bg-background px-6 pt-3">
+    <div className="-mx-6 -mb-6 mt-8 flex items-center justify-between gap-2 border-t border-border bg-background px-6 py-4">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-2 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex h-10 items-center gap-1.5 rounded-sm px-3 text-[14px] font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
@@ -857,7 +857,7 @@ function SetupFooterActions({
       <button
         type="submit"
         disabled={disabled}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+        className="inline-flex h-10 items-center gap-1.5 rounded-sm bg-primary px-5 text-[14px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-foreground/55"
       >
         Continue
         <ArrowRight className="h-3.5 w-3.5" />
