@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  ChevronDown,
+  
   Globe,
   Info,
   LogIn,
@@ -98,48 +98,37 @@ function PlatformLanding() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-10 sm:py-14 lg:grid-cols-[460px_1fr] lg:gap-10">
-        <div className="flex flex-col items-center">
-          <PageHeader />
+      <main className="mx-auto flex max-w-xl flex-col items-center px-6 py-8 sm:py-12">
+        <PageHeader />
 
-          <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            {screen.kind === "email" && (
-              <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
-            )}
+        <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          {screen.kind === "email" && (
+            <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+          )}
 
-            {screen.kind === "login" && (
-              <LoginCard
-                email={screen.email}
-                onBack={() => setScreen({ kind: "email" })}
-              />
-            )}
-            {screen.kind === "setup" && (
-              <SetupStepper
-                initialEmail={screen.email}
-                initialLanguage={language}
-                onCancel={() => setScreen({ kind: "email" })}
-                onComplete={(email) =>
-                  setScreen({ kind: "success", email })
-                }
-              />
-            )}
-            {screen.kind === "success" && (
-              <SuccessStateCard email={screen.email} />
-            )}
-          </section>
+          {screen.kind === "login" && (
+            <LoginCard
+              email={screen.email}
+              onBack={() => setScreen({ kind: "email" })}
+            />
+          )}
+          {screen.kind === "setup" && (
+            <SetupStepper
+              initialEmail={screen.email}
+              initialLanguage={language}
+              onCancel={() => setScreen({ kind: "email" })}
+              onComplete={(email) =>
+                setScreen({ kind: "success", email })
+              }
+            />
+          )}
+          {screen.kind === "success" && (
+            <SuccessStateCard email={screen.email} />
+          )}
+        </section>
 
-          <div className="mt-5 w-full max-w-[460px] lg:hidden">
-            <HelpLinksAccordion />
-          </div>
-
-          <AuditFooter />
-        </div>
-
-        <div className="hidden lg:block">
-          <div className="sticky top-10">
-            <HelpLinksPanel />
-          </div>
-        </div>
+        <SetupHelpLinks />
+        <AuditNote />
       </main>
     </div>
   );
@@ -162,101 +151,32 @@ function PageHeader() {
 }
 
 const HELP_LINKS = [
-  { label: "Setup Guide", description: "Step-by-step instructions" },
-  { label: "Installation Checklist", description: "Verify prerequisites" },
-  { label: "Contact Support", description: "Reach the platform team" },
+  { label: "Setup guide", href: "#" },
+  { label: "Installation checklist", href: "#" },
+  { label: "Contact support", href: "#" },
 ];
 
-function HelpLinksPanel() {
+function SetupHelpLinks() {
   return (
-    <div className="w-full rounded-sm border border-border bg-background">
-      <div className="border-b border-border bg-muted/40 px-4 py-3">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Need help setting up?
-        </div>
-      </div>
-      <ul className="divide-y divide-border">
-        {HELP_LINKS.map((link) => (
-          <li key={link.label}>
-            <a
-              href="#"
-              className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
-            >
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
-                {link.label.charAt(0)}
-              </span>
-              <div>
-                <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
-                  {link.label}
-                </div>
-                <div className="text-[11px] text-muted-foreground">
-                  {link.description}
-                </div>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function HelpLinksAccordion() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="w-full rounded-sm border border-border bg-background">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between border-b border-border bg-muted/40 px-4 py-3 text-left"
-      >
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Need help setting up?
+    <div className="mt-5 flex w-full max-w-[460px] flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
+      <span>Need help?</span>
+      {HELP_LINKS.map((link, i) => (
+        <span key={link.label} className="flex items-center gap-3">
+          <a href={link.href} className="text-primary hover:underline">
+            {link.label}
+          </a>
+          {i < HELP_LINKS.length - 1 && <span className="opacity-40">·</span>}
         </span>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      {open && (
-        <ul className="divide-y divide-border">
-          {HELP_LINKS.map((link) => (
-            <li key={link.label}>
-              <a
-                href="#"
-                className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
-              >
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
-                  {link.label.charAt(0)}
-                </span>
-                <div>
-                  <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
-                    {link.label}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {link.description}
-                  </div>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      ))}
     </div>
   );
 }
 
-function AuditFooter() {
+function AuditNote() {
   return (
-    <div className="mt-5 flex flex-col items-center gap-2 text-[11px] text-muted-foreground">
-      <div className="flex items-center gap-1.5">
-        <ShieldCheck className="h-3 w-3" />
-        Console access is audited.
-      </div>
-      <a href="/dashboard" className="text-primary hover:underline">
-        Skip onboarding to dashboard →
-      </a>
+    <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+      <ShieldCheck className="h-3 w-3" />
+      Console access is audited.
     </div>
   );
 }
@@ -661,9 +581,9 @@ function DomainSetupForm({
 /* ---- Administration Essentials ---- */
 
 const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[] = [
-  { value: "demo", label: "Demo", hint: "For pilots and walkthroughs." },
-  { value: "saas", label: "SaaS", hint: "For managing multiple accounts." },
-  { value: "own", label: "Own Deployment", hint: "For a dedicated installation." },
+  { value: "demo", label: "Demo", hint: "Pilots and walkthroughs" },
+  { value: "saas", label: "SaaS", hint: "Multiple accounts" },
+  { value: "own", label: "Own Deployment", hint: "Dedicated installation" },
 ];
 
 const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
@@ -689,7 +609,7 @@ const OPERATION_DEFAULTS: Record<
   own: { location: "datacenter", scale: "1" },
 };
 
-function InstallationUseSelector({
+function InstallationUseCards({
   value,
   onChange,
 }: {
@@ -708,19 +628,19 @@ function InstallationUseSelector({
             className={
               "flex flex-col items-start gap-0.5 rounded-sm border px-2.5 py-2 text-left transition-colors " +
               (active
-                ? "border-primary bg-primary/10"
-                : "border-border bg-background hover:border-primary/40 hover:bg-muted/30")
+                ? "border-primary bg-primary/[0.06]"
+                : "border-border bg-background hover:border-primary/40")
             }
           >
             <span
               className={
-                "text-[12.5px] font-medium " +
+                "text-[12.5px] font-semibold leading-tight " +
                 (active ? "text-primary" : "text-foreground")
               }
             >
               {opt.label}
             </span>
-            <span className="text-[10.5px] leading-snug text-muted-foreground">
+            <span className="block w-full truncate text-[10.5px] leading-snug text-muted-foreground">
               {opt.hint}
             </span>
           </button>
@@ -744,7 +664,7 @@ function SetupLocationDropdown({
       className={inputCls}
     >
       <option value="" disabled>
-        Select a location
+        Select location
       </option>
       {LOCATION_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -794,52 +714,123 @@ function FirstAdministratorForm({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <div className="space-y-3">
-      <Field label="Full name">
+    <div className="space-y-2.5">
+      <PlainField label="Full name">
         <input
           value={data.fullName}
           onChange={(e) => set("fullName", e.target.value)}
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
-      <Field
+      </PlainField>
+      <PlainField
         label={
-          <span>
+          <>
             Work email <span className="text-destructive">*</span>
-          </span>
+          </>
         }
-        hint="Used for first platform administrator access."
+        hint="Used for administrator access."
       >
         <input
           type="email"
           value={data.email}
           onChange={(e) => set("email", e.target.value)}
           required
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
-      <Field label="Recovery email" hint="Optional backup email.">
+      </PlainField>
+      <PlainField label="Recovery email" hint="Optional backup email.">
         <input
           type="email"
           value={data.recoveryEmail}
           onChange={(e) => set("recoveryEmail", e.target.value)}
           placeholder="recovery@your-org.org"
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
+      </PlainField>
     </div>
   );
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function InstallationContextSection({
+  data,
+  onOperationChange,
+  set,
+}: {
+  data: SetupData;
+  onOperationChange: (mode: OperationMode) => void;
+  set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+}) {
   return (
-    <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-      {children}
-    </h3>
+    <section className="space-y-3">
+      <SectionTitle>Installation context</SectionTitle>
+      <PlainField label="How will this installation be used?">
+        <InstallationUseCards
+          value={data.operationMode}
+          onChange={onOperationChange}
+        />
+      </PlainField>
+      <PlainField label="Where will it run?">
+        <SetupLocationDropdown
+          value={data.setupLocation}
+          onChange={(v) => set("setupLocation", v)}
+        />
+      </PlainField>
+      <PlainField label="Expected accounts">
+        <ExpectedAccountsSegment
+          value={data.accountScale}
+          onChange={(v) => set("accountScale", v)}
+        />
+      </PlainField>
+    </section>
   );
 }
 
-function SetupStepFooter({
+function FirstAdministratorSection({
+  data,
+  set,
+}: {
+  data: SetupData;
+  set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+}) {
+  return (
+    <section className="space-y-3">
+      <SectionTitle>First administrator</SectionTitle>
+      <FirstAdministratorForm data={data} set={set} />
+    </section>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[13px] font-semibold text-foreground">{children}</h3>
+  );
+}
+
+function PlainField({
+  label,
+  hint,
+  children,
+}: {
+  label: React.ReactNode;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[12px] font-medium text-foreground">
+        {label}
+      </span>
+      {children}
+      {hint && (
+        <span className="mt-1 block text-[11px] text-muted-foreground">
+          {hint}
+        </span>
+      )}
+    </label>
+  );
+}
+
+function SetupFooterActions({
   onBack,
   disabled,
 }: {
@@ -847,11 +838,11 @@ function SetupStepFooter({
   disabled: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 pt-1">
+    <div className="-mx-6 mt-5 flex items-center justify-between gap-2 border-t border-border bg-background px-6 pt-3">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-2 text-[13px] font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
@@ -859,7 +850,7 @@ function SetupStepFooter({
       <button
         type="submit"
         disabled={disabled}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
       >
         Continue
         <ArrowRight className="h-3.5 w-3.5" />
@@ -867,6 +858,9 @@ function SetupStepFooter({
     </div>
   );
 }
+
+// Backwards-compatible aliases
+const ExpectedAccountsSegment = AccountVolumeSelector;
 
 function AdministratorSetupForm({
   data,
@@ -907,37 +901,18 @@ function AdministratorSetupForm({
     >
       <CardHeading
         title="Administration Essentials"
-        subtitle="Tell us how this installation will run and who will manage it first."
+        subtitle="Set how this installation will run and who manages it first."
       />
 
-      <section className="space-y-3">
-        <SectionHeading>Installation Context</SectionHeading>
-        <Field label="How will this installation be used?">
-          <InstallationUseSelector
-            value={data.operationMode}
-            onChange={onOperationChange}
-          />
-        </Field>
-        <Field label="Where will it run?">
-          <SetupLocationDropdown
-            value={data.setupLocation}
-            onChange={(v) => set("setupLocation", v)}
-          />
-        </Field>
-        <Field label="How many accounts do you expect to support?">
-          <AccountVolumeSelector
-            value={data.accountScale}
-            onChange={(v) => set("accountScale", v)}
-          />
-        </Field>
-      </section>
+      <InstallationContextSection
+        data={data}
+        onOperationChange={onOperationChange}
+        set={set}
+      />
 
-      <section className="space-y-3">
-        <SectionHeading>First Administrator</SectionHeading>
-        <FirstAdministratorForm data={data} set={set} />
-      </section>
+      <FirstAdministratorSection data={data} set={set} />
 
-      <SetupStepFooter onBack={onBack} disabled={!valid} />
+      <SetupFooterActions onBack={onBack} disabled={!valid} />
     </form>
   );
 }
@@ -1219,6 +1194,9 @@ function LanguageSelector({
 
 const inputCls =
   "h-9 w-full rounded-sm border border-border bg-background px-2.5 text-[13px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15";
+
+const compactInputCls =
+  "h-8 w-full rounded-sm border border-border bg-background px-2.5 text-[13px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15";
 
 const readOnlyInputCls =
   "h-9 w-full rounded-sm border border-border bg-[oklch(0.985_0.003_250)] px-2.5 text-[13px] text-muted-foreground outline-none";
