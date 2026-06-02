@@ -17,6 +17,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
 export type Role =
+  | "CITIZEN" // Citizen — files and tracks own complaints
   | "CSR" // Citizen Service Representative — registers complaints
   | "GRO" // Grievance Routing Officer — assigns / reassigns / rejects
   | "LME" // Last-Mile Employee — resolves
@@ -50,6 +51,12 @@ export type Permission =
   | "AUDIT_LOG_VIEW";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  CITIZEN: [
+    "PGR_COMPLAINT_VIEW",
+    "PGR_COMPLAINT_CREATE",
+    "PGR_COMPLAINT_REOPEN",
+    "PGR_COMPLAINT_COMMENT",
+  ],
   CSR: [
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",
@@ -135,6 +142,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
+  CITIZEN: "Citizen",
   CSR: "Citizen Service Rep.",
   GRO: "Grievance Routing Officer",
   LME: "Field Employee",
@@ -252,6 +260,7 @@ export function RbacProvider({ children }: { children: ReactNode }) {
 
 function roleUser(role: Role): string {
   switch (role) {
+    case "CITIZEN": return "Anjali Verma";
     case "CSR": return "Harpreet Kaur";
     case "GRO": return "Manjit Singh";
     case "LME": return "Ramesh Kumar";
@@ -259,8 +268,6 @@ function roleUser(role: Role): string {
     case "ACCOUNT_ADMIN": return "Vikram Mehta";
     case "PLATFORM_ADMIN": return "Priya Nair";
     case "TEST_USER": return "Test User";
-
-
   }
 }
 
