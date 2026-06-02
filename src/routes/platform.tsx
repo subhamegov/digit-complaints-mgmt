@@ -407,7 +407,7 @@ function LoginCard({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setRole("PLATFORM_ADMIN");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/admin/home" });
   };
 
   return (
@@ -1059,7 +1059,7 @@ function DemoSkipSetupLink() {
     }
     setRole("PLATFORM_ADMIN");
     setOpen(false);
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/admin/home" });
   };
 
   return (
