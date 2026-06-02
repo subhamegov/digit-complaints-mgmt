@@ -182,6 +182,12 @@ const COMMON_LINKS: HelpLink[] = [
 ];
 
 const HELP_CONTENT: Record<HelpStepKey, HelpContent> = {
+  email: {
+    about:
+      "Enter your work email to sign in or start first-time setup.",
+    need: "A valid work email for the platform administrator.",
+    links: COMMON_LINKS,
+  },
   language: {
     about: "Choose the default language for setup.",
     need: "Preferred platform language.",
