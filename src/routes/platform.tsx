@@ -162,7 +162,7 @@ function PageHeader() {
         Admin Console
       </h1>
       <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-        Set up or access your platform administration workspace.
+        Set up or access platform administration.
       </p>
     </div>
   );
@@ -356,10 +356,7 @@ function EmailEntryCard({
         if (valid) onContinue(email);
       }}
     >
-      <CardHeading
-        title="Enter Work Email"
-        subtitle="We'll check whether this platform is already set up."
-      />
+      <CardHeading title="Enter Work Email" />
       <div className="mt-5 space-y-3">
         <Field label="Work Email">
           <input
@@ -386,7 +383,7 @@ function EmailEntryCard({
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
         <p className="text-[11px] leading-relaxed text-muted-foreground">
-          New installation? Setup starts automatically if no administrator exists.
+          New installation? Setup starts automatically.
         </p>
       </div>
 
