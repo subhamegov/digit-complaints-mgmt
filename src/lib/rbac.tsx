@@ -17,6 +17,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
 export type Role =
+  | "CITIZEN" // Citizen — files and tracks own complaints
   | "CSR" // Citizen Service Representative — registers complaints
   | "GRO" // Grievance Routing Officer — assigns / reassigns / rejects
   | "LME" // Last-Mile Employee — resolves
