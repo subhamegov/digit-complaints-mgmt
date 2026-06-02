@@ -900,16 +900,20 @@ function AdministratorSetupForm({
 
   return (
     <form
-      className="space-y-5"
+      className="space-y-8"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onNext();
       }}
     >
-      <CardHeading
-        title="Administration Essentials"
-        subtitle="Set how this installation will run and who manages it first."
-      />
+      <div>
+        <h2 className="text-[24px] font-bold leading-tight text-foreground">
+          Administration essentials
+        </h2>
+        <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+          Set how this installation will run and who manages it first.
+        </p>
+      </div>
 
       <InstallationContextSection
         data={data}
