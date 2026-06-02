@@ -98,48 +98,37 @@ function PlatformLanding() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-10 sm:py-14 lg:grid-cols-[460px_1fr] lg:gap-10">
-        <div className="flex flex-col items-center">
-          <PageHeader />
+      <main className="mx-auto flex max-w-xl flex-col items-center px-6 py-8 sm:py-12">
+        <PageHeader />
 
-          <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            {screen.kind === "email" && (
-              <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
-            )}
+        <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          {screen.kind === "email" && (
+            <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+          )}
 
-            {screen.kind === "login" && (
-              <LoginCard
-                email={screen.email}
-                onBack={() => setScreen({ kind: "email" })}
-              />
-            )}
-            {screen.kind === "setup" && (
-              <SetupStepper
-                initialEmail={screen.email}
-                initialLanguage={language}
-                onCancel={() => setScreen({ kind: "email" })}
-                onComplete={(email) =>
-                  setScreen({ kind: "success", email })
-                }
-              />
-            )}
-            {screen.kind === "success" && (
-              <SuccessStateCard email={screen.email} />
-            )}
-          </section>
+          {screen.kind === "login" && (
+            <LoginCard
+              email={screen.email}
+              onBack={() => setScreen({ kind: "email" })}
+            />
+          )}
+          {screen.kind === "setup" && (
+            <SetupStepper
+              initialEmail={screen.email}
+              initialLanguage={language}
+              onCancel={() => setScreen({ kind: "email" })}
+              onComplete={(email) =>
+                setScreen({ kind: "success", email })
+              }
+            />
+          )}
+          {screen.kind === "success" && (
+            <SuccessStateCard email={screen.email} />
+          )}
+        </section>
 
-          <div className="mt-5 w-full max-w-[460px] lg:hidden">
-            <HelpLinksAccordion />
-          </div>
-
-          <AuditFooter />
-        </div>
-
-        <div className="hidden lg:block">
-          <div className="sticky top-10">
-            <HelpLinksPanel />
-          </div>
-        </div>
+        <SetupHelpLinks />
+        <AuditNote />
       </main>
     </div>
   );
