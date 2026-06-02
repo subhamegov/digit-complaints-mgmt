@@ -118,7 +118,10 @@ function PlatformLanding() {
 
         <section className="relative w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {screen.kind === "email" && (
-            <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+            <>
+              <SetupHelpRail stepKey="email" />
+              <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+            </>
           )}
 
           {screen.kind === "login" && (
@@ -165,7 +168,7 @@ function PageHeader() {
   );
 }
 
-type HelpStepKey = "language" | "essentials" | "platform" | "review";
+type HelpStepKey = "email" | "language" | "essentials" | "platform" | "review";
 
 type HelpLink = { label: string; href: string };
 
@@ -182,6 +185,12 @@ const COMMON_LINKS: HelpLink[] = [
 ];
 
 const HELP_CONTENT: Record<HelpStepKey, HelpContent> = {
+  email: {
+    about:
+      "Enter your work email to sign in or start first-time setup.",
+    need: "A valid work email for the platform administrator.",
+    links: COMMON_LINKS,
+  },
   language: {
     about: "Choose the default language for setup.",
     need: "Preferred platform language.",
