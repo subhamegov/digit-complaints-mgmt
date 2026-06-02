@@ -762,21 +762,21 @@ function InstallationContextSection({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-5">
       <SectionTitle>Installation context</SectionTitle>
-      <PlainField label="How will this installation be used?">
+      <PlainField variant="question" label="How will this installation be used?">
         <InstallationUseCards
           value={data.operationMode}
           onChange={onOperationChange}
         />
       </PlainField>
-      <PlainField label="Where will it run?">
+      <PlainField variant="question" label="Where will it run?">
         <SetupLocationDropdown
           value={data.setupLocation}
           onChange={(v) => set("setupLocation", v)}
         />
       </PlainField>
-      <PlainField label="Expected accounts">
+      <PlainField variant="question" label="Expected accounts">
         <ExpectedAccountsSegment
           value={data.accountScale}
           onChange={(v) => set("accountScale", v)}
@@ -794,7 +794,7 @@ function FirstAdministratorSection({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-5">
       <SectionTitle>First administrator</SectionTitle>
       <FirstAdministratorForm data={data} set={set} />
     </section>
