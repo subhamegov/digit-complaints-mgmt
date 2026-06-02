@@ -363,11 +363,12 @@ function SetupStepper({
         No administrator found. Complete setup to create the first administrator.
       </Banner>
 
-      <div className="mt-4">
+      <div className="mt-5">
         <StepStrip current={step} />
       </div>
 
-      <div className="mt-5">
+      <div className="mt-8">
+
         {step === 0 && (
           <StepLanguage
             value={data.language}
@@ -581,9 +582,9 @@ function DomainSetupForm({
 /* ---- Administration Essentials ---- */
 
 const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[] = [
-  { value: "demo", label: "Demo", hint: "Pilots and walkthroughs" },
+  { value: "demo", label: "Demo", hint: "Pilots and demos" },
   { value: "saas", label: "SaaS", hint: "Multiple accounts" },
-  { value: "own", label: "Own Deployment", hint: "Dedicated installation" },
+  { value: "own", label: "Own deployment", hint: "Dedicated installation" },
 ];
 
 const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
@@ -617,7 +618,7 @@ function InstallationUseCards({
   onChange: (v: OperationMode) => void;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 items-stretch gap-2">
       {OPERATION_OPTIONS.map((opt) => {
         const active = value === opt.value;
         return (
@@ -626,7 +627,7 @@ function InstallationUseCards({
             type="button"
             onClick={() => onChange(opt.value)}
             className={
-              "flex flex-col items-start gap-0.5 rounded-sm border px-2.5 py-2 text-left transition-colors " +
+              "flex h-full min-h-[64px] flex-col items-start justify-start gap-1 rounded-sm border px-3 py-2.5 text-left transition-colors " +
               (active
                 ? "border-primary bg-primary/[0.06]"
                 : "border-border bg-background hover:border-primary/40")
@@ -634,13 +635,13 @@ function InstallationUseCards({
           >
             <span
               className={
-                "text-[12.5px] font-semibold leading-tight " +
+                "text-[13px] font-semibold leading-tight " +
                 (active ? "text-primary" : "text-foreground")
               }
             >
               {opt.label}
             </span>
-            <span className="block w-full truncate text-[10.5px] leading-snug text-muted-foreground">
+            <span className="block w-full text-[12px] leading-snug text-muted-foreground">
               {opt.hint}
             </span>
           </button>
@@ -714,7 +715,7 @@ function FirstAdministratorForm({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-5">
       <PlainField label="Full name">
         <input
           value={data.fullName}
@@ -761,21 +762,21 @@ function InstallationContextSection({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-5">
       <SectionTitle>Installation context</SectionTitle>
-      <PlainField label="How will this installation be used?">
+      <PlainField variant="question" label="How will this installation be used?">
         <InstallationUseCards
           value={data.operationMode}
           onChange={onOperationChange}
         />
       </PlainField>
-      <PlainField label="Where will it run?">
+      <PlainField variant="question" label="Where will it run?">
         <SetupLocationDropdown
           value={data.setupLocation}
           onChange={(v) => set("setupLocation", v)}
         />
       </PlainField>
-      <PlainField label="Expected accounts">
+      <PlainField variant="question" label="Expected accounts">
         <ExpectedAccountsSegment
           value={data.accountScale}
           onChange={(v) => set("accountScale", v)}
@@ -793,7 +794,7 @@ function FirstAdministratorSection({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-5">
       <SectionTitle>First administrator</SectionTitle>
       <FirstAdministratorForm data={data} set={set} />
     </section>
@@ -802,7 +803,9 @@ function FirstAdministratorSection({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[13px] font-semibold text-foreground">{children}</h3>
+    <h3 className="text-[18px] font-semibold leading-tight text-foreground">
+      {children}
+    </h3>
   );
 }
 
@@ -810,19 +813,23 @@ function PlainField({
   label,
   hint,
   children,
+  variant = "field",
 }: {
   label: React.ReactNode;
   hint?: string;
   children: React.ReactNode;
+  variant?: "field" | "question";
 }) {
+  const labelCls =
+    variant === "question"
+      ? "mb-3 block text-[16px] font-medium leading-snug text-foreground"
+      : "mb-2 block text-[15px] font-medium leading-snug text-foreground";
   return (
     <label className="block">
-      <span className="mb-1 block text-[12px] font-medium text-foreground">
-        {label}
-      </span>
+      <span className={labelCls}>{label}</span>
       {children}
       {hint && (
-        <span className="mt-1 block text-[11px] text-muted-foreground">
+        <span className="mt-2 block text-[14px] leading-relaxed text-muted-foreground">
           {hint}
         </span>
       )}
@@ -838,11 +845,11 @@ function SetupFooterActions({
   disabled: boolean;
 }) {
   return (
-    <div className="-mx-6 mt-5 flex items-center justify-between gap-2 border-t border-border bg-background px-6 pt-3">
+    <div className="-mx-6 -mb-6 mt-8 flex items-center justify-between gap-2 border-t border-border bg-background px-6 py-4">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-2 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex h-10 items-center gap-1.5 rounded-sm px-3 text-[14px] font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
@@ -850,7 +857,7 @@ function SetupFooterActions({
       <button
         type="submit"
         disabled={disabled}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+        className="inline-flex h-10 items-center gap-1.5 rounded-sm bg-primary px-5 text-[14px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-foreground/55"
       >
         Continue
         <ArrowRight className="h-3.5 w-3.5" />
@@ -893,16 +900,20 @@ function AdministratorSetupForm({
 
   return (
     <form
-      className="space-y-5"
+      className="space-y-8"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onNext();
       }}
     >
-      <CardHeading
-        title="Administration Essentials"
-        subtitle="Set how this installation will run and who manages it first."
-      />
+      <div>
+        <h2 className="text-[24px] font-bold leading-tight text-foreground">
+          Administration essentials
+        </h2>
+        <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+          Set how this installation will run and who manages it first.
+        </p>
+      </div>
 
       <InstallationContextSection
         data={data}
@@ -1134,8 +1145,8 @@ function StepActions({
 
 function Banner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2 rounded-sm border border-border bg-[oklch(0.985_0.003_250)] px-3 py-2 text-[11.5px] leading-relaxed text-muted-foreground">
-      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+    <div className="flex items-start gap-1.5 rounded-sm border border-border/60 bg-[oklch(0.985_0.003_250)] px-2.5 py-1.5 text-[12px] leading-snug text-muted-foreground">
+      <Info className="mt-0.5 h-3 w-3 shrink-0 text-primary/70" />
       <span>{children}</span>
     </div>
   );
