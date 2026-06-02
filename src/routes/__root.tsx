@@ -108,7 +108,11 @@ function RootComponent() {
 function AppLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { role } = useRbac();
-  const isChromeless = pathname === "/login" || pathname === "/" || pathname === "/platform";
+  const isChromeless =
+    pathname === "/login" ||
+    pathname === "/" ||
+    pathname === "/platform" ||
+    pathname.startsWith("/admin");
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -137,4 +141,5 @@ function AppLayout() {
     </div>
   );
 }
+
 

@@ -18,12 +18,38 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as EscalationsRouteImport } from './routes/escalations'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuditRouteImport } from './routes/audit'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
 import { Route as ConfigWorkflowRouteImport } from './routes/config.workflow'
 import { Route as ConfigComplaintTypesRouteImport } from './routes/config.complaint-types'
 import { Route as ComplaintsNewRouteImport } from './routes/complaints.new'
+import { Route as AdminValidationRulesRouteImport } from './routes/admin.validation-rules'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminUserStatsRouteImport } from './routes/admin.user-stats'
+import { Route as AdminTelemetryRouteImport } from './routes/admin.telemetry'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPlatformAdministratorsRouteImport } from './routes/admin.platform-administrators'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminMasterDataSchemasRouteImport } from './routes/admin.master-data-schemas'
+import { Route as AdminLocalizationRouteImport } from './routes/admin.localization'
+import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
+import { Route as AdminInstallationRouteImport } from './routes/admin.installation'
+import { Route as AdminHomeRouteImport } from './routes/admin.home'
+import { Route as AdminHelpRouteImport } from './routes/admin.help'
+import { Route as AdminGeographiesRouteImport } from './routes/admin.geographies'
+import { Route as AdminDomainsRouteImport } from './routes/admin.domains'
+import { Route as AdminDocumentationRouteImport } from './routes/admin.documentation'
+import { Route as AdminConfigurationRegistryRouteImport } from './routes/admin.configuration-registry'
+import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
+import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
+import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
+import { Route as AdminTemplatesWorkflowsRouteImport } from './routes/admin.templates.workflows'
+import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templates.use-cases'
+import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
+import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
+import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
@@ -70,6 +96,11 @@ const AuditRoute = AuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -100,9 +131,137 @@ const ComplaintsNewRoute = ComplaintsNewRouteImport.update({
   path: '/complaints/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminValidationRulesRoute = AdminValidationRulesRouteImport.update({
+  id: '/validation-rules',
+  path: '/validation-rules',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUserStatsRoute = AdminUserStatsRouteImport.update({
+  id: '/user-stats',
+  path: '/user-stats',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTelemetryRoute = AdminTelemetryRouteImport.update({
+  id: '/telemetry',
+  path: '/telemetry',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlatformAdministratorsRoute =
+  AdminPlatformAdministratorsRouteImport.update({
+    id: '/platform-administrators',
+    path: '/platform-administrators',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMasterDataSchemasRoute = AdminMasterDataSchemasRouteImport.update({
+  id: '/master-data-schemas',
+  path: '/master-data-schemas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLocalizationRoute = AdminLocalizationRouteImport.update({
+  id: '/localization',
+  path: '/localization',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInstallationRoute = AdminInstallationRouteImport.update({
+  id: '/installation',
+  path: '/installation',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomeRoute = AdminHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHelpRoute = AdminHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGeographiesRoute = AdminGeographiesRouteImport.update({
+  id: '/geographies',
+  path: '/geographies',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDomainsRoute = AdminDomainsRouteImport.update({
+  id: '/domains',
+  path: '/domains',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDocumentationRoute = AdminDocumentationRouteImport.update({
+  id: '/documentation',
+  path: '/documentation',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConfigurationRegistryRoute =
+  AdminConfigurationRegistryRouteImport.update({
+    id: '/configuration-registry',
+    path: '/configuration-registry',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminAuthenticationRoute = AdminAuthenticationRouteImport.update({
+  id: '/authentication',
+  path: '/authentication',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAccountsRoute = AdminAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplatesWorkflowsRoute = AdminTemplatesWorkflowsRouteImport.update({
+  id: '/templates/workflows',
+  path: '/templates/workflows',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplatesUseCasesRoute = AdminTemplatesUseCasesRouteImport.update({
+  id: '/templates/use-cases',
+  path: '/templates/use-cases',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplatesRolesRoute = AdminTemplatesRolesRouteImport.update({
+  id: '/templates/roles',
+  path: '/templates/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplatesKpisRoute = AdminTemplatesKpisRouteImport.update({
+  id: '/templates/kpis',
+  path: '/templates/kpis',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
+  id: '/templates/forms',
+  path: '/templates/forms',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
@@ -112,14 +271,40 @@ export interface FileRoutesByFullPath {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/documentation': typeof AdminDocumentationRoute
+  '/admin/domains': typeof AdminDomainsRoute
+  '/admin/geographies': typeof AdminGeographiesRoute
+  '/admin/help': typeof AdminHelpRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/installation': typeof AdminInstallationRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/localization': typeof AdminLocalizationRoute
+  '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/user-stats': typeof AdminUserStatsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/templates/forms': typeof AdminTemplatesFormsRoute
+  '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
+  '/admin/templates/roles': typeof AdminTemplatesRolesRoute
+  '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
+  '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
@@ -129,15 +314,41 @@ export interface FileRoutesByTo {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/documentation': typeof AdminDocumentationRoute
+  '/admin/domains': typeof AdminDomainsRoute
+  '/admin/geographies': typeof AdminGeographiesRoute
+  '/admin/help': typeof AdminHelpRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/installation': typeof AdminInstallationRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/localization': typeof AdminLocalizationRoute
+  '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/user-stats': typeof AdminUserStatsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
+  '/admin/templates/forms': typeof AdminTemplatesFormsRoute
+  '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
+  '/admin/templates/roles': typeof AdminTemplatesRolesRoute
+  '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
+  '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/audit': typeof AuditRoute
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
@@ -147,16 +358,42 @@ export interface FileRoutesById {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/documentation': typeof AdminDocumentationRoute
+  '/admin/domains': typeof AdminDomainsRoute
+  '/admin/geographies': typeof AdminGeographiesRoute
+  '/admin/help': typeof AdminHelpRoute
+  '/admin/home': typeof AdminHomeRoute
+  '/admin/installation': typeof AdminInstallationRoute
+  '/admin/integrations': typeof AdminIntegrationsRoute
+  '/admin/localization': typeof AdminLocalizationRoute
+  '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/user-stats': typeof AdminUserStatsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/templates/forms': typeof AdminTemplatesFormsRoute
+  '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
+  '/admin/templates/roles': typeof AdminTemplatesRolesRoute
+  '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
+  '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/audit'
     | '/dashboard'
     | '/escalations'
@@ -166,14 +403,40 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/admin/accounts'
+    | '/admin/audit-log'
+    | '/admin/authentication'
+    | '/admin/configuration-registry'
+    | '/admin/documentation'
+    | '/admin/domains'
+    | '/admin/geographies'
+    | '/admin/help'
+    | '/admin/home'
+    | '/admin/installation'
+    | '/admin/integrations'
+    | '/admin/localization'
+    | '/admin/master-data-schemas'
+    | '/admin/notifications'
+    | '/admin/platform-administrators'
+    | '/admin/settings'
+    | '/admin/telemetry'
+    | '/admin/user-stats'
+    | '/admin/users'
+    | '/admin/validation-rules'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/templates/forms'
+    | '/admin/templates/kpis'
+    | '/admin/templates/roles'
+    | '/admin/templates/use-cases'
+    | '/admin/templates/workflows'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/audit'
     | '/dashboard'
     | '/escalations'
@@ -183,14 +446,40 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/admin/accounts'
+    | '/admin/audit-log'
+    | '/admin/authentication'
+    | '/admin/configuration-registry'
+    | '/admin/documentation'
+    | '/admin/domains'
+    | '/admin/geographies'
+    | '/admin/help'
+    | '/admin/home'
+    | '/admin/installation'
+    | '/admin/integrations'
+    | '/admin/localization'
+    | '/admin/master-data-schemas'
+    | '/admin/notifications'
+    | '/admin/platform-administrators'
+    | '/admin/settings'
+    | '/admin/telemetry'
+    | '/admin/user-stats'
+    | '/admin/users'
+    | '/admin/validation-rules'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox'
+    | '/admin/templates/forms'
+    | '/admin/templates/kpis'
+    | '/admin/templates/roles'
+    | '/admin/templates/use-cases'
+    | '/admin/templates/workflows'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/audit'
     | '/dashboard'
     | '/escalations'
@@ -200,15 +489,41 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/admin/accounts'
+    | '/admin/audit-log'
+    | '/admin/authentication'
+    | '/admin/configuration-registry'
+    | '/admin/documentation'
+    | '/admin/domains'
+    | '/admin/geographies'
+    | '/admin/help'
+    | '/admin/home'
+    | '/admin/installation'
+    | '/admin/integrations'
+    | '/admin/localization'
+    | '/admin/master-data-schemas'
+    | '/admin/notifications'
+    | '/admin/platform-administrators'
+    | '/admin/settings'
+    | '/admin/telemetry'
+    | '/admin/user-stats'
+    | '/admin/users'
+    | '/admin/validation-rules'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/templates/forms'
+    | '/admin/templates/kpis'
+    | '/admin/templates/roles'
+    | '/admin/templates/use-cases'
+    | '/admin/templates/workflows'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuditRoute: typeof AuditRoute
   DashboardRoute: typeof DashboardRoute
   EscalationsRoute: typeof EscalationsRoute
@@ -290,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -332,11 +654,245 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComplaintsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/validation-rules': {
+      id: '/admin/validation-rules'
+      path: '/validation-rules'
+      fullPath: '/admin/validation-rules'
+      preLoaderRoute: typeof AdminValidationRulesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/user-stats': {
+      id: '/admin/user-stats'
+      path: '/user-stats'
+      fullPath: '/admin/user-stats'
+      preLoaderRoute: typeof AdminUserStatsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/telemetry': {
+      id: '/admin/telemetry'
+      path: '/telemetry'
+      fullPath: '/admin/telemetry'
+      preLoaderRoute: typeof AdminTelemetryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/platform-administrators': {
+      id: '/admin/platform-administrators'
+      path: '/platform-administrators'
+      fullPath: '/admin/platform-administrators'
+      preLoaderRoute: typeof AdminPlatformAdministratorsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/master-data-schemas': {
+      id: '/admin/master-data-schemas'
+      path: '/master-data-schemas'
+      fullPath: '/admin/master-data-schemas'
+      preLoaderRoute: typeof AdminMasterDataSchemasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/localization': {
+      id: '/admin/localization'
+      path: '/localization'
+      fullPath: '/admin/localization'
+      preLoaderRoute: typeof AdminLocalizationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/integrations': {
+      id: '/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AdminIntegrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/installation': {
+      id: '/admin/installation'
+      path: '/installation'
+      fullPath: '/admin/installation'
+      preLoaderRoute: typeof AdminInstallationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/home': {
+      id: '/admin/home'
+      path: '/home'
+      fullPath: '/admin/home'
+      preLoaderRoute: typeof AdminHomeRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/help': {
+      id: '/admin/help'
+      path: '/help'
+      fullPath: '/admin/help'
+      preLoaderRoute: typeof AdminHelpRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/geographies': {
+      id: '/admin/geographies'
+      path: '/geographies'
+      fullPath: '/admin/geographies'
+      preLoaderRoute: typeof AdminGeographiesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/domains': {
+      id: '/admin/domains'
+      path: '/domains'
+      fullPath: '/admin/domains'
+      preLoaderRoute: typeof AdminDomainsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/documentation': {
+      id: '/admin/documentation'
+      path: '/documentation'
+      fullPath: '/admin/documentation'
+      preLoaderRoute: typeof AdminDocumentationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/configuration-registry': {
+      id: '/admin/configuration-registry'
+      path: '/configuration-registry'
+      fullPath: '/admin/configuration-registry'
+      preLoaderRoute: typeof AdminConfigurationRegistryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/authentication': {
+      id: '/admin/authentication'
+      path: '/authentication'
+      fullPath: '/admin/authentication'
+      preLoaderRoute: typeof AdminAuthenticationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-log': {
+      id: '/admin/audit-log'
+      path: '/audit-log'
+      fullPath: '/admin/audit-log'
+      preLoaderRoute: typeof AdminAuditLogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/accounts': {
+      id: '/admin/accounts'
+      path: '/accounts'
+      fullPath: '/admin/accounts'
+      preLoaderRoute: typeof AdminAccountsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/templates/workflows': {
+      id: '/admin/templates/workflows'
+      path: '/templates/workflows'
+      fullPath: '/admin/templates/workflows'
+      preLoaderRoute: typeof AdminTemplatesWorkflowsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/templates/use-cases': {
+      id: '/admin/templates/use-cases'
+      path: '/templates/use-cases'
+      fullPath: '/admin/templates/use-cases'
+      preLoaderRoute: typeof AdminTemplatesUseCasesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/templates/roles': {
+      id: '/admin/templates/roles'
+      path: '/templates/roles'
+      fullPath: '/admin/templates/roles'
+      preLoaderRoute: typeof AdminTemplatesRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/templates/kpis': {
+      id: '/admin/templates/kpis'
+      path: '/templates/kpis'
+      fullPath: '/admin/templates/kpis'
+      preLoaderRoute: typeof AdminTemplatesKpisRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/templates/forms': {
+      id: '/admin/templates/forms'
+      path: '/templates/forms'
+      fullPath: '/admin/templates/forms'
+      preLoaderRoute: typeof AdminTemplatesFormsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAccountsRoute: typeof AdminAccountsRoute
+  AdminAuditLogRoute: typeof AdminAuditLogRoute
+  AdminAuthenticationRoute: typeof AdminAuthenticationRoute
+  AdminConfigurationRegistryRoute: typeof AdminConfigurationRegistryRoute
+  AdminDocumentationRoute: typeof AdminDocumentationRoute
+  AdminDomainsRoute: typeof AdminDomainsRoute
+  AdminGeographiesRoute: typeof AdminGeographiesRoute
+  AdminHelpRoute: typeof AdminHelpRoute
+  AdminHomeRoute: typeof AdminHomeRoute
+  AdminInstallationRoute: typeof AdminInstallationRoute
+  AdminIntegrationsRoute: typeof AdminIntegrationsRoute
+  AdminLocalizationRoute: typeof AdminLocalizationRoute
+  AdminMasterDataSchemasRoute: typeof AdminMasterDataSchemasRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminPlatformAdministratorsRoute: typeof AdminPlatformAdministratorsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTelemetryRoute: typeof AdminTelemetryRoute
+  AdminUserStatsRoute: typeof AdminUserStatsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminValidationRulesRoute: typeof AdminValidationRulesRoute
+  AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
+  AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
+  AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
+  AdminTemplatesUseCasesRoute: typeof AdminTemplatesUseCasesRoute
+  AdminTemplatesWorkflowsRoute: typeof AdminTemplatesWorkflowsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountsRoute: AdminAccountsRoute,
+  AdminAuditLogRoute: AdminAuditLogRoute,
+  AdminAuthenticationRoute: AdminAuthenticationRoute,
+  AdminConfigurationRegistryRoute: AdminConfigurationRegistryRoute,
+  AdminDocumentationRoute: AdminDocumentationRoute,
+  AdminDomainsRoute: AdminDomainsRoute,
+  AdminGeographiesRoute: AdminGeographiesRoute,
+  AdminHelpRoute: AdminHelpRoute,
+  AdminHomeRoute: AdminHomeRoute,
+  AdminInstallationRoute: AdminInstallationRoute,
+  AdminIntegrationsRoute: AdminIntegrationsRoute,
+  AdminLocalizationRoute: AdminLocalizationRoute,
+  AdminMasterDataSchemasRoute: AdminMasterDataSchemasRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminPlatformAdministratorsRoute: AdminPlatformAdministratorsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTelemetryRoute: AdminTelemetryRoute,
+  AdminUserStatsRoute: AdminUserStatsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminValidationRulesRoute: AdminValidationRulesRoute,
+  AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
+  AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
+  AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
+  AdminTemplatesUseCasesRoute: AdminTemplatesUseCasesRoute,
+  AdminTemplatesWorkflowsRoute: AdminTemplatesWorkflowsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuditRoute: AuditRoute,
   DashboardRoute: DashboardRoute,
   EscalationsRoute: EscalationsRoute,
