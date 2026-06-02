@@ -108,7 +108,7 @@ function PlatformLanding() {
       <main className="mx-auto flex max-w-xl flex-col items-center px-6 py-8 sm:py-12">
         <PageHeader />
 
-        <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <section className="relative w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {screen.kind === "email" && (
             <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
           )}
