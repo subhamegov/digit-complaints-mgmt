@@ -118,7 +118,10 @@ function PlatformLanding() {
 
         <section className="relative w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {screen.kind === "email" && (
-            <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+            <>
+              <SetupHelpRail stepKey="email" />
+              <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
+            </>
           )}
 
           {screen.kind === "login" && (
