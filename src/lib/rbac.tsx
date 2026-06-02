@@ -51,6 +51,12 @@ export type Permission =
   | "AUDIT_LOG_VIEW";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  CITIZEN: [
+    "PGR_COMPLAINT_VIEW",
+    "PGR_COMPLAINT_CREATE",
+    "PGR_COMPLAINT_REOPEN",
+    "PGR_COMPLAINT_COMMENT",
+  ],
   CSR: [
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",
