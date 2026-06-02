@@ -1,16 +1,23 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useId, useMemo, useState } from "react";
+import { useId, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  
   Globe,
+  HelpCircle,
   Info,
   LogIn,
   ShieldCheck,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useRbac } from "@/lib/rbac";
+
 
 export const Route = createFileRoute("/platform")({
   head: () => ({
@@ -101,7 +108,7 @@ function PlatformLanding() {
       <main className="mx-auto flex max-w-xl flex-col items-center px-6 py-8 sm:py-12">
         <PageHeader />
 
-        <section className="w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <section className="relative w-full max-w-[460px] rounded-sm border border-border bg-background shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           {screen.kind === "email" && (
             <EmailEntryCard initialEmail={email} onContinue={onContinueEmail} />
           )}
@@ -127,9 +134,9 @@ function PlatformLanding() {
           )}
         </section>
 
-        <SetupHelpLinks />
-        <AuditNote />
+        <SetupAuditFooter />
       </main>
+
     </div>
   );
 }
@@ -150,36 +157,166 @@ function PageHeader() {
   );
 }
 
-const HELP_LINKS = [
+type HelpStepKey = "language" | "essentials" | "platform" | "review";
+
+type HelpLink = { label: string; href: string };
+
+type HelpContent = {
+  about: string;
+  need: string;
+  links: HelpLink[];
+};
+
+const COMMON_LINKS: HelpLink[] = [
   { label: "Setup guide", href: "#" },
   { label: "Installation checklist", href: "#" },
   { label: "Contact support", href: "#" },
 ];
 
-function SetupHelpLinks() {
-  return (
-    <div className="mt-5 flex w-full max-w-[460px] flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
-      <span>Need help?</span>
-      {HELP_LINKS.map((link, i) => (
-        <span key={link.label} className="flex items-center gap-3">
-          <a href={link.href} className="text-primary hover:underline">
-            {link.label}
-          </a>
-          {i < HELP_LINKS.length - 1 && <span className="opacity-40">·</span>}
-        </span>
-      ))}
-    </div>
-  );
-}
+const HELP_CONTENT: Record<HelpStepKey, HelpContent> = {
+  language: {
+    about: "Choose the default language for setup.",
+    need: "Preferred platform language.",
+    links: COMMON_LINKS,
+  },
+  essentials: {
+    about:
+      "Define how the installation will run and who manages it first.",
+    need:
+      "Operating mode, setup location, expected accounts, first administrator email.",
+    links: COMMON_LINKS,
+  },
+  platform: {
+    about:
+      "Define platform name, access URLs, tenant code, and environment.",
+    need:
+      "Platform URL, admin URL, API URL, root tenant code, support email.",
+    links: [
+      { label: "DNS setup guide", href: "#" },
+      { label: "SSL/TLS checklist", href: "#" },
+      { label: "Installation checklist", href: "#" },
+      { label: "Contact support", href: "#" },
+    ],
+  },
+  review: {
+    about: "Review setup details before creating the platform.",
+    need:
+      "Confirm administrator, installation context, and platform settings.",
+    links: [
+      { label: "Installation checklist", href: "#" },
+      { label: "Contact support", href: "#" },
+    ],
+  },
+};
 
-function AuditNote() {
+function SetupAuditFooter() {
   return (
-    <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+    <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
       <ShieldCheck className="h-3 w-3" />
       Console access is audited.
     </div>
   );
 }
+
+function SetupHelpRail({ stepKey }: { stepKey: HelpStepKey }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      {/* Desktop: slim vertical rail anchored to the right of the card */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Open help"
+        className="absolute right-[-44px] top-4 hidden h-auto w-9 flex-col items-center gap-1.5 rounded-sm border border-border bg-background py-3 text-[11px] font-medium text-muted-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/40 hover:text-primary md:inline-flex"
+      >
+        <HelpCircle className="h-4 w-4" />
+        <span className="[writing-mode:vertical-rl] rotate-180 tracking-wide">
+          Help
+        </span>
+      </button>
+      {/* Mobile / small screens: compact floating button */}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Open help"
+        className="absolute right-2 top-2 inline-flex h-7 items-center gap-1 rounded-sm border border-border bg-background px-2 text-[11px] font-medium text-muted-foreground hover:border-primary/40 hover:text-primary md:hidden"
+      >
+        <HelpCircle className="h-3.5 w-3.5" />
+        Help
+      </button>
+      <SetupHelpDrawer open={open} onOpenChange={setOpen} stepKey={stepKey} />
+    </>
+  );
+}
+
+function SetupHelpDrawer({
+  open,
+  onOpenChange,
+  stepKey,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  stepKey: HelpStepKey;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full border-l border-border bg-background p-0 sm:max-w-[360px]"
+      >
+        <SheetHeader className="border-b border-border px-5 py-4 text-left">
+          <SheetTitle className="text-[15px] font-semibold text-foreground">
+            Need help with this step?
+          </SheetTitle>
+        </SheetHeader>
+        <div className="px-5 py-5">
+          <ContextualHelpContent stepKey={stepKey} />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function ContextualHelpContent({ stepKey }: { stepKey: HelpStepKey }) {
+  const content = HELP_CONTENT[stepKey];
+  return (
+    <div className="space-y-5 text-[13px] text-muted-foreground">
+      <section>
+        <h3 className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-foreground">
+          About this step
+        </h3>
+        <p className="leading-relaxed">{content.about}</p>
+      </section>
+      <section>
+        <h3 className="mb-1.5 text-[12px] font-semibold uppercase tracking-wider text-foreground">
+          What you need
+        </h3>
+        <p className="leading-relaxed">{content.need}</p>
+      </section>
+      <section>
+        <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-foreground">
+          Helpful links
+        </h3>
+        <ul className="space-y-1.5">
+          {content.links.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+
 
 
 
@@ -357,8 +494,12 @@ function SetupStepper({
   const next = () => setStep((s) => Math.min(s + 1, SETUP_STEPS.length - 1));
   const back = () => (step === 0 ? onCancel() : setStep((s) => s - 1));
 
+  const stepKeys: HelpStepKey[] = ["language", "essentials", "platform", "review"];
+
   return (
     <div className="px-6 py-6">
+      <SetupHelpRail stepKey={stepKeys[step]} />
+
       <Banner>
         No administrator found. Complete setup to create the first administrator.
       </Banner>
