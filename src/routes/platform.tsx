@@ -1,16 +1,23 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useId, useMemo, useState } from "react";
+import { useId, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  
   Globe,
+  HelpCircle,
   Info,
   LogIn,
   ShieldCheck,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useRbac } from "@/lib/rbac";
+
 
 export const Route = createFileRoute("/platform")({
   head: () => ({
