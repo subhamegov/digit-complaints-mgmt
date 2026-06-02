@@ -396,6 +396,7 @@ function DashboardPage() {
       />
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
+        <DemoSetupBanner />
         {canCustomize && (
           <div className="rounded border border-border bg-surface p-3 flex flex-wrap items-end gap-3">
             <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
