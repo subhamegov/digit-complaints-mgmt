@@ -714,52 +714,123 @@ function FirstAdministratorForm({
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
 }) {
   return (
-    <div className="space-y-3">
-      <Field label="Full name">
+    <div className="space-y-2.5">
+      <PlainField label="Full name">
         <input
           value={data.fullName}
           onChange={(e) => set("fullName", e.target.value)}
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
-      <Field
+      </PlainField>
+      <PlainField
         label={
-          <span>
+          <>
             Work email <span className="text-destructive">*</span>
-          </span>
+          </>
         }
-        hint="Used for first platform administrator access."
+        hint="Used for administrator access."
       >
         <input
           type="email"
           value={data.email}
           onChange={(e) => set("email", e.target.value)}
           required
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
-      <Field label="Recovery email" hint="Optional backup email.">
+      </PlainField>
+      <PlainField label="Recovery email" hint="Optional backup email.">
         <input
           type="email"
           value={data.recoveryEmail}
           onChange={(e) => set("recoveryEmail", e.target.value)}
           placeholder="recovery@your-org.org"
-          className={inputCls}
+          className={compactInputCls}
         />
-      </Field>
+      </PlainField>
     </div>
   );
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function InstallationContextSection({
+  data,
+  onOperationChange,
+  set,
+}: {
+  data: SetupData;
+  onOperationChange: (mode: OperationMode) => void;
+  set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+}) {
   return (
-    <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-      {children}
-    </h3>
+    <section className="space-y-3">
+      <SectionTitle>Installation context</SectionTitle>
+      <PlainField label="How will this installation be used?">
+        <InstallationUseCards
+          value={data.operationMode}
+          onChange={onOperationChange}
+        />
+      </PlainField>
+      <PlainField label="Where will it run?">
+        <SetupLocationDropdown
+          value={data.setupLocation}
+          onChange={(v) => set("setupLocation", v)}
+        />
+      </PlainField>
+      <PlainField label="Expected accounts">
+        <ExpectedAccountsSegment
+          value={data.accountScale}
+          onChange={(v) => set("accountScale", v)}
+        />
+      </PlainField>
+    </section>
   );
 }
 
-function SetupStepFooter({
+function FirstAdministratorSection({
+  data,
+  set,
+}: {
+  data: SetupData;
+  set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+}) {
+  return (
+    <section className="space-y-3">
+      <SectionTitle>First administrator</SectionTitle>
+      <FirstAdministratorForm data={data} set={set} />
+    </section>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[13px] font-semibold text-foreground">{children}</h3>
+  );
+}
+
+function PlainField({
+  label,
+  hint,
+  children,
+}: {
+  label: React.ReactNode;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[12px] font-medium text-foreground">
+        {label}
+      </span>
+      {children}
+      {hint && (
+        <span className="mt-1 block text-[11px] text-muted-foreground">
+          {hint}
+        </span>
+      )}
+    </label>
+  );
+}
+
+function SetupFooterActions({
   onBack,
   disabled,
 }: {
@@ -767,11 +838,11 @@ function SetupStepFooter({
   disabled: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 pt-1">
+    <div className="-mx-6 mt-5 flex items-center justify-between gap-2 border-t border-border bg-background px-6 pt-3">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm px-2 text-[13px] font-medium text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
@@ -779,7 +850,7 @@ function SetupStepFooter({
       <button
         type="submit"
         disabled={disabled}
-        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
       >
         Continue
         <ArrowRight className="h-3.5 w-3.5" />
@@ -787,6 +858,9 @@ function SetupStepFooter({
     </div>
   );
 }
+
+// Backwards-compatible aliases
+const ExpectedAccountsSegment = AccountVolumeSelector;
 
 function AdministratorSetupForm({
   data,
@@ -827,37 +901,18 @@ function AdministratorSetupForm({
     >
       <CardHeading
         title="Administration Essentials"
-        subtitle="Tell us how this installation will run and who will manage it first."
+        subtitle="Set how this installation will run and who manages it first."
       />
 
-      <section className="space-y-3">
-        <SectionHeading>Installation Context</SectionHeading>
-        <Field label="How will this installation be used?">
-          <InstallationUseSelector
-            value={data.operationMode}
-            onChange={onOperationChange}
-          />
-        </Field>
-        <Field label="Where will it run?">
-          <SetupLocationDropdown
-            value={data.setupLocation}
-            onChange={(v) => set("setupLocation", v)}
-          />
-        </Field>
-        <Field label="How many accounts do you expect to support?">
-          <AccountVolumeSelector
-            value={data.accountScale}
-            onChange={(v) => set("accountScale", v)}
-          />
-        </Field>
-      </section>
+      <InstallationContextSection
+        data={data}
+        onOperationChange={onOperationChange}
+        set={set}
+      />
 
-      <section className="space-y-3">
-        <SectionHeading>First Administrator</SectionHeading>
-        <FirstAdministratorForm data={data} set={set} />
-      </section>
+      <FirstAdministratorSection data={data} set={set} />
 
-      <SetupStepFooter onBack={onBack} disabled={!valid} />
+      <SetupFooterActions onBack={onBack} disabled={!valid} />
     </form>
   );
 }
