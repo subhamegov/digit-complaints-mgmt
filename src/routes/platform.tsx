@@ -662,7 +662,7 @@ function PlatformSetupForm({
       }}
     >
       <CardHeading title="Name Platform" />
-      <Field label="Platform Name">
+      <Field label="What do you want to name this installation?">
         <input
           value={data.platformName}
           onChange={(e) => {
@@ -670,16 +670,18 @@ function PlatformSetupForm({
             set("platformName", name);
             if (!codeEdited) set("platformCode", slugify(name));
           }}
+          placeholder="DIGIT Complaints Management"
           className={inputCls}
         />
       </Field>
-      <Field label="Platform Code" hint="Auto-suggested from name. Lowercase, no spaces.">
+      <Field label="What do you want to name the default account?" hint="Lowercase, no spaces.">
         <input
           value={data.platformCode}
           onChange={(e) => {
             setCodeEdited(true);
             set("platformCode", e.target.value);
           }}
+          placeholder="default"
           className={inputCls}
         />
       </Field>
