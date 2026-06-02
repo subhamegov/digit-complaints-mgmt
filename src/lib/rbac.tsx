@@ -142,6 +142,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
+  CITIZEN: "Citizen",
   CSR: "Citizen Service Rep.",
   GRO: "Grievance Routing Officer",
   LME: "Field Employee",
