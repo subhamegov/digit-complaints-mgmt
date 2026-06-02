@@ -165,7 +165,7 @@ function PageHeader() {
   );
 }
 
-type HelpStepKey = "language" | "essentials" | "platform" | "review";
+type HelpStepKey = "email" | "language" | "essentials" | "platform" | "review";
 
 type HelpLink = { label: string; href: string };
 
