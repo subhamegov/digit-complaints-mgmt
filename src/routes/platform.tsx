@@ -803,7 +803,9 @@ function FirstAdministratorSection({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[13px] font-semibold text-foreground">{children}</h3>
+    <h3 className="text-[18px] font-semibold leading-tight text-foreground">
+      {children}
+    </h3>
   );
 }
 
@@ -811,19 +813,23 @@ function PlainField({
   label,
   hint,
   children,
+  variant = "field",
 }: {
   label: React.ReactNode;
   hint?: string;
   children: React.ReactNode;
+  variant?: "field" | "question";
 }) {
+  const labelCls =
+    variant === "question"
+      ? "mb-3 block text-[16px] font-medium leading-snug text-foreground"
+      : "mb-2 block text-[15px] font-medium leading-snug text-foreground";
   return (
     <label className="block">
-      <span className="mb-1 block text-[12px] font-medium text-foreground">
-        {label}
-      </span>
+      <span className={labelCls}>{label}</span>
       {children}
       {hint && (
-        <span className="mt-1 block text-[11px] text-muted-foreground">
+        <span className="mt-2 block text-[14px] leading-relaxed text-muted-foreground">
           {hint}
         </span>
       )}
