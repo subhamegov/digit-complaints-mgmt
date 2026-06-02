@@ -1217,11 +1217,11 @@ function ReviewSetupCard({
     ["Installation Use", data.operationMode ? operationLabel[data.operationMode] : "—"],
     ["Setup Location", data.setupLocation ? locationLabel[data.setupLocation] : "—"],
     ["Account Volume", data.accountScale ? scaleLabel[data.accountScale] : "—"],
-    ["Administrator", data.fullName || "—"],
-    ["Work Email", data.email],
-    ["Recovery Email", data.recoveryEmail || "—"],
-    ["Platform Name", data.platformName],
-    ["Platform Code", data.platformCode],
+    ["Administrator name", data.fullName || "—"],
+    ["Work email", data.email],
+    ["Recovery email", data.recoveryEmail || "—"],
+    ["Installation name", data.platformName],
+    ["Default account", data.platformCode],
   ];
   return (
     <div className="space-y-4">
