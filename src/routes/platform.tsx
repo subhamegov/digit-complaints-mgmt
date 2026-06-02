@@ -745,11 +745,11 @@ const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[]
   { value: "own", label: "Own deployment", hint: "Dedicated installation" },
 ];
 
-const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
-  { value: "laptop", label: "Laptop" },
-  { value: "captive", label: "Captive Cloud" },
-  { value: "hyperscaler", label: "Hyperscaler Cloud" },
-  { value: "datacenter", label: "Data Center" },
+const LOCATION_OPTIONS: { value: SetupLocation; label: string; hint: string }[] = [
+  { value: "laptop", label: "Laptop", hint: "Local setup" },
+  { value: "captive", label: "Captive cloud", hint: "Private managed cloud" },
+  { value: "hyperscaler", label: "Hyperscaler cloud", hint: "AWS, Azure, GCP, OCI" },
+  { value: "datacenter", label: "Data center", hint: "Dedicated infrastructure" },
 ];
 
 const ACCOUNT_OPTIONS: { value: AccountScale; label: string }[] = [
@@ -809,7 +809,7 @@ function InstallationUseCards({
   );
 }
 
-function SetupLocationDropdown({
+function SetupLocationCards({
   value,
   onChange,
 }: {
@@ -817,20 +817,36 @@ function SetupLocationDropdown({
   onChange: (v: SetupLocation) => void;
 }) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value as SetupLocation)}
-      className={inputCls}
-    >
-      <option value="" disabled>
-        Select location
-      </option>
-      {LOCATION_OPTIONS.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <div className="grid grid-cols-2 items-stretch gap-2">
+      {LOCATION_OPTIONS.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={
+              "flex h-full min-h-[64px] flex-col items-start justify-start gap-1 rounded-sm border px-3 py-2.5 text-left transition-colors " +
+              (active
+                ? "border-primary bg-primary/[0.06]"
+                : "border-border bg-background hover:border-primary/40")
+            }
+          >
+            <span
+              className={
+                "text-[13px] font-semibold leading-tight " +
+                (active ? "text-primary" : "text-foreground")
+              }
+            >
+              {opt.label}
+            </span>
+            <span className="block w-full text-[12px] leading-snug text-muted-foreground">
+              {opt.hint}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -929,7 +945,7 @@ function InstallationContextSection({
         />
       </PlainField>
       <PlainField variant="question" label="Where will it run?">
-        <SetupLocationDropdown
+        <SetupLocationCards
           value={data.setupLocation}
           onChange={(v) => set("setupLocation", v)}
         />
