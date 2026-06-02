@@ -385,11 +385,15 @@ function EmailEntryCard({
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           New installation? Setup starts automatically.
         </p>
+        <div className="flex justify-center pt-1">
+          <DemoSkipSetupLink />
+        </div>
       </div>
 
     </form>
   );
 }
+
 
 /* ---------------- Login ---------------- */
 
@@ -403,9 +407,14 @@ function LoginCard({
   const navigate = useNavigate();
   const { setRole } = useRbac();
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== "DIGIT") {
+      setError("Incorrect password. Use DIGIT for the demo.");
+      return;
+    }
     setRole("PLATFORM_ADMIN");
     navigate({ to: "/admin/home" });
   };
@@ -428,12 +437,20 @@ function LoginCard({
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
             className={inputCls}
             autoComplete="current-password"
             autoFocus
           />
         </Field>
+
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          Demo password: <span className="font-mono font-medium text-foreground">DIGIT</span>
+        </p>
+
+        {error && (
+          <p className="text-[12px] text-destructive">{error}</p>
+        )}
 
         <PrimaryButton type="submit" disabled={password.length < 1}>
           Sign In
@@ -444,10 +461,15 @@ function LoginCard({
           <ArrowLeft className="h-3.5 w-3.5" />
           Back
         </SecondaryButton>
+
+        <div className="flex justify-center pt-1">
+          <DemoSkipSetupLink />
+        </div>
       </div>
     </form>
   );
 }
+
 
 /* ---------------- Setup stepper ---------------- */
 
