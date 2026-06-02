@@ -396,6 +396,7 @@ function DashboardPage() {
       />
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
+        <DemoSetupBanner />
         {canCustomize && (
           <div className="rounded border border-border bg-surface p-3 flex flex-wrap items-end gap-3">
             <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
@@ -564,6 +565,19 @@ function DashboardPage() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function DemoSetupBanner() {
+  const active =
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("demoSetupActive") === "1";
+  if (!active) return null;
+  return (
+    <div className="flex items-center gap-2 rounded-sm border border-amber-300/60 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100">
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+      <span>Demo setup active. Complete setup before production use.</span>
     </div>
   );
 }
