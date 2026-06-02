@@ -1255,7 +1255,7 @@ function ReviewSetupCard({
 function SuccessStateCard({ email }: { email: string }) {
   const navigate = useNavigate();
   const { setRole } = useRbac();
-  const enter = (to: "/dashboard" | "/audit") => {
+  const enter = (to: "/admin/home" | "/admin/audit-log") => {
     setRole("PLATFORM_ADMIN");
     navigate({ to });
   };
@@ -1270,17 +1270,18 @@ function SuccessStateCard({ email }: { email: string }) {
       </p>
       <p className="mt-1 text-[11px] text-muted-foreground">{email}</p>
       <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-        <PrimaryButton type="button" onClick={() => enter("/dashboard")}>
+        <PrimaryButton type="button" onClick={() => enter("/admin/home")}>
           Go to Home
           <ArrowRight className="h-3.5 w-3.5" />
         </PrimaryButton>
-        <SecondaryButton type="button" onClick={() => enter("/audit")}>
+        <SecondaryButton type="button" onClick={() => enter("/admin/audit-log")}>
           View Audit Log
         </SecondaryButton>
       </div>
     </div>
   );
 }
+
 
 /* ---------------- Primitives ---------------- */
 
