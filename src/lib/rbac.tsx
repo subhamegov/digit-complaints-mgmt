@@ -260,6 +260,7 @@ export function RbacProvider({ children }: { children: ReactNode }) {
 
 function roleUser(role: Role): string {
   switch (role) {
+    case "CITIZEN": return "Anjali Verma";
     case "CSR": return "Harpreet Kaur";
     case "GRO": return "Manjit Singh";
     case "LME": return "Ramesh Kumar";
@@ -267,8 +268,6 @@ function roleUser(role: Role): string {
     case "ACCOUNT_ADMIN": return "Vikram Mehta";
     case "PLATFORM_ADMIN": return "Priya Nair";
     case "TEST_USER": return "Test User";
-
-
   }
 }
 
