@@ -581,9 +581,9 @@ function DomainSetupForm({
 /* ---- Administration Essentials ---- */
 
 const OPERATION_OPTIONS: { value: OperationMode; label: string; hint: string }[] = [
-  { value: "demo", label: "Demo", hint: "Pilots and walkthroughs" },
+  { value: "demo", label: "Demo", hint: "Pilots and demos" },
   { value: "saas", label: "SaaS", hint: "Multiple accounts" },
-  { value: "own", label: "Own Deployment", hint: "Dedicated installation" },
+  { value: "own", label: "Own deployment", hint: "Dedicated installation" },
 ];
 
 const LOCATION_OPTIONS: { value: SetupLocation; label: string }[] = [
