@@ -1142,6 +1142,7 @@ function AdministratorSetupForm({
     data.operationMode !== "" &&
     data.setupLocation !== "" &&
     data.accountScale !== "" &&
+    data.fullName.trim().length > 0 &&
     emailValid &&
     recoveryValid;
 
