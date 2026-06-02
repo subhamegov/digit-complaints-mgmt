@@ -662,7 +662,7 @@ function PlatformSetupForm({
       }}
     >
       <CardHeading title="Name Platform" />
-      <Field label="Platform Name">
+      <Field label="What do you want to name this installation?">
         <input
           value={data.platformName}
           onChange={(e) => {
@@ -670,16 +670,18 @@ function PlatformSetupForm({
             set("platformName", name);
             if (!codeEdited) set("platformCode", slugify(name));
           }}
+          placeholder="DIGIT Complaints Management"
           className={inputCls}
         />
       </Field>
-      <Field label="Platform Code" hint="Auto-suggested from name. Lowercase, no spaces.">
+      <Field label="What do you want to name the default account?" hint="Lowercase, no spaces.">
         <input
           value={data.platformCode}
           onChange={(e) => {
             setCodeEdited(true);
             set("platformCode", e.target.value);
           }}
+          placeholder="default"
           className={inputCls}
         />
       </Field>
@@ -887,10 +889,17 @@ function FirstAdministratorForm({
 }) {
   return (
     <div className="space-y-5">
-      <PlainField label="Full name">
+      <PlainField
+        label={
+          <>
+            Administrator name <span className="text-destructive">*</span>
+          </>
+        }
+      >
         <input
           value={data.fullName}
           onChange={(e) => set("fullName", e.target.value)}
+          required
           className={compactInputCls}
         />
       </PlainField>
@@ -900,7 +909,6 @@ function FirstAdministratorForm({
             Work email <span className="text-destructive">*</span>
           </>
         }
-        hint="Used for administrator access."
       >
         <input
           type="email"
@@ -915,7 +923,6 @@ function FirstAdministratorForm({
           type="email"
           value={data.recoveryEmail}
           onChange={(e) => set("recoveryEmail", e.target.value)}
-          placeholder="recovery@your-org.org"
           className={compactInputCls}
         />
       </PlainField>
@@ -1135,6 +1142,7 @@ function AdministratorSetupForm({
     data.operationMode !== "" &&
     data.setupLocation !== "" &&
     data.accountScale !== "" &&
+    data.fullName.trim().length > 0 &&
     emailValid &&
     recoveryValid;
 
@@ -1209,11 +1217,11 @@ function ReviewSetupCard({
     ["Installation Use", data.operationMode ? operationLabel[data.operationMode] : "—"],
     ["Setup Location", data.setupLocation ? locationLabel[data.setupLocation] : "—"],
     ["Account Volume", data.accountScale ? scaleLabel[data.accountScale] : "—"],
-    ["Administrator", data.fullName || "—"],
-    ["Work Email", data.email],
-    ["Recovery Email", data.recoveryEmail || "—"],
-    ["Platform Name", data.platformName],
-    ["Platform Code", data.platformCode],
+    ["Administrator name", data.fullName || "—"],
+    ["Work email", data.email],
+    ["Recovery email", data.recoveryEmail || "—"],
+    ["Installation name", data.platformName],
+    ["Default account", data.platformCode],
   ];
   return (
     <div className="space-y-4">
