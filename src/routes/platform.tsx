@@ -1003,6 +1003,7 @@ function SetupFooterActions({
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
       </button>
+      <DemoSkipSetupLink />
       <button
         type="submit"
         disabled={disabled}
@@ -1012,6 +1013,81 @@ function SetupFooterActions({
         <ArrowRight className="h-3.5 w-3.5" />
       </button>
     </div>
+  );
+}
+
+function DemoSkipSetupLink() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { setRole } = useRbac();
+
+  const confirmSkip = () => {
+    try {
+      localStorage.setItem("demoSetupActive", "1");
+      localStorage.setItem("setupStatus", "incomplete");
+    } catch {
+      // ignore storage errors in demo
+    }
+    setRole("PLATFORM_ADMIN");
+    setOpen(false);
+    navigate({ to: "/dashboard" });
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex h-10 items-center rounded-sm px-2 text-[13px] font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      >
+        Skip setup for demo
+      </button>
+      <SkipSetupConfirmationModal
+        open={open}
+        onOpenChange={setOpen}
+        onConfirm={confirmSkip}
+      />
+    </>
+  );
+}
+
+function SkipSetupConfirmationModal({
+  open,
+  onOpenChange,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle className="text-[16px]">Skip setup for demo?</DialogTitle>
+          <DialogDescription className="text-[13px] leading-relaxed">
+            We&rsquo;ll use sample settings so you can explore the admin
+            console. You can complete setup later.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="inline-flex h-9 items-center justify-center rounded-sm border border-border bg-background px-3 text-[13px] font-medium text-foreground hover:bg-muted"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="inline-flex h-9 items-center justify-center rounded-sm bg-primary px-3 text-[13px] font-medium text-primary-foreground hover:opacity-90"
+          >
+            Use sample setup
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
