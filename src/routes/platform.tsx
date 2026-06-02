@@ -609,7 +609,7 @@ const OPERATION_DEFAULTS: Record<
   own: { location: "datacenter", scale: "1" },
 };
 
-function InstallationUseSelector({
+function InstallationUseCards({
   value,
   onChange,
 }: {
@@ -628,19 +628,19 @@ function InstallationUseSelector({
             className={
               "flex flex-col items-start gap-0.5 rounded-sm border px-2.5 py-2 text-left transition-colors " +
               (active
-                ? "border-primary bg-primary/10"
-                : "border-border bg-background hover:border-primary/40 hover:bg-muted/30")
+                ? "border-primary bg-primary/[0.06]"
+                : "border-border bg-background hover:border-primary/40")
             }
           >
             <span
               className={
-                "text-[12.5px] font-medium " +
+                "text-[12.5px] font-semibold leading-tight " +
                 (active ? "text-primary" : "text-foreground")
               }
             >
               {opt.label}
             </span>
-            <span className="text-[10.5px] leading-snug text-muted-foreground">
+            <span className="block w-full truncate text-[10.5px] leading-snug text-muted-foreground">
               {opt.hint}
             </span>
           </button>
@@ -664,7 +664,7 @@ function SetupLocationDropdown({
       className={inputCls}
     >
       <option value="" disabled>
-        Select a location
+        Select location
       </option>
       {LOCATION_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>
