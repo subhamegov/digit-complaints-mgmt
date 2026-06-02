@@ -249,12 +249,18 @@ function HelpLinksAccordion() {
 
 function AuditFooter() {
   return (
-    <div className="mt-5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-      <ShieldCheck className="h-3 w-3" />
-      Console access is audited.
+    <div className="mt-5 flex flex-col items-center gap-2 text-[11px] text-muted-foreground">
+      <div className="flex items-center gap-1.5">
+        <ShieldCheck className="h-3 w-3" />
+        Console access is audited.
+      </div>
+      <a href="/dashboard" className="text-primary hover:underline">
+        Skip onboarding to dashboard →
+      </a>
     </div>
   );
 }
+
 
 
 /* ---------------- Email entry ---------------- */
