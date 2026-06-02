@@ -945,7 +945,7 @@ function InstallationContextSection({
         />
       </PlainField>
       <PlainField variant="question" label="Where will it run?">
-        <SetupLocationDropdown
+        <SetupLocationCards
           value={data.setupLocation}
           onChange={(v) => set("setupLocation", v)}
         />
