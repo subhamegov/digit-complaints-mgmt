@@ -1145,8 +1145,8 @@ function StepActions({
 
 function Banner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2 rounded-sm border border-border bg-[oklch(0.985_0.003_250)] px-3 py-2 text-[11.5px] leading-relaxed text-muted-foreground">
-      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+    <div className="flex items-start gap-1.5 rounded-sm border border-border/60 bg-[oklch(0.985_0.003_250)] px-2.5 py-1.5 text-[12px] leading-snug text-muted-foreground">
+      <Info className="mt-0.5 h-3 w-3 shrink-0 text-primary/70" />
       <span>{children}</span>
     </div>
   );
