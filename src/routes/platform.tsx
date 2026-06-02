@@ -151,101 +151,23 @@ function PageHeader() {
 }
 
 const HELP_LINKS = [
-  { label: "Setup Guide", description: "Step-by-step instructions" },
-  { label: "Installation Checklist", description: "Verify prerequisites" },
-  { label: "Contact Support", description: "Reach the platform team" },
+  { label: "Setup guide", href: "#" },
+  { label: "Installation checklist", href: "#" },
+  { label: "Contact support", href: "#" },
 ];
 
-function HelpLinksPanel() {
+function SetupHelpLinks() {
   return (
-    <div className="w-full rounded-sm border border-border bg-background">
-      <div className="border-b border-border bg-muted/40 px-4 py-3">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Need help setting up?
-        </div>
-      </div>
-      <ul className="divide-y divide-border">
-        {HELP_LINKS.map((link) => (
-          <li key={link.label}>
-            <a
-              href="#"
-              className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
-            >
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
-                {link.label.charAt(0)}
-              </span>
-              <div>
-                <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
-                  {link.label}
-                </div>
-                <div className="text-[11px] text-muted-foreground">
-                  {link.description}
-                </div>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function HelpLinksAccordion() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="w-full rounded-sm border border-border bg-background">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between border-b border-border bg-muted/40 px-4 py-3 text-left"
-      >
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Need help setting up?
+    <div className="mt-5 flex w-full max-w-[460px] flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
+      <span>Need help?</span>
+      {HELP_LINKS.map((link, i) => (
+        <span key={link.label} className="flex items-center gap-3">
+          <a href={link.href} className="text-primary hover:underline">
+            {link.label}
+          </a>
+          {i < HELP_LINKS.length - 1 && <span className="opacity-40">·</span>}
         </span>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      {open && (
-        <ul className="divide-y divide-border">
-          {HELP_LINKS.map((link) => (
-            <li key={link.label}>
-              <a
-                href="#"
-                className="group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
-              >
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[10px] font-medium text-muted-foreground group-hover:border-primary/30 group-hover:text-primary">
-                  {link.label.charAt(0)}
-                </span>
-                <div>
-                  <div className="text-[13px] font-medium text-foreground group-hover:text-primary">
-                    {link.label}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {link.description}
-                  </div>
-                </div>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function AuditFooter() {
-  return (
-    <div className="mt-5 flex flex-col items-center gap-2 text-[11px] text-muted-foreground">
-      <div className="flex items-center gap-1.5">
-        <ShieldCheck className="h-3 w-3" />
-        Console access is audited.
-      </div>
-      <a href="/dashboard" className="text-primary hover:underline">
-        Skip onboarding to dashboard →
-      </a>
+      ))}
     </div>
   );
 }
