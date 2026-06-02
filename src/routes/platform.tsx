@@ -172,6 +172,15 @@ function SetupHelpLinks() {
   );
 }
 
+function AuditNote() {
+  return (
+    <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+      <ShieldCheck className="h-3 w-3" />
+      Console access is audited.
+    </div>
+  );
+}
+
 
 
 /* ---------------- Email entry ---------------- */
