@@ -889,10 +889,17 @@ function FirstAdministratorForm({
 }) {
   return (
     <div className="space-y-5">
-      <PlainField label="Full name">
+      <PlainField
+        label={
+          <>
+            Administrator name <span className="text-destructive">*</span>
+          </>
+        }
+      >
         <input
           value={data.fullName}
           onChange={(e) => set("fullName", e.target.value)}
+          required
           className={compactInputCls}
         />
       </PlainField>
@@ -902,7 +909,6 @@ function FirstAdministratorForm({
             Work email <span className="text-destructive">*</span>
           </>
         }
-        hint="Used for administrator access."
       >
         <input
           type="email"
@@ -917,7 +923,6 @@ function FirstAdministratorForm({
           type="email"
           value={data.recoveryEmail}
           onChange={(e) => set("recoveryEmail", e.target.value)}
-          placeholder="recovery@your-org.org"
           className={compactInputCls}
         />
       </PlainField>
