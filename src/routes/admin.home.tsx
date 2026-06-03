@@ -62,10 +62,10 @@ function HomePage() {
 
 function ReadinessWarningSection({
   onOpenGeneratePassword,
-  onOpenCreateBaseUrl,
+  onCreateBaseUrl,
 }: {
   onOpenGeneratePassword: () => void;
-  onOpenCreateBaseUrl: () => void;
+  onCreateBaseUrl: () => void;
 }) {
   const noop = () =>
     toast(t("ADMIN_ACTION_NOT_CONFIGURED", "Action not configured in prototype."));
