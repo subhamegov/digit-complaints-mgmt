@@ -399,13 +399,21 @@ export function AccountsTable({
                 </td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.type}</td>
                 <td className="px-3 py-2.5 align-top"><AccountStatusBadge status={a.status} /></td>
-                <td className="px-3 py-2.5 align-top"><EnvironmentBadge env={a.environment} /></td>
+                <td className="px-3 py-2.5 align-top">
+                  <div className="flex flex-wrap gap-1">
+                    {a.environments.map((e) => (
+                      <EnvironmentBadge key={e} env={e} />
+                    ))}
+                  </div>
+                </td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.operatingMode}</td>
-                <td className="px-3 py-2.5 align-top text-foreground">{a.tenancyModel}</td>
                 <td className="px-3 py-2.5 align-top"><IsolationBadge value={a.isolation} /></td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.primaryAdmin}</td>
                 <td className="px-3 py-2.5 align-top text-right tabular-nums text-foreground">
                   {a.users}
+                </td>
+                <td className="px-3 py-2.5 align-top text-right tabular-nums text-foreground">
+                  {a.validForDays} {t("ADMIN_UNIT_DAYS", "days")}
                 </td>
                 <td className="px-3 py-2.5 align-top text-muted-foreground">{a.lastActivity}</td>
                 <td className="px-3 py-2.5 align-top text-right">
