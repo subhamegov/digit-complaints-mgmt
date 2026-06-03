@@ -1332,6 +1332,26 @@ function AdministratorSetupForm({
     set("operationMode", mode);
     set("setupLocation", defaults.location);
     set("accountScale", defaults.scale);
+    if (defaults.location !== "laptop") setTempPassword(null);
+  };
+
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [pwdModalOpen, setPwdModalOpen] = useState(false);
+  const isLaptop = data.setupLocation === "laptop";
+
+  // Clear temp password if user switches away from laptop
+  if (!isLaptop && tempPassword !== null) {
+    setTempPassword(null);
+    setPwdModalOpen(false);
+  }
+
+  const openPwdModal = () => {
+    if (!tempPassword) setTempPassword(generateTempPassword());
+    setPwdModalOpen(true);
+  };
+  const regeneratePwd = () => {
+    setTempPassword(generateTempPassword());
+    toast(t("SETUP_TEMP_PWD_REGENERATED", "New password generated."));
   };
 
   return (
@@ -1355,11 +1375,22 @@ function AdministratorSetupForm({
         data={data}
         onOperationChange={onOperationChange}
         set={set}
+        tempPassword={isLaptop ? tempPassword : null}
+        onOpenTempPasswordModal={openPwdModal}
       />
 
       <FirstAdministratorSection data={data} set={set} />
 
       <SetupFooterActions onBack={onBack} disabled={!valid} />
+
+      {isLaptop && tempPassword && (
+        <TemporaryPasswordModal
+          open={pwdModalOpen}
+          onOpenChange={setPwdModalOpen}
+          password={tempPassword}
+          onRegenerate={regeneratePwd}
+        />
+      )}
     </form>
   );
 }
