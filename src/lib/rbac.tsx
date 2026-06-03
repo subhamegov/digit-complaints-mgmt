@@ -48,7 +48,11 @@ export type Permission =
   | "MDMS_COMPLAINT_TYPE_MANAGE"
   | "MDMS_WORKFLOW_MANAGE"
   | "HRMS_USER_MANAGE"
-  | "AUDIT_LOG_VIEW";
+  | "AUDIT_LOG_VIEW"
+  | "ACC_VIEW"
+  | "ACC_CREATE"
+  | "ACC_EDIT"
+  | "ACC_EXPORT";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   CITIZEN: [
