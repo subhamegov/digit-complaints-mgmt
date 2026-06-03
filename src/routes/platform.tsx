@@ -4,12 +4,19 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Copy,
+  Eye,
+  EyeOff,
   Globe,
   HelpCircle,
   Info,
+  KeyRound,
   LogIn,
+  RefreshCw,
   ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 import {
   Sheet,
   SheetContent,
