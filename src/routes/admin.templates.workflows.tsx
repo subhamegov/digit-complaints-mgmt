@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BlankAdminPage } from "@/components/admin/AdminLayout";
+import { ComingSoonPage } from "@/components/admin/ComingSoonPage";
 
 export const Route = createFileRoute("/admin/templates/workflows")({
-  component: BlankAdminPage,
+  component: ComingSoonPage,
 });
