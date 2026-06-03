@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminLayout";
 import { t } from "@/lib/i18n";
@@ -31,7 +31,7 @@ const HOME_CARDS: Array<{ code: string; label: string }> = [
 
 function HomePage() {
   const [pwOpen, setPwOpen] = useState(false);
-  const [urlOpen, setUrlOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="flex h-full flex-col">
       <AdminPageHeader
@@ -45,7 +45,7 @@ function HomePage() {
         <DemoSetupBanner />
         <ReadinessWarningSection
           onOpenGeneratePassword={() => setPwOpen(true)}
-          onOpenCreateBaseUrl={() => setUrlOpen(true)}
+          onCreateBaseUrl={() => navigate({ to: "/admin/domains" })}
         />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {HOME_CARDS.map((c) => (
@@ -54,7 +54,6 @@ function HomePage() {
         </div>
       </div>
       <GeneratePasswordModal open={pwOpen} onOpenChange={setPwOpen} />
-      <CreateBaseUrlModal open={urlOpen} onOpenChange={setUrlOpen} />
     </div>
   );
 }
@@ -63,10 +62,10 @@ function HomePage() {
 
 function ReadinessWarningSection({
   onOpenGeneratePassword,
-  onOpenCreateBaseUrl,
+  onCreateBaseUrl,
 }: {
   onOpenGeneratePassword: () => void;
-  onOpenCreateBaseUrl: () => void;
+  onCreateBaseUrl: () => void;
 }) {
   const noop = () =>
     toast(t("ADMIN_ACTION_NOT_CONFIGURED", "Action not configured in prototype."));
@@ -136,7 +135,7 @@ function ReadinessWarningSection({
           )}
           status="required"
           actions={
-            <Button size="sm" className="h-7 text-[12px]" onClick={onOpenCreateBaseUrl}>
+            <Button size="sm" className="h-7 text-[12px]" onClick={onCreateBaseUrl}>
               {t("ADMIN_CREATE_BASE_URL", "Create base URL")}
             </Button>
           }
