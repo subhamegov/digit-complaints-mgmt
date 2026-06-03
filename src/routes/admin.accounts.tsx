@@ -567,7 +567,7 @@ export function AccountsPage() {
         return false;
       }
       if (filters.status !== "All" && a.status !== filters.status) return false;
-      if (filters.env !== "All" && a.environment !== filters.env) return false;
+      if (filters.env !== "All" && !a.environments.includes(filters.env)) return false;
       if (filters.mode !== "All" && a.operatingMode !== filters.mode) return false;
       if (filters.type !== "All" && a.type !== filters.type) return false;
       return true;
