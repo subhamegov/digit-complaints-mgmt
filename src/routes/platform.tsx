@@ -1339,6 +1339,14 @@ function AdministratorSetupForm({
   const [pwdModalOpen, setPwdModalOpen] = useState(false);
   const isLaptop = data.setupLocation === "laptop";
 
+  useEffect(() => {
+    if (!isLaptop) {
+      setTempPassword(null);
+      setPwdModalOpen(false);
+    }
+  }, [isLaptop]);
+
+
 
   const openPwdModal = () => {
     if (!tempPassword) setTempPassword(generateTempPassword());
