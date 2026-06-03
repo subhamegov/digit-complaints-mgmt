@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminLayout";
 import { t } from "@/lib/i18n";
