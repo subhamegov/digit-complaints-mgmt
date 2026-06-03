@@ -128,6 +128,10 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "MDMS_WORKFLOW_MANAGE",
     "HRMS_USER_MANAGE",
     "AUDIT_LOG_VIEW",
+    "ACC_VIEW",
+    "ACC_CREATE",
+    "ACC_EDIT",
+    "ACC_EXPORT",
   ],
   TEST_USER: [
     "PGR_DASHBOARD_VIEW",
