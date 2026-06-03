@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminLayout";
 import { t } from "@/lib/i18n";
-import { AlertTriangle, MailWarning, MailX, Copy, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, MailWarning, MailX, Link, Copy, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/home")({
@@ -30,6 +31,7 @@ const HOME_CARDS: Array<{ code: string; label: string }> = [
 
 function HomePage() {
   const [pwOpen, setPwOpen] = useState(false);
+  const [urlOpen, setUrlOpen] = useState(false);
   return (
     <div className="flex h-full flex-col">
       <AdminPageHeader
@@ -41,7 +43,10 @@ function HomePage() {
       />
       <div className="flex-1 space-y-6 p-4 lg:p-6">
         <DemoSetupBanner />
-        <ReadinessWarningSection onOpenGeneratePassword={() => setPwOpen(true)} />
+        <ReadinessWarningSection
+          onOpenGeneratePassword={() => setPwOpen(true)}
+          onOpenCreateBaseUrl={() => setUrlOpen(true)}
+        />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {HOME_CARDS.map((c) => (
             <PlaceholderHomeCard key={c.code} title={t(c.code, c.label)} />
@@ -49,6 +54,7 @@ function HomePage() {
         </div>
       </div>
       <GeneratePasswordModal open={pwOpen} onOpenChange={setPwOpen} />
+      <CreateBaseUrlModal open={urlOpen} onOpenChange={setUrlOpen} />
     </div>
   );
 }
@@ -57,8 +63,10 @@ function HomePage() {
 
 function ReadinessWarningSection({
   onOpenGeneratePassword,
+  onOpenCreateBaseUrl,
 }: {
   onOpenGeneratePassword: () => void;
+  onOpenCreateBaseUrl: () => void;
 }) {
   const noop = () =>
     toast(t("ADMIN_ACTION_NOT_CONFIGURED", "Action not configured in prototype."));
@@ -70,13 +78,13 @@ function ReadinessWarningSection({
           {t("ADMIN_ACTION_REQUIRED", "Action required")}
         </h2>
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         <WarningCard
           icon={MailWarning}
           title={t("ADMIN_WARN_ADMIN_EMAIL_TITLE", "Administrator email not verified")}
           body={t(
             "ADMIN_WARN_ADMIN_EMAIL_BODY",
-            "Verify the platform administrator email to secure account recovery and access notifications.",
+            "Verify the platform administrator email for account recovery and access notifications.",
           )}
           status="pending"
           actions={
@@ -100,7 +108,7 @@ function ReadinessWarningSection({
           title={t("ADMIN_WARN_DEFAULT_EMAIL_TITLE", "Default email setup missing")}
           body={t(
             "ADMIN_WARN_DEFAULT_EMAIL_BODY",
-            "Configure a default sender email before sending invites, password resets, or notifications.",
+            "Configure a sender email before sending invites, password resets, or notifications.",
           )}
           status="required"
           actions={
@@ -117,6 +125,20 @@ function ReadinessWarningSection({
                 {t("ADMIN_GENERATE_PASSWORD", "Generate password")}
               </Button>
             </>
+          }
+        />
+        <WarningCard
+          icon={Link}
+          title={t("ADMIN_WARN_BASE_URL_TITLE", "Base URL not configured")}
+          body={t(
+            "ADMIN_WARN_BASE_URL_BODY",
+            "Create a base URL so users and administrators can access this installation.",
+          )}
+          status="required"
+          actions={
+            <Button size="sm" className="h-7 text-[12px]" onClick={onOpenCreateBaseUrl}>
+              {t("ADMIN_CREATE_BASE_URL", "Create base URL")}
+            </Button>
           }
         />
       </div>
@@ -252,6 +274,85 @@ export function GeneratePasswordModal({
           </Button>
           <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             {t("ADMIN_CLOSE", "Close")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------- Create base URL modal ---------- */
+
+export function CreateBaseUrlModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = () => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setError(t("ADMIN_BASE_URL_REQUIRED", "Base URL is required."));
+      return;
+    }
+    try {
+      new URL(trimmed);
+    } catch {
+      setError(t("ADMIN_BASE_URL_INVALID", "Please enter a valid URL."));
+      return;
+    }
+    setError(null);
+    toast(t("ADMIN_BASE_URL_SAVED", "Base URL saved in prototype."));
+    onOpenChange(false);
+    setUrl("");
+  };
+
+  const handleClose = () => {
+    setError(null);
+    setUrl("");
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("ADMIN_CREATE_BASE_URL", "Create base URL")}</DialogTitle>
+          <DialogDescription>
+            {t("ADMIN_CREATE_BASE_URL_BODY", "Set the public access URL for this installation.")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-1.5">
+          <label className="text-[12px] font-medium text-foreground">
+            {t("ADMIN_BASE_URL_LABEL", "Base URL")}
+          </label>
+          <Input
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="https://cms.example.org"
+            className={cn(error && "border-rose-400 focus-visible:ring-rose-400")}
+          />
+          <p className="text-[12px] text-muted-foreground">
+            {t(
+              "ADMIN_BASE_URL_HELPER",
+              "Used as the public access URL for this installation.",
+            )}
+          </p>
+          {error && <p className="text-[12px] text-rose-600">{error}</p>}
+        </div>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" size="sm" onClick={handleClose}>
+            {t("ADMIN_CLOSE", "Close")}
+          </Button>
+          <Button size="sm" onClick={handleSave}>
+            {t("ADMIN_SAVE", "Save")}
           </Button>
         </DialogFooter>
       </DialogContent>
