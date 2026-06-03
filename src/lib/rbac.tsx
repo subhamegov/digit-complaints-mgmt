@@ -52,7 +52,11 @@ export type Permission =
   | "ACC_VIEW"
   | "ACC_CREATE"
   | "ACC_EDIT"
-  | "ACC_EXPORT";
+  | "ACC_EXPORT"
+  | "DOMAIN_VIEW"
+  | "DOMAIN_CREATE"
+  | "DOMAIN_EDIT"
+  | "DOMAIN_VERIFY";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   CITIZEN: [
