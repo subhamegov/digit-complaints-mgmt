@@ -501,10 +501,20 @@ export function AccountDetailsDrawer({
               <Can perm="ACC_VIEW">
                 <DrawerSection title="Setup" code="ADMIN_ACC_SEC_SETUP">
                   <DrawerField label="Status" code="ADMIN_F_STATUS" value={<AccountStatusBadge status={account.status} />} />
-                  <DrawerField label="Environment" code="ADMIN_F_ENV" value={<EnvironmentBadge env={account.environment} />} />
+                  <DrawerField
+                    label="Environments"
+                    code="ADMIN_F_ENVS"
+                    value={
+                      <div className="flex flex-wrap gap-1">
+                        {account.environments.map((e) => (
+                          <EnvironmentBadge key={e} env={e} />
+                        ))}
+                      </div>
+                    }
+                  />
                   <DrawerField label="Operating mode" code="ADMIN_F_MODE" value={account.operatingMode} />
-                  <DrawerField label="Tenancy model" code="ADMIN_F_TENANCY" value={account.tenancyModel} />
-                  <DrawerField label="Isolation" code="ADMIN_F_ISOLATION" value={<IsolationBadge value={account.isolation} />} />
+                  <DrawerField label="Data isolation" code="ADMIN_F_DATA_ISOLATION" value={<IsolationBadge value={account.isolation} />} />
+                  <DrawerField label="Valid for" code="ADMIN_F_VALID_FOR" value={`${account.validForDays} ${t("ADMIN_UNIT_DAYS", "days")}`} />
                 </DrawerSection>
               </Can>
               <Can perm="ACC_VIEW">
