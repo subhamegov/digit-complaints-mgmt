@@ -116,6 +116,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
       { to: "/admin/telemetry",             labelCode: "ADMIN_NAV_TELEMETRY",        label: "Telemetry",              icon: Activity },
       { to: "/admin/user-stats",            labelCode: "ADMIN_NAV_USER_STATS",       label: "User Stats",             icon: BarChart3 },
       { to: "/admin/audit-log",             labelCode: "ADMIN_NAV_AUDIT_LOG",        label: "Audit Log",              icon: ScrollText },
+      { to: "/admin/platform-health",       labelCode: "ADMIN_NAV_PLATFORM_HEALTH",  label: "Platform Health",        icon: HeartPulse },
     ],
   },
   {
