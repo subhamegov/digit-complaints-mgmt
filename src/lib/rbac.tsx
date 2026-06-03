@@ -136,6 +136,10 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "ACC_CREATE",
     "ACC_EDIT",
     "ACC_EXPORT",
+    "DOMAIN_VIEW",
+    "DOMAIN_CREATE",
+    "DOMAIN_EDIT",
+    "DOMAIN_VERIFY",
   ],
   TEST_USER: [
     "PGR_DASHBOARD_VIEW",
