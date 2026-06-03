@@ -105,16 +105,16 @@ function ReadinessWarningSection({
         />
         <WarningCard
           icon={MailX}
-          title={t("ADMIN_WARN_DEFAULT_EMAIL_TITLE", "Default email setup missing")}
+          title={t("ADMIN_WARN_EMAIL_SERVER_TITLE", "Email server setup not complete")}
           body={t(
-            "ADMIN_WARN_DEFAULT_EMAIL_BODY",
-            "Configure a sender email before sending invites, password resets, or notifications.",
+            "ADMIN_WARN_EMAIL_SERVER_BODY",
+            "Set up an email server before sending invites, password resets, or notifications.",
           )}
           status="required"
           actions={
             <>
               <Button size="sm" className="h-7 text-[12px]" onClick={noop}>
-                {t("ADMIN_CONFIGURE_EMAIL", "Configure email")}
+                {t("ADMIN_SETUP_EMAIL_SERVER", "Set up email server")}
               </Button>
               <Button
                 size="sm"
