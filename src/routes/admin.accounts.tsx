@@ -60,12 +60,12 @@ export type Account = {
   code: string;
   type: AccountType;
   status: AccountStatus;
-  environment: Environment;
+  environments: Environment[];
   operatingMode: OperatingMode;
-  tenancyModel: TenancyModel;
   isolation: Isolation;
   primaryAdmin: string;
   users: number;
+  validForDays: number;
   lastActivity: string;
 };
 
@@ -77,12 +77,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "nairobi",
     type: "Government",
     status: "Active",
-    environment: "Production",
+    environments: ["Sandbox", "UAT", "Production"],
     operatingMode: "SaaS",
-    tenancyModel: "Shared",
     isolation: "Verified",
     primaryAdmin: "admin@nairobi.go.ke",
     users: 128,
+    validForDays: 365,
     lastActivity: "2 hours ago",
   },
   {
@@ -92,12 +92,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "bomet",
     type: "Government",
     status: "Pending setup",
-    environment: "UAT",
+    environments: ["Sandbox", "UAT"],
     operatingMode: "SaaS",
-    tenancyModel: "Shared",
     isolation: "Pending",
     primaryAdmin: "admin@bomet.go.ke",
     users: 12,
+    validForDays: 180,
     lastActivity: "1 day ago",
   },
   {
@@ -107,12 +107,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "demo",
     type: "Demo",
     status: "Active",
-    environment: "Sandbox",
+    environments: ["Sandbox"],
     operatingMode: "Demo",
-    tenancyModel: "Shared",
     isolation: "Not checked",
     primaryAdmin: "demo@digit.org",
     users: 6,
+    validForDays: 30,
     lastActivity: "4 hours ago",
   },
   {
@@ -122,12 +122,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "state-dc",
     type: "Government",
     status: "Draft",
-    environment: "UAT",
+    environments: ["UAT"],
     operatingMode: "Own Deployment",
-    tenancyModel: "Dedicated",
     isolation: "Pending",
     primaryAdmin: "it@example.gov",
     users: 3,
+    validForDays: 90,
     lastActivity: "3 days ago",
   },
 ];
