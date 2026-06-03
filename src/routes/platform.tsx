@@ -1339,11 +1339,6 @@ function AdministratorSetupForm({
   const [pwdModalOpen, setPwdModalOpen] = useState(false);
   const isLaptop = data.setupLocation === "laptop";
 
-  // Clear temp password if user switches away from laptop
-  if (!isLaptop && tempPassword !== null) {
-    setTempPassword(null);
-    setPwdModalOpen(false);
-  }
 
   const openPwdModal = () => {
     if (!tempPassword) setTempPassword(generateTempPassword());
