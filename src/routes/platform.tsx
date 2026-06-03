@@ -1,15 +1,23 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Copy,
+  Eye,
+  EyeOff,
   Globe,
   HelpCircle,
   Info,
+  KeyRound,
   LogIn,
+  RefreshCw,
   ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
+import { t } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -956,10 +964,14 @@ function InstallationContextSection({
   data,
   onOperationChange,
   set,
+  tempPassword,
+  onOpenTempPasswordModal,
 }: {
   data: SetupData;
   onOperationChange: (mode: OperationMode) => void;
   set: <K extends keyof SetupData>(k: K, v: SetupData[K]) => void;
+  tempPassword: string | null;
+  onOpenTempPasswordModal: () => void;
 }) {
   return (
     <section className="space-y-5">
@@ -975,6 +987,12 @@ function InstallationContextSection({
           value={data.setupLocation}
           onChange={(v) => set("setupLocation", v)}
         />
+        {data.setupLocation === "laptop" && (
+          <LaptopPasswordNotice
+            generated={!!tempPassword}
+            onAction={onOpenTempPasswordModal}
+          />
+        )}
       </PlainField>
       <PlainField variant="question" label="Expected accounts">
         <ExpectedAccountsSegment
@@ -983,6 +1001,147 @@ function InstallationContextSection({
         />
       </PlainField>
     </section>
+  );
+}
+
+function LaptopPasswordNotice({
+  generated,
+  onAction,
+}: {
+  generated: boolean;
+  onAction: () => void;
+}) {
+  return (
+    <div className="mt-2 flex items-start justify-between gap-3 rounded-sm border border-amber-300/70 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-500/[0.06]">
+      <div className="flex items-start gap-2 min-w-0">
+        <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" />
+        <div className="min-w-0">
+          <div className="text-[13px] font-semibold text-foreground">
+            {generated
+              ? t("SETUP_TEMP_PWD_GENERATED_TITLE", "Temporary password generated")
+              : t("SETUP_TEMP_PWD_REQUIRED_TITLE", "Temporary password required")}
+          </div>
+          <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">
+            {generated
+              ? t(
+                  "SETUP_TEMP_PWD_GENERATED_BODY",
+                  "Save this password before continuing. It will be required for first login.",
+                )
+              : t(
+                  "SETUP_TEMP_PWD_REQUIRED_BODY",
+                  "No email server is configured for a laptop setup. We will generate a temporary password for the first administrator. Save it and use it for first login.",
+                )}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onAction}
+        className="shrink-0 self-start rounded-sm border border-border bg-background px-2.5 py-1 text-[12px] font-medium text-foreground hover:border-primary/40"
+      >
+        {generated
+          ? t("SETUP_TEMP_PWD_VIEW", "View password")
+          : t("SETUP_TEMP_PWD_GENERATE", "Generate temporary password")}
+      </button>
+    </div>
+  );
+}
+
+function generateTempPassword(): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const digits = "23456789";
+  const symbols = "!@#$%^&*";
+  const all = upper + lower + digits + symbols;
+  const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+  const chars = [pick(upper), pick(lower), pick(digits), pick(symbols)];
+  for (let i = 0; i < 12; i++) chars.push(pick(all));
+  return chars.sort(() => Math.random() - 0.5).join("");
+}
+
+function TemporaryPasswordModal({
+  open,
+  onOpenChange,
+  password,
+  onRegenerate,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  password: string;
+  onRegenerate: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(password);
+      toast(t("SETUP_TEMP_PWD_COPIED", "Password copied."));
+    } catch {
+      toast(t("ADMIN_ACTION_NOT_CONFIGURED", "Action not configured in prototype."));
+    }
+  };
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("SETUP_TEMP_PWD_TITLE", "Temporary password")}</DialogTitle>
+          <DialogDescription>
+            {t(
+              "SETUP_TEMP_PWD_BODY",
+              "Save this password. It will be required for first login.",
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <TemporaryPasswordField password={password} visible={visible} />
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisible((v) => !v)}
+          >
+            {visible ? (
+              <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+            ) : (
+              <Eye className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            {visible
+              ? t("SETUP_TEMP_PWD_HIDE", "Hide password")
+              : t("SETUP_TEMP_PWD_SHOW", "Show password")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={onRegenerate}>
+            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            {t("SETUP_TEMP_PWD_REGEN", "Regenerate")}
+          </Button>
+          <Button size="sm" onClick={handleCopy}>
+            <Copy className="mr-1.5 h-3.5 w-3.5" />
+            {t("SETUP_TEMP_PWD_COPY", "Copy password")}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+            {t("SETUP_CLOSE", "Close")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TemporaryPasswordField({
+  password,
+  visible,
+}: {
+  password: string;
+  visible: boolean;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[12px] font-medium text-foreground">
+        {t("SETUP_TEMP_PWD_TITLE", "Temporary password")}
+      </label>
+      <div className="flex items-center gap-2 rounded-sm border border-border bg-muted/40 px-2.5 py-2">
+        <code className="flex-1 truncate font-mono text-[13px] text-foreground">
+          {visible ? password : "•".repeat(password.length)}
+        </code>
+      </div>
+    </div>
   );
 }
 
@@ -1173,6 +1332,29 @@ function AdministratorSetupForm({
     set("operationMode", mode);
     set("setupLocation", defaults.location);
     set("accountScale", defaults.scale);
+    if (defaults.location !== "laptop") setTempPassword(null);
+  };
+
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [pwdModalOpen, setPwdModalOpen] = useState(false);
+  const isLaptop = data.setupLocation === "laptop";
+
+  useEffect(() => {
+    if (!isLaptop) {
+      setTempPassword(null);
+      setPwdModalOpen(false);
+    }
+  }, [isLaptop]);
+
+
+
+  const openPwdModal = () => {
+    if (!tempPassword) setTempPassword(generateTempPassword());
+    setPwdModalOpen(true);
+  };
+  const regeneratePwd = () => {
+    setTempPassword(generateTempPassword());
+    toast(t("SETUP_TEMP_PWD_REGENERATED", "New password generated."));
   };
 
   return (
@@ -1196,11 +1378,22 @@ function AdministratorSetupForm({
         data={data}
         onOperationChange={onOperationChange}
         set={set}
+        tempPassword={isLaptop ? tempPassword : null}
+        onOpenTempPasswordModal={openPwdModal}
       />
 
       <FirstAdministratorSection data={data} set={set} />
 
       <SetupFooterActions onBack={onBack} disabled={!valid} />
+
+      {isLaptop && tempPassword && (
+        <TemporaryPasswordModal
+          open={pwdModalOpen}
+          onOpenChange={setPwdModalOpen}
+          password={tempPassword}
+          onRegenerate={regeneratePwd}
+        />
+      )}
     </form>
   );
 }
