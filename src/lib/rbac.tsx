@@ -56,7 +56,10 @@ export type Permission =
   | "DOMAIN_VIEW"
   | "DOMAIN_CREATE"
   | "DOMAIN_EDIT"
-  | "DOMAIN_VERIFY";
+  | "DOMAIN_VERIFY"
+  | "HEALTH_VIEW"
+  | "HEALTH_CONFIGURE"
+  | "HEALTH_ALERT_TEST";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   CITIZEN: [
