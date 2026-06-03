@@ -143,6 +143,9 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "DOMAIN_CREATE",
     "DOMAIN_EDIT",
     "DOMAIN_VERIFY",
+    "HEALTH_VIEW",
+    "HEALTH_CONFIGURE",
+    "HEALTH_ALERT_TEST",
   ],
   TEST_USER: [
     "PGR_DASHBOARD_VIEW",
