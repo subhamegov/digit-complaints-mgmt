@@ -30,6 +30,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUserStatsRouteImport } from './routes/admin.user-stats'
 import { Route as AdminTelemetryRouteImport } from './routes/admin.telemetry'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPlatformHealthRouteImport } from './routes/admin.platform-health'
 import { Route as AdminPlatformAdministratorsRouteImport } from './routes/admin.platform-administrators'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminMasterDataSchemasRouteImport } from './routes/admin.master-data-schemas'
@@ -154,6 +155,11 @@ const AdminTelemetryRoute = AdminTelemetryRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlatformHealthRoute = AdminPlatformHealthRouteImport.update({
+  id: '/platform-health',
+  path: '/platform-health',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPlatformAdministratorsRoute =
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/platform-health': typeof AdminPlatformHealthRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
   '/admin/user-stats': typeof AdminUserStatsRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/platform-health': typeof AdminPlatformHealthRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
   '/admin/user-stats': typeof AdminUserStatsRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
+  '/admin/platform-health': typeof AdminPlatformHealthRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
   '/admin/user-stats': typeof AdminUserStatsRoute
@@ -418,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/master-data-schemas'
     | '/admin/notifications'
     | '/admin/platform-administrators'
+    | '/admin/platform-health'
     | '/admin/settings'
     | '/admin/telemetry'
     | '/admin/user-stats'
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/admin/master-data-schemas'
     | '/admin/notifications'
     | '/admin/platform-administrators'
+    | '/admin/platform-health'
     | '/admin/settings'
     | '/admin/telemetry'
     | '/admin/user-stats'
@@ -504,6 +515,7 @@ export interface FileRouteTypes {
     | '/admin/master-data-schemas'
     | '/admin/notifications'
     | '/admin/platform-administrators'
+    | '/admin/platform-health'
     | '/admin/settings'
     | '/admin/telemetry'
     | '/admin/user-stats'
@@ -689,6 +701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/platform-health': {
+      id: '/admin/platform-health'
+      path: '/platform-health'
+      fullPath: '/admin/platform-health'
+      preLoaderRoute: typeof AdminPlatformHealthRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/platform-administrators': {
       id: '/admin/platform-administrators'
       path: '/platform-administrators'
@@ -848,6 +867,7 @@ interface AdminRouteChildren {
   AdminMasterDataSchemasRoute: typeof AdminMasterDataSchemasRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPlatformAdministratorsRoute: typeof AdminPlatformAdministratorsRoute
+  AdminPlatformHealthRoute: typeof AdminPlatformHealthRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTelemetryRoute: typeof AdminTelemetryRoute
   AdminUserStatsRoute: typeof AdminUserStatsRoute
@@ -876,6 +896,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMasterDataSchemasRoute: AdminMasterDataSchemasRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPlatformAdministratorsRoute: AdminPlatformAdministratorsRoute,
+  AdminPlatformHealthRoute: AdminPlatformHealthRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTelemetryRoute: AdminTelemetryRoute,
   AdminUserStatsRoute: AdminUserStatsRoute,
