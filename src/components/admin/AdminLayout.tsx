@@ -354,10 +354,12 @@ export function EmptyStateCard({
   title,
   body,
   icon: Icon = Inbox,
+  action,
 }: {
   title?: string;
   body?: string;
   icon?: React.ComponentType<{ className?: string }>;
+  action?: ReactNode;
 }) {
   return (
     <div className="rounded border border-dashed border-border bg-surface px-5 py-10 text-center">
@@ -370,6 +372,7 @@ export function EmptyStateCard({
       <p className="mt-1 text-[12.5px] text-muted-foreground">
         {body ?? t("ADMIN_EMPTY_BODY", "Configuration for this section will appear here.")}
       </p>
+      {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
 }
