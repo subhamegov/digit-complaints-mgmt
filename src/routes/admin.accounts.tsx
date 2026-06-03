@@ -60,12 +60,12 @@ export type Account = {
   code: string;
   type: AccountType;
   status: AccountStatus;
-  environment: Environment;
+  environments: Environment[];
   operatingMode: OperatingMode;
-  tenancyModel: TenancyModel;
   isolation: Isolation;
   primaryAdmin: string;
   users: number;
+  validForDays: number;
   lastActivity: string;
 };
 
@@ -77,12 +77,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "nairobi",
     type: "Government",
     status: "Active",
-    environment: "Production",
+    environments: ["Sandbox", "UAT", "Production"],
     operatingMode: "SaaS",
-    tenancyModel: "Shared",
     isolation: "Verified",
     primaryAdmin: "admin@nairobi.go.ke",
     users: 128,
+    validForDays: 365,
     lastActivity: "2 hours ago",
   },
   {
@@ -92,12 +92,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "bomet",
     type: "Government",
     status: "Pending setup",
-    environment: "UAT",
+    environments: ["Sandbox", "UAT"],
     operatingMode: "SaaS",
-    tenancyModel: "Shared",
     isolation: "Pending",
     primaryAdmin: "admin@bomet.go.ke",
     users: 12,
+    validForDays: 180,
     lastActivity: "1 day ago",
   },
   {
@@ -107,12 +107,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "demo",
     type: "Demo",
     status: "Active",
-    environment: "Sandbox",
+    environments: ["Sandbox"],
     operatingMode: "Demo",
-    tenancyModel: "Shared",
     isolation: "Not checked",
     primaryAdmin: "demo@digit.org",
     users: 6,
+    validForDays: 30,
     lastActivity: "4 hours ago",
   },
   {
@@ -122,12 +122,12 @@ const SAMPLE_ACCOUNTS: Account[] = [
     code: "state-dc",
     type: "Government",
     status: "Draft",
-    environment: "UAT",
+    environments: ["UAT"],
     operatingMode: "Own Deployment",
-    tenancyModel: "Dedicated",
     isolation: "Pending",
     primaryAdmin: "it@example.gov",
     users: 3,
+    validForDays: 90,
     lastActivity: "3 days ago",
   },
 ];
@@ -359,12 +359,12 @@ export function AccountsTable({
     { code: "ADMIN_COL_CODE", label: "Account code" },
     { code: "ADMIN_COL_TYPE", label: "Type" },
     { code: "ADMIN_COL_STATUS", label: "Status" },
-    { code: "ADMIN_COL_ENV", label: "Environment" },
+    { code: "ADMIN_COL_ENV", label: "Environments" },
     { code: "ADMIN_COL_MODE", label: "Operating mode" },
-    { code: "ADMIN_COL_TENANCY", label: "Tenancy model" },
-    { code: "ADMIN_COL_ISOLATION", label: "Isolation" },
+    { code: "ADMIN_COL_DATA_ISOLATION", label: "Data isolation" },
     { code: "ADMIN_COL_PRIMARY_ADMIN", label: "Primary admin" },
     { code: "ADMIN_COL_USERS", label: "Users", className: "text-right" },
+    { code: "ADMIN_COL_VALID_FOR", label: "Valid for", className: "text-right" },
     { code: "ADMIN_COL_LAST_ACTIVITY", label: "Last activity" },
     { code: "ADMIN_COL_ACTIONS", label: "Actions", className: "text-right" },
   ];
@@ -399,13 +399,21 @@ export function AccountsTable({
                 </td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.type}</td>
                 <td className="px-3 py-2.5 align-top"><AccountStatusBadge status={a.status} /></td>
-                <td className="px-3 py-2.5 align-top"><EnvironmentBadge env={a.environment} /></td>
+                <td className="px-3 py-2.5 align-top">
+                  <div className="flex flex-wrap gap-1">
+                    {a.environments.map((e) => (
+                      <EnvironmentBadge key={e} env={e} />
+                    ))}
+                  </div>
+                </td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.operatingMode}</td>
-                <td className="px-3 py-2.5 align-top text-foreground">{a.tenancyModel}</td>
                 <td className="px-3 py-2.5 align-top"><IsolationBadge value={a.isolation} /></td>
                 <td className="px-3 py-2.5 align-top text-foreground">{a.primaryAdmin}</td>
                 <td className="px-3 py-2.5 align-top text-right tabular-nums text-foreground">
                   {a.users}
+                </td>
+                <td className="px-3 py-2.5 align-top text-right tabular-nums text-foreground">
+                  {a.validForDays} {t("ADMIN_UNIT_DAYS", "days")}
                 </td>
                 <td className="px-3 py-2.5 align-top text-muted-foreground">{a.lastActivity}</td>
                 <td className="px-3 py-2.5 align-top text-right">
@@ -493,10 +501,20 @@ export function AccountDetailsDrawer({
               <Can perm="ACC_VIEW">
                 <DrawerSection title="Setup" code="ADMIN_ACC_SEC_SETUP">
                   <DrawerField label="Status" code="ADMIN_F_STATUS" value={<AccountStatusBadge status={account.status} />} />
-                  <DrawerField label="Environment" code="ADMIN_F_ENV" value={<EnvironmentBadge env={account.environment} />} />
+                  <DrawerField
+                    label="Environments"
+                    code="ADMIN_F_ENVS"
+                    value={
+                      <div className="flex flex-wrap gap-1">
+                        {account.environments.map((e) => (
+                          <EnvironmentBadge key={e} env={e} />
+                        ))}
+                      </div>
+                    }
+                  />
                   <DrawerField label="Operating mode" code="ADMIN_F_MODE" value={account.operatingMode} />
-                  <DrawerField label="Tenancy model" code="ADMIN_F_TENANCY" value={account.tenancyModel} />
-                  <DrawerField label="Isolation" code="ADMIN_F_ISOLATION" value={<IsolationBadge value={account.isolation} />} />
+                  <DrawerField label="Data isolation" code="ADMIN_F_DATA_ISOLATION" value={<IsolationBadge value={account.isolation} />} />
+                  <DrawerField label="Valid for" code="ADMIN_F_VALID_FOR" value={`${account.validForDays} ${t("ADMIN_UNIT_DAYS", "days")}`} />
                 </DrawerSection>
               </Can>
               <Can perm="ACC_VIEW">
@@ -549,7 +567,7 @@ export function AccountsPage() {
         return false;
       }
       if (filters.status !== "All" && a.status !== filters.status) return false;
-      if (filters.env !== "All" && a.environment !== filters.env) return false;
+      if (filters.env !== "All" && !a.environments.includes(filters.env)) return false;
       if (filters.mode !== "All" && a.operatingMode !== filters.mode) return false;
       if (filters.type !== "All" && a.type !== filters.type) return false;
       return true;
