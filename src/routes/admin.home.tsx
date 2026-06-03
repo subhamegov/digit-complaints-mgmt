@@ -135,7 +135,7 @@ function ReadinessWarningSection({
           )}
           status="required"
           actions={
-            <Button size="sm" className="h-7 text-[12px]" onClick={onOpenCreateBaseUrl}>
+            <Button size="sm" className="h-7 text-[12px]" onClick={onCreateBaseUrl}>
               {t("ADMIN_CREATE_BASE_URL", "Create base URL")}
             </Button>
           }
