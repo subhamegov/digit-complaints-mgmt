@@ -128,15 +128,15 @@ function ReadinessWarningSection({
         />
         <WarningCard
           icon={Link}
-          title={t("ADMIN_WARN_BASE_URL_TITLE", "Base URL not configured")}
+          title={t("ADMIN_WARN_DOMAIN_TITLE", "Domain not configured")}
           body={t(
-            "ADMIN_WARN_BASE_URL_BODY",
-            "Create a base URL so users and administrators can access this installation.",
+            "ADMIN_WARN_DOMAIN_BODY",
+            "Configure a domain so users and administrators can access this installation.",
           )}
           status="required"
           actions={
             <Button size="sm" className="h-7 text-[12px]" onClick={onCreateBaseUrl}>
-              {t("ADMIN_CREATE_BASE_URL", "Create base URL")}
+              {t("ADMIN_CONFIGURE_DOMAIN", "Configure domain")}
             </Button>
           }
         />
