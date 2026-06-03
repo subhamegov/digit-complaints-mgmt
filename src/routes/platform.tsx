@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
