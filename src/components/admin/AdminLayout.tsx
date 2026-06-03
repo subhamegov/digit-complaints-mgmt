@@ -41,6 +41,7 @@ import {
   Menu,
   X,
   Inbox,
+  HeartPulse,
 } from "lucide-react";
 import { useRbac, type Permission } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
