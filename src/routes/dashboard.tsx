@@ -1148,7 +1148,21 @@ function DashboardPage() {
   );
 }
 
+function ViewToggle({ value, onChange }: { value: "table" | "bar"; onChange: (v: "table" | "bar") => void }) {
+  return (
+    <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+      {(["table", "bar"] as const).map((v) => (
+        <button key={v} onClick={() => onChange(v)}
+          className={cn("px-2 py-1 capitalize", value === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+          {v}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function DemoSetupBanner() {
+
   const active =
     typeof window !== "undefined" &&
     window.localStorage.getItem("demoSetupActive") === "1";
