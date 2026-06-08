@@ -524,8 +524,8 @@ function DashboardPage() {
           <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Department / Type</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
           <tbody>
             {typeBuckets.map((g) => (
-              <>
-                <tr key={g.dept} className="border-t border-border bg-muted/30">
+              <Fragment key={g.dept}>
+                <tr className="border-t border-border bg-muted/30">
                   <td className="py-1.5">
                     <button onClick={() => setTypeExpanded((p) => ({ ...p, [g.dept]: !p[g.dept] }))} className="font-semibold text-foreground hover:underline">
                       {typeExpanded[g.dept] ? "▾" : "▸"} {g.dept}
@@ -539,8 +539,9 @@ function DashboardPage() {
                     <td className="py-1.5 text-right tabular-nums">{t2.count}</td>
                   </tr>
                 ))}
-              </>
+              </Fragment>
             ))}
+
           </tbody>
         </table>
       ) : (
