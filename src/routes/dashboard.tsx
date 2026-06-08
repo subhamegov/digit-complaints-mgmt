@@ -309,9 +309,34 @@ function DashboardPage() {
   }, [trend]);
 
 
+  // View toggles for new widgets
+  const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
+  const [statusView, setStatusView] = useState<"table" | "bar">("table");
+  const [typeView, setTypeView] = useState<"table" | "bar">("table");
+  const [slaView, setSlaView] = useState<"table" | "bar">("table");
+  const [overTimeGran, setOverTimeGran] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [typeExpanded, setTypeExpanded] = useState<Record<string, boolean>>({});
+
+  const geoData = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of filteredComplaints) {
+      const isOpen = ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      if (geoView === "open" && !isOpen) continue;
+      if (geoView === "resolved" && !isResolved) continue;
+      m.set(c.ward, (m.get(c.ward) ?? 0) + 1);
+    }
+    const arr = Array.from(m, ([ward, count]) => ({ ward, count }));
+    const max = Math.max(...arr.map((x) => x.count), 1);
+    return { arr: arr.sort((a, b) => b.count - a.count), max };
+  }, [filteredComplaints, geoView]);
+
+  const overTimeData =
+    overTimeGran === "daily" ? overTimeDaily : overTimeGran === "weekly" ? overTimeWeekly : overTimeMonthly;
 
   // Unified KPI registry: every box (stat card or chart panel) is a KPI.
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
+
     // Stat KPIs
     { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => "4 nearing breach" },
