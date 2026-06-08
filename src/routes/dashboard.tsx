@@ -847,20 +847,28 @@ function DashboardPage() {
     setDragId(null);
   };
 
-  // Per-tile resize. Width snaps to grid columns (1..3).
+  // Per-tile resize. Width snaps to grid columns (1..3). Height snaps to row steps (1..3).
   const gridRef = useRef<HTMLDivElement>(null);
-  const [sizes, setSizes] = useState<Record<string, { colSpan: 1 | 2 | 3 }>>({});
+  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; rowSpan?: 1 | 2 | 3 }>>({});
   const [resizingId, setResizingId] = useState<string | null>(null);
-  // Disable native drag while pointer is on a resize handle so HTML5 drag doesn't
-  // race with our pointer-based resize.
+  const [resizingAxis, setResizingAxis] = useState<"x" | "y" | "xy" | null>(null);
+  // Disable native drag while pointer is on a resize handle.
   const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
-  const startResize = (id: string, _kind: KpiKind, e: React.PointerEvent<HTMLDivElement>) => {
+  const ROW_STEP = 280; // px per rowSpan unit
+
+  const startResize = (
+    id: string,
+    _kind: KpiKind,
+    axis: "x" | "y" | "xy",
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     const handleEl = e.currentTarget;
     handleEl.setPointerCapture(e.pointerId);
     setResizingId(id);
+    setResizingAxis(axis);
 
     const grid = gridRef.current;
     const tile = document.querySelector(`[data-kpi-id="${id}"]`) as HTMLElement | null;
@@ -869,22 +877,32 @@ function DashboardPage() {
     const gridRect = parentGrid.getBoundingClientRect();
     const tileRect = tile.getBoundingClientRect();
     const gap = 12;
-    // Detect column count from computed grid-template-columns
     const styles = window.getComputedStyle(parentGrid);
     const cols = styles.gridTemplateColumns.split(" ").filter(Boolean).length || 3;
     const maxSpan = Math.min(cols, 3) as 1 | 2 | 3;
     const colWidth = (gridRect.width + gap) / cols;
 
     const onMove = (ev: PointerEvent) => {
-      const widthFromLeft = ev.clientX - tileRect.left;
-      const span = Math.max(1, Math.min(maxSpan, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
-      setSizes((p) => ({ ...p, [id]: { colSpan: span } }));
+      setSizes((p) => {
+        const cur = p[id] ?? {};
+        const next = { ...cur };
+        if (axis === "x" || axis === "xy") {
+          const widthFromLeft = ev.clientX - tileRect.left;
+          next.colSpan = Math.max(1, Math.min(maxSpan, Math.round(widthFromLeft / colWidth))) as 1 | 2 | 3;
+        }
+        if (axis === "y" || axis === "xy") {
+          const heightFromTop = ev.clientY - tileRect.top;
+          next.rowSpan = Math.max(1, Math.min(3, Math.round(heightFromTop / ROW_STEP))) as 1 | 2 | 3;
+        }
+        return { ...p, [id]: next };
+      });
     };
     void grid;
 
     const onUp = (ev: PointerEvent) => {
       handleEl.releasePointerCapture?.(ev.pointerId);
       setResizingId(null);
+      setResizingAxis(null);
       handleEl.removeEventListener("pointermove", onMove);
       handleEl.removeEventListener("pointerup", onUp);
       handleEl.removeEventListener("pointercancel", onUp);
