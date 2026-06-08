@@ -1073,7 +1073,9 @@ function DashboardPage() {
                     padded={k.padded}
                     onRemove={() => removeKpi(id)}
                   >
-                    {k.render?.()}
+                    <div className="h-[280px] overflow-auto">
+                      {k.render?.()}
+                    </div>
                   </Panel>
                 )}
 
