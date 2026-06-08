@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, Fragment } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
@@ -12,12 +12,13 @@ import { useRbac } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
-  trend7d, COMPLAINTS, complaintTypeOf,
+  trend7d, COMPLAINTS, complaintTypeOf, OFFICERS, officerOf,
   type Complaint,
 } from "@/lib/mock-data";
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
+  PieChart, Pie, Cell, Legend,
 } from "recharts";
 
 type KpiKind = "stat" | "panel";
@@ -115,17 +116,237 @@ function DashboardPage() {
   const recent = filteredComplaints.slice(0, 6);
   const wardsMax = Math.max(...wards.map((w) => w.total), 1);
 
+  // --- Derived datasets for additional KPIs ---
+  const fmtHHMM = (hours: number) => {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
+
+  const resolutionRate = s.total ? Math.round((s.resolved / s.total) * 1000) / 10 : 0;
+
+  // Pseudo-derived avg resolution/first-response per complaint based on filed age,
+  // so values stay stable but look realistic.
+  const avgResolutionHrs = s.avgResolutionHrs; // 42
+  const firstResponseHrs = 2.4;
+
+  const STATUS_ORDER: Complaint["status"][] = ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED", "RESOLVED", "CLOSED", "REJECTED"];
+  const STATUS_LABEL: Record<Complaint["status"], string> = {
+    OPEN: "Pending Assignment",
+    ASSIGNED: "Assigned",
+    IN_PROGRESS: "Pending Resolution",
+    REOPENED: "Reopened",
+    RESOLVED: "Resolved",
+    CLOSED: "Closed",
+    REJECTED: "Rejected",
+  };
+  const statusBuckets = useMemo(() => {
+    const m = new Map<string, number>();
+    STATUS_ORDER.forEach((st) => m.set(st, 0));
+    for (const c of filteredComplaints) m.set(c.status, (m.get(c.status) ?? 0) + 1);
+    return STATUS_ORDER.map((st) => ({ key: st, label: STATUS_LABEL[st], value: m.get(st) ?? 0 }));
+  }, [filteredComplaints]);
+
+  const typeBuckets = useMemo(() => {
+    const byDept = new Map<string, { dept: string; total: number; types: { code: string; name: string; count: number }[] }>();
+    for (const c of filteredComplaints) {
+      const ct = complaintTypeOf(c.typeCode);
+      if (!ct) continue;
+      const g = byDept.get(ct.department) ?? { dept: ct.department, total: 0, types: [] };
+      g.total++;
+      const existing = g.types.find((x) => x.code === ct.code);
+      if (existing) existing.count++;
+      else g.types.push({ code: ct.code, name: ct.name, count: 1 });
+      byDept.set(ct.department, g);
+    }
+    return Array.from(byDept.values()).sort((a, b) => b.total - a.total);
+  }, [filteredComplaints]);
+
+  const slaBuckets = useMemo(() => {
+    let within = 0, nearing = 0, breached = 0;
+    for (const c of filteredComplaints) {
+      if (c.slaState === "WITHIN") within++;
+      else if (c.slaState === "NEARING") nearing++;
+      else breached++;
+    }
+    return [
+      { key: "within", label: "Within SLA", value: within, color: "var(--color-chart-3)" },
+      { key: "nearing", label: "Breaching SLA", value: nearing, color: "var(--color-chart-2)" },
+      { key: "breached", label: "Breached SLA", value: breached, color: "var(--color-chart-4)" },
+    ];
+  }, [filteredComplaints]);
+
+  const CHANNEL_LABEL: Record<string, string> = {
+    MOBILE_APP: "Mobile App", WEB: "Web", CALL_CENTER: "Call", COUNTER: "Counter", WHATSAPP: "WhatsApp",
+  };
+  const channelBuckets = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of filteredComplaints) m.set(c.channel, (m.get(c.channel) ?? 0) + 1);
+    const total = filteredComplaints.length || 1;
+    return Array.from(m, ([k, v]) => ({ name: CHANNEL_LABEL[k] ?? k, value: v, pct: Math.round((v / total) * 1000) / 10 }));
+  }, [filteredComplaints]);
+
+  const openBreakdown = useMemo(() => {
+    const openSet = filteredComplaints.filter((c) => ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status));
+    const reopened = openSet.filter((c) => c.reopenCount > 0 || c.status === "REOPENED").length;
+    const fresh = openSet.length - reopened;
+    return [
+      { name: "New", value: fresh },
+      { name: "Reopened", value: reopened },
+    ];
+  }, [filteredComplaints]);
+
+  const hourBuckets = useMemo(() => {
+    const arr = Array.from({ length: 24 }, (_, h) => ({ hour: `${String(h).padStart(2, "0")}h`, value: 0 }));
+    for (const c of filteredComplaints) {
+      const h = new Date(c.filedOn).getHours();
+      arr[h].value++;
+    }
+    return arr;
+  }, [filteredComplaints]);
+
+  const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dowBuckets = useMemo(() => {
+    const arr = DOW.map((d) => ({ day: d, value: 0 }));
+    for (const c of filteredComplaints) {
+      const d = new Date(c.filedOn).getDay();
+      arr[d].value++;
+    }
+    return arr;
+  }, [filteredComplaints]);
+
+  const trendingTypes = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of filteredComplaints) m.set(c.typeCode, (m.get(c.typeCode) ?? 0) + 1);
+    const ranked = Array.from(m, ([code, count]) => ({ code, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+    return ranked.map((r, i) => {
+      // deterministic pseudo-WoW from code length
+      const seed = (r.code.length * 7) % 50;
+      const wow = ((seed - 20) + (i * 1.7));
+      return {
+        rank: i + 1,
+        name: complaintTypeOf(r.code)?.name ?? r.code,
+        volume: r.count,
+        wow: Math.round(wow * 10) / 10,
+      };
+    });
+  }, [filteredComplaints]);
+
+  const trendingLocations = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of filteredComplaints) m.set(c.ward, (m.get(c.ward) ?? 0) + 1);
+    const arr = Array.from(m, ([ward, count]) => {
+      const spike = 1 + ((ward.charCodeAt(ward.length - 1) % 10) * 0.3);
+      return { ward, count, spike: Math.round(spike * 10) / 10 };
+    }).sort((a, b) => b.spike - a.spike);
+    return arr;
+  }, [filteredComplaints]);
+
+  const openByEmployee = useMemo(() => {
+    const m = new Map<string, { open: number; totalResHrs: number; resCount: number }>();
+    for (const c of filteredComplaints) {
+      const id = c.assignedOfficerId;
+      if (!id) continue;
+      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0 };
+      if (["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)) e.open++;
+      if (c.status === "RESOLVED" || c.status === "CLOSED") {
+        e.resCount++;
+        e.totalResHrs += c.slaHours - c.slaRemainingHrs;
+      }
+      m.set(id, e);
+    }
+    const totalOpen = Array.from(m.values()).reduce((a, b) => a + b.open, 0) || 1;
+    return Array.from(m, ([id, v]) => ({
+      id,
+      name: officerOf(id)?.name ?? id,
+      open: v.open,
+      pct: Math.round((v.open / totalOpen) * 1000) / 10,
+      avgHrs: v.resCount ? Math.round((v.totalResHrs / v.resCount) * 10) / 10 : 0,
+    })).sort((a, b) => b.open - a.open);
+  }, [filteredComplaints]);
+
+  const resolutionByType = useMemo(() => {
+    const m = new Map<string, { total: number; resolved: number; hrs: number }>();
+    for (const c of filteredComplaints) {
+      const ct = complaintTypeOf(c.typeCode);
+      if (!ct) continue;
+      const e = m.get(ct.code) ?? { total: 0, resolved: 0, hrs: 0 };
+      e.total++;
+      if (c.status === "RESOLVED" || c.status === "CLOSED") {
+        e.resolved++;
+        e.hrs += c.slaHours - c.slaRemainingHrs;
+      }
+      m.set(ct.code, e);
+    }
+    return Array.from(m, ([code, v]) => ({
+      name: complaintTypeOf(code)?.name ?? code,
+      closure: v.total ? Math.round((v.resolved / v.total) * 1000) / 10 : 0,
+      avgHrs: v.resolved ? Math.round((v.hrs / v.resolved) * 10) / 10 : 0,
+    })).sort((a, b) => b.closure - a.closure);
+  }, [filteredComplaints]);
+
+  // Time-series with daily/weekly/monthly synthesis from trend7d.
+  const overTimeDaily = trend;
+  const overTimeWeekly = useMemo(() => {
+    const sumF = trend.reduce((a, b) => a + b.filed, 0);
+    const sumR = trend.reduce((a, b) => a + b.resolved, 0);
+    return [
+      { day: "W-3", filed: Math.round(sumF * 0.78), resolved: Math.round(sumR * 0.74) },
+      { day: "W-2", filed: Math.round(sumF * 0.9), resolved: Math.round(sumR * 0.88) },
+      { day: "W-1", filed: Math.round(sumF * 0.95), resolved: Math.round(sumR * 0.93) },
+      { day: "This wk", filed: sumF, resolved: sumR },
+    ];
+  }, [trend]);
+  const overTimeMonthly = useMemo(() => {
+    const sumF = trend.reduce((a, b) => a + b.filed, 0) * 4;
+    const sumR = trend.reduce((a, b) => a + b.resolved, 0) * 4;
+    return [
+      { day: "Feb", filed: Math.round(sumF * 0.7), resolved: Math.round(sumR * 0.68) },
+      { day: "Mar", filed: Math.round(sumF * 0.82), resolved: Math.round(sumR * 0.8) },
+      { day: "Apr", filed: Math.round(sumF * 0.95), resolved: Math.round(sumR * 0.92) },
+      { day: "May", filed: sumF, resolved: sumR },
+    ];
+  }, [trend]);
+
+
+  // View toggles for new widgets
+  const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
+  const [statusView, setStatusView] = useState<"table" | "bar">("table");
+  const [typeView, setTypeView] = useState<"table" | "bar">("table");
+  const [slaView, setSlaView] = useState<"table" | "bar">("table");
+  const [overTimeGran, setOverTimeGran] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [typeExpanded, setTypeExpanded] = useState<Record<string, boolean>>({});
+
+  const geoData = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of filteredComplaints) {
+      const isOpen = ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      if (geoView === "open" && !isOpen) continue;
+      if (geoView === "resolved" && !isResolved) continue;
+      m.set(c.ward, (m.get(c.ward) ?? 0) + 1);
+    }
+    const arr = Array.from(m, ([ward, count]) => ({ ward, count }));
+    const max = Math.max(...arr.map((x) => x.count), 1);
+    return { arr: arr.sort((a, b) => b.count - a.count), max };
+  }, [filteredComplaints, geoView]);
+
+  const overTimeData =
+    overTimeGran === "daily" ? overTimeDaily : overTimeGran === "weekly" ? overTimeWeekly : overTimeMonthly;
 
   // Unified KPI registry: every box (stat card or chart panel) is a KPI.
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
+
     // Stat KPIs
     { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => "4 nearing breach" },
     { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
-    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint.", icon: Clock, intent: "neutral", getValue: () => `${s.avgResolutionHrs}h`, getDelta: () => "Target: 36h" },
+    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hh:mm).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(avgResolutionHrs), getDelta: () => "Target: 36:00" },
     { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Percentage of complaints reopened after resolution.", icon: Repeat, intent: "neutral", getValue: () => `${s.reopenRate}%`, getDelta: () => `CSAT ${s.satisfaction}/5` },
-    { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement.", icon: Clock, intent: "positive", getValue: () => "2.4h", getDelta: () => "−18% WoW" },
+    { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hh:mm).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
+    { id: "resolution-rate", kind: "stat", label: "Resolution rate", description: "Resolved ÷ logged complaints, as a percentage.", icon: ThumbsUp, intent: "positive", getValue: () => `${resolutionRate}%`, getDelta: () => `${s.resolved}/${s.total} resolved` },
+
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp, intent: "warning", getValue: () => "9.2%", getDelta: () => "+1.1 pts" },
     { id: "active-officers", kind: "stat", label: "Active field officers", description: "Officers with at least one assignment in the last 24 hours.", icon: Users, intent: "neutral", getValue: () => "142", getDelta: () => "12 on leave" },
     { id: "repeat-citizens", kind: "stat", label: "Repeat complainants", description: "Citizens filing more than one complaint in 30 days.", icon: Repeat, intent: "warning", getValue: () => "63", getDelta: () => "+8 vs last week" },
@@ -231,7 +452,359 @@ function DashboardPage() {
         />
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax]);
+
+    // --- New panels (KPIs 7-19) ---
+    {
+      id: "geo-map", kind: "panel", label: "Complaints by geography", description: "Ward heat-map with logged/open/resolved toggle.",
+      icon: MapPin, colSpan: 2, title: "Complaints by geography",
+      action: (
+        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+          {(["logged", "open", "resolved"] as const).map((v) => (
+            <button key={v} onClick={() => setGeoView(v)}
+              className={cn("px-2 py-1 capitalize", geoView === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+              {v}
+            </button>
+          ))}
+        </div>
+      ),
+      render: () => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+          {geoData.arr.map((w) => {
+            const intensity = w.count / geoData.max;
+            return (
+              <div key={w.ward}
+                className="rounded-sm border border-border p-2 text-center"
+                style={{ backgroundColor: `color-mix(in oklab, var(--primary) ${Math.round(intensity * 70)}%, var(--surface))` }}>
+                <div className="text-[11px] font-semibold text-foreground">{w.ward}</div>
+                <div className="text-[14px] font-bold tabular-nums text-foreground">{w.count}</div>
+              </div>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      id: "by-status", kind: "panel", label: "Complaints by status", description: "Status distribution as table or bar chart.",
+      icon: ListChecks, colSpan: 1, title: "Complaints by status",
+      action: (
+        <ViewToggle value={statusView} onChange={setStatusView} />
+      ),
+      render: () => statusView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Status</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {statusBuckets.map((b) => (
+              <tr key={b.key} className="border-t border-border">
+                <td className="py-1.5">{b.label}</td>
+                <td className="py-1.5 text-right tabular-nums">{b.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={statusBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} interval={0} angle={-20} textAnchor="end" height={50} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-1)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-type", kind: "panel", label: "Complaints by type / sub-type", description: "Department → complaint type drill-down.",
+      icon: BarChart3, colSpan: 2, title: "Complaints by type / sub-type",
+      action: <ViewToggle value={typeView} onChange={setTypeView} />,
+      render: () => typeView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Department / Type</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {typeBuckets.map((g) => (
+              <Fragment key={g.dept}>
+                <tr className="border-t border-border bg-muted/30">
+                  <td className="py-1.5">
+                    <button onClick={() => setTypeExpanded((p) => ({ ...p, [g.dept]: !p[g.dept] }))} className="font-semibold text-foreground hover:underline">
+                      {typeExpanded[g.dept] ? "▾" : "▸"} {g.dept}
+                    </button>
+                  </td>
+                  <td className="py-1.5 text-right tabular-nums font-semibold">{g.total}</td>
+                </tr>
+                {typeExpanded[g.dept] && g.types.map((t2) => (
+                  <tr key={t2.code} className="border-t border-border">
+                    <td className="py-1.5 pl-6 text-muted-foreground">{t2.name}</td>
+                    <td className="py-1.5 text-right tabular-nums">{t2.count}</td>
+                  </tr>
+                ))}
+              </Fragment>
+            ))}
+
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={typeBuckets.map((g) => ({ name: g.dept, value: g.total }))} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-2)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-sla", kind: "panel", label: "Complaints by SLA", description: "Within / breaching / breached SLA distribution.",
+      icon: AlertTriangle, colSpan: 1, title: "Complaints by SLA",
+      action: <ViewToggle value={slaView} onChange={setSlaView} />,
+      render: () => slaView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Bucket</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {slaBuckets.map((b) => (
+              <tr key={b.key} className="border-t border-border">
+                <td className="py-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full mr-2" style={{ backgroundColor: b.color }} />
+                  {b.label}
+                </td>
+                <td className="py-1.5 text-right tabular-nums font-semibold" style={{ color: b.color }}>{b.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={slaBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" radius={[2, 2, 0, 0]}>
+                {slaBuckets.map((b) => <Cell key={b.key} fill={b.color} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-channel", kind: "panel", label: "Complaints by channel", description: "Channel mix as a percentage pie.",
+      icon: Activity, colSpan: 1, title: "Complaints by channel",
+      render: () => (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={channelBuckets} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.pct}%`}>
+                {channelBuckets.map((_, i) => (
+                  <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={{ fontSize: 12 }} formatter={(v: any, n: any, p: any) => [`${v} (${p.payload.pct}%)`, n]} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "open-breakdown", kind: "panel", label: "Open complaints breakdown", description: "New vs reopened open complaints.",
+      icon: Repeat, colSpan: 1, title: "Open complaints — new vs reopened",
+      render: () => (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={openBreakdown} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.value}`}>
+                <Cell fill="var(--color-chart-1)" />
+                <Cell fill="var(--color-chart-4)" />
+              </Pie>
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "time-of-day", kind: "panel", label: "Time-of-day pattern", description: "Complaints logged by hour of day.",
+      icon: Clock, colSpan: 2, title: "Time-of-day pattern",
+      render: () => (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={hourBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} interval={1} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-1)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "day-of-week", kind: "panel", label: "Day-of-week pattern", description: "Complaints logged by day of week.",
+      icon: BarChart3, colSpan: 1, title: "Day-of-week pattern",
+      render: () => (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dowBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-3)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "trending-complaints", kind: "panel", label: "Trending complaints", description: "Top 5 categories this week with WoW change.",
+      icon: TrendingUp, colSpan: 1, title: "Trending complaints (top 5)",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium w-6">#</th>
+            <th className="py-1 font-medium">Category</th>
+            <th className="py-1 font-medium text-right">Volume</th>
+            <th className="py-1 font-medium text-right">WoW</th>
+          </tr></thead>
+          <tbody>
+            {trendingTypes.map((r) => {
+              const up = r.wow >= 0;
+              return (
+                <tr key={r.rank} className="border-t border-border">
+                  <td className="py-1.5 tabular-nums">{r.rank}</td>
+                  <td className="py-1.5 truncate">{r.name}</td>
+                  <td className="py-1.5 text-right tabular-nums">{r.volume}</td>
+                  <td className={cn("py-1.5 text-right tabular-nums font-semibold", up ? "text-emerald-600" : "text-red-600")}>
+                    {up ? "↑" : "↓"} {Math.abs(r.wow).toFixed(1)}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "trending-locations", kind: "panel", label: "Trending locations", description: "Ward spikes week-over-week with top callout.",
+      icon: MapPin, colSpan: 2, title: "Trending locations",
+      render: () => {
+        const top = trendingLocations[0];
+        return (
+          <div className="space-y-3">
+            {top && (
+              <div className="rounded-sm border border-primary/40 bg-primary/5 p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Top spike</div>
+                  <div className="text-[14px] font-semibold text-foreground">{top.ward}</div>
+                  <div className="text-[12px] text-muted-foreground">{top.count} complaints</div>
+                </div>
+                <div className="text-[20px] font-bold text-primary">{top.spike.toFixed(1)}×</div>
+              </div>
+            )}
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {trendingLocations.map((l) => {
+                const intensity = Math.min(1, (l.spike - 1) / 2);
+                return (
+                  <div key={l.ward} className="rounded-sm border border-border p-2 text-center"
+                    style={{ backgroundColor: `color-mix(in oklab, var(--color-chart-4) ${Math.round(intensity * 65)}%, var(--surface))` }}>
+                    <div className="text-[11px] font-semibold">{l.ward}</div>
+                    <div className="text-[11px] text-muted-foreground">{l.spike.toFixed(1)}×</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. resolution time.",
+      icon: Users, colSpan: 2, title: "Open complaints by employee",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Employee</th>
+            <th className="py-1 font-medium text-right">Open</th>
+            <th className="py-1 font-medium text-right">% of total</th>
+            <th className="py-1 font-medium text-right">Avg. resolution</th>
+          </tr></thead>
+          <tbody>
+            {openByEmployee.map((e) => (
+              <tr key={e.id} className="border-t border-border">
+                <td className="py-1.5">{e.name}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.open}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
+                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "—"}</td>
+              </tr>
+            ))}
+            {openByEmployee.length === 0 && (
+              <tr><td colSpan={4} className="py-3 text-center text-muted-foreground">No assignments</td></tr>
+            )}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure rate and avg. resolution per type.",
+      icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Complaint type</th>
+            <th className="py-1 font-medium text-right">Closure</th>
+            <th className="py-1 font-medium text-right">Avg. resolution</th>
+          </tr></thead>
+          <tbody>
+            {resolutionByType.map((r) => (
+              <tr key={r.name} className="border-t border-border">
+                <td className="py-1.5">{r.name}</td>
+                <td className="py-1.5 text-right tabular-nums">{r.closure.toFixed(1)}%</td>
+                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "over-time", kind: "panel", label: "Complaints logged over time", description: "Time-series with daily / weekly / monthly toggle.",
+      icon: LineChartIcon, colSpan: 3, title: "Complaints logged over time",
+      action: (
+        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+          {(["daily", "weekly", "monthly"] as const).map((g) => (
+            <button key={g} onClick={() => setOverTimeGran(g)}
+              className={cn("px-2 py-1 capitalize", overTimeGran === g ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+              {g}
+            </button>
+          ))}
+        </div>
+      ),
+      render: () => (
+        <div className="h-[260px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={overTimeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Line type="monotone" dataKey="filed" stroke="var(--color-chart-1)" strokeWidth={2} dot={{ r: 3 }} name="Logged" />
+              <Line type="monotone" dataKey="resolved" stroke="var(--color-chart-3)" strokeWidth={2} dot={{ r: 3 }} name="Resolved" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -241,9 +814,16 @@ function DashboardPage() {
 
   // Default visible set: stats first, then key charts. Resets each mount.
   const defaultIds = useMemo(
-    () => ["total", "open", "resolved", "breached", "avg-resolution", "reopen", "trend", "wards", "dept", "recent", "sla"],
+    () => [
+      "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
+      "trend", "wards", "dept", "geo-map", "by-status", "by-type", "by-sla",
+      "by-channel", "open-breakdown", "time-of-day", "day-of-week",
+      "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
+      "over-time", "recent", "sla",
+    ],
     [],
   );
+
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -569,7 +1149,21 @@ function DashboardPage() {
   );
 }
 
+function ViewToggle({ value, onChange }: { value: "table" | "bar"; onChange: (v: "table" | "bar") => void }) {
+  return (
+    <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+      {(["table", "bar"] as const).map((v) => (
+        <button key={v} onClick={() => onChange(v)}
+          className={cn("px-2 py-1 capitalize", value === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+          {v}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function DemoSetupBanner() {
+
   const active =
     typeof window !== "undefined" &&
     window.localStorage.getItem("demoSetupActive") === "1";
