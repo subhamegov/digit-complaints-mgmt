@@ -120,7 +120,7 @@ function DashboardPage() {
   const fmtHHMM = (hours: number) => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
   };
 
   const resolutionRate = s.total ? Math.round((s.resolved / s.total) * 1000) / 10 : 0;
@@ -342,9 +342,9 @@ function DashboardPage() {
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => "4 nearing breach" },
     { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
-    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hh:mm).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(avgResolutionHrs), getDelta: () => "Target: 36:00" },
+    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(avgResolutionHrs), getDelta: () => "Target: 36h" },
     { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Percentage of complaints reopened after resolution.", icon: Repeat, intent: "neutral", getValue: () => `${s.reopenRate}%`, getDelta: () => `CSAT ${s.satisfaction}/5` },
-    { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hh:mm).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
+    { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
     { id: "resolution-rate", kind: "stat", label: "Resolution rate", description: "Resolved ÷ logged complaints, as a percentage.", icon: ThumbsUp, intent: "positive", getValue: () => `${resolutionRate}%`, getDelta: () => `${s.resolved}/${s.total} resolved` },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp, intent: "warning", getValue: () => "9.2%", getDelta: () => "+1.1 pts" },
@@ -359,7 +359,7 @@ function DashboardPage() {
       id: "trend", kind: "panel", label: "Complaints filed vs resolved", description: "7-day line chart of complaints filed vs resolved.",
       icon: LineChartIcon, colSpan: 2, title: "Complaints filed vs resolved — last 7 days",
       render: () => (
-        <div className="h-[240px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={trend} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -394,7 +394,7 @@ function DashboardPage() {
       id: "dept", kind: "panel", label: "By department", description: "Open vs resolved vs breached by department.",
       icon: BarChart3, colSpan: 2, title: "By department — open vs resolved",
       render: () => (
-        <div className="h-[240px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={dept} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -502,7 +502,7 @@ function DashboardPage() {
           </tbody>
         </table>
       ) : (
-        <div className="h-[220px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={statusBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -545,7 +545,7 @@ function DashboardPage() {
           </tbody>
         </table>
       ) : (
-        <div className="h-[240px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={typeBuckets.map((g) => ({ name: g.dept, value: g.total }))} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -578,7 +578,7 @@ function DashboardPage() {
           </tbody>
         </table>
       ) : (
-        <div className="h-[220px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={slaBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -597,7 +597,7 @@ function DashboardPage() {
       id: "by-channel", kind: "panel", label: "Complaints by channel", description: "Channel mix as a percentage pie.",
       icon: Activity, colSpan: 1, title: "Complaints by channel",
       render: () => (
-        <div className="h-[240px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={channelBuckets} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.pct}%`}>
@@ -616,7 +616,7 @@ function DashboardPage() {
       id: "open-breakdown", kind: "panel", label: "Open complaints breakdown", description: "New vs reopened open complaints.",
       icon: Repeat, colSpan: 1, title: "Open complaints — new vs reopened",
       render: () => (
-        <div className="h-[240px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={openBreakdown} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.value}`}>
@@ -634,7 +634,7 @@ function DashboardPage() {
       id: "time-of-day", kind: "panel", label: "Time-of-day pattern", description: "Complaints logged by hour of day.",
       icon: Clock, colSpan: 2, title: "Time-of-day pattern",
       render: () => (
-        <div className="h-[220px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={hourBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -651,7 +651,7 @@ function DashboardPage() {
       id: "day-of-week", kind: "panel", label: "Day-of-week pattern", description: "Complaints logged by day of week.",
       icon: BarChart3, colSpan: 1, title: "Day-of-week pattern",
       render: () => (
-        <div className="h-[220px]">
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={dowBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -1073,7 +1073,9 @@ function DashboardPage() {
                     padded={k.padded}
                     onRemove={() => removeKpi(id)}
                   >
-                    {k.render?.()}
+                    <div className="h-[280px] overflow-auto">
+                      {k.render?.()}
+                    </div>
                   </Panel>
                 )}
 
