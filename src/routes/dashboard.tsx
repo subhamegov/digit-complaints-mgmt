@@ -12,7 +12,7 @@ import { useRbac } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
-  trend7d, COMPLAINTS, complaintTypeOf,
+  trend7d, COMPLAINTS, complaintTypeOf, OFFICERS, officerOf,
   type Complaint,
 } from "@/lib/mock-data";
 
