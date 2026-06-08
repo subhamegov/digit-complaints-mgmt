@@ -452,7 +452,358 @@ function DashboardPage() {
         />
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax]);
+
+    // --- New panels (KPIs 7-19) ---
+    {
+      id: "geo-map", kind: "panel", label: "Complaints by geography", description: "Ward heat-map with logged/open/resolved toggle.",
+      icon: MapPin, colSpan: 2, title: "Complaints by geography",
+      action: (
+        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+          {(["logged", "open", "resolved"] as const).map((v) => (
+            <button key={v} onClick={() => setGeoView(v)}
+              className={cn("px-2 py-1 capitalize", geoView === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+              {v}
+            </button>
+          ))}
+        </div>
+      ),
+      render: () => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+          {geoData.arr.map((w) => {
+            const intensity = w.count / geoData.max;
+            return (
+              <div key={w.ward}
+                className="rounded-sm border border-border p-2 text-center"
+                style={{ backgroundColor: `color-mix(in oklab, var(--primary) ${Math.round(intensity * 70)}%, var(--surface))` }}>
+                <div className="text-[11px] font-semibold text-foreground">{w.ward}</div>
+                <div className="text-[14px] font-bold tabular-nums text-foreground">{w.count}</div>
+              </div>
+            );
+          })}
+        </div>
+      ),
+    },
+    {
+      id: "by-status", kind: "panel", label: "Complaints by status", description: "Status distribution as table or bar chart.",
+      icon: ListChecks, colSpan: 1, title: "Complaints by status",
+      action: (
+        <ViewToggle value={statusView} onChange={setStatusView} />
+      ),
+      render: () => statusView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Status</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {statusBuckets.map((b) => (
+              <tr key={b.key} className="border-t border-border">
+                <td className="py-1.5">{b.label}</td>
+                <td className="py-1.5 text-right tabular-nums">{b.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={statusBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} interval={0} angle={-20} textAnchor="end" height={50} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-1)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-type", kind: "panel", label: "Complaints by type / sub-type", description: "Department → complaint type drill-down.",
+      icon: BarChart3, colSpan: 2, title: "Complaints by type / sub-type",
+      action: <ViewToggle value={typeView} onChange={setTypeView} />,
+      render: () => typeView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Department / Type</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {typeBuckets.map((g) => (
+              <>
+                <tr key={g.dept} className="border-t border-border bg-muted/30">
+                  <td className="py-1.5">
+                    <button onClick={() => setTypeExpanded((p) => ({ ...p, [g.dept]: !p[g.dept] }))} className="font-semibold text-foreground hover:underline">
+                      {typeExpanded[g.dept] ? "▾" : "▸"} {g.dept}
+                    </button>
+                  </td>
+                  <td className="py-1.5 text-right tabular-nums font-semibold">{g.total}</td>
+                </tr>
+                {typeExpanded[g.dept] && g.types.map((t2) => (
+                  <tr key={t2.code} className="border-t border-border">
+                    <td className="py-1.5 pl-6 text-muted-foreground">{t2.name}</td>
+                    <td className="py-1.5 text-right tabular-nums">{t2.count}</td>
+                  </tr>
+                ))}
+              </>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={typeBuckets.map((g) => ({ name: g.dept, value: g.total }))} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} interval={0} angle={-15} textAnchor="end" height={50} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-2)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-sla", kind: "panel", label: "Complaints by SLA", description: "Within / breaching / breached SLA distribution.",
+      icon: AlertTriangle, colSpan: 1, title: "Complaints by SLA",
+      action: <ViewToggle value={slaView} onChange={setSlaView} />,
+      render: () => slaView === "table" ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground"><th className="py-1 font-medium">Bucket</th><th className="py-1 font-medium text-right">Count</th></tr></thead>
+          <tbody>
+            {slaBuckets.map((b) => (
+              <tr key={b.key} className="border-t border-border">
+                <td className="py-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full mr-2" style={{ backgroundColor: b.color }} />
+                  {b.label}
+                </td>
+                <td className="py-1.5 text-right tabular-nums font-semibold" style={{ color: b.color }}>{b.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={slaBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" radius={[2, 2, 0, 0]}>
+                {slaBuckets.map((b) => <Cell key={b.key} fill={b.color} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "by-channel", kind: "panel", label: "Complaints by channel", description: "Channel mix as a percentage pie.",
+      icon: Activity, colSpan: 1, title: "Complaints by channel",
+      render: () => (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={channelBuckets} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.pct}%`}>
+                {channelBuckets.map((_, i) => (
+                  <Cell key={i} fill={`var(--color-chart-${(i % 5) + 1})`} />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={{ fontSize: 12 }} formatter={(v: any, n: any, p: any) => [`${v} (${p.payload.pct}%)`, n]} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "open-breakdown", kind: "panel", label: "Open complaints breakdown", description: "New vs reopened open complaints.",
+      icon: Repeat, colSpan: 1, title: "Open complaints — new vs reopened",
+      render: () => (
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={openBreakdown} dataKey="value" nameKey="name" innerRadius={40} outerRadius={75} label={(d: any) => `${d.value}`}>
+                <Cell fill="var(--color-chart-1)" />
+                <Cell fill="var(--color-chart-4)" />
+              </Pie>
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "time-of-day", kind: "panel", label: "Time-of-day pattern", description: "Complaints logged by hour of day.",
+      icon: Clock, colSpan: 2, title: "Time-of-day pattern",
+      render: () => (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={hourBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} interval={1} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-1)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "day-of-week", kind: "panel", label: "Day-of-week pattern", description: "Complaints logged by day of week.",
+      icon: BarChart3, colSpan: 1, title: "Day-of-week pattern",
+      render: () => (
+        <div className="h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dowBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-3)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+    {
+      id: "trending-complaints", kind: "panel", label: "Trending complaints", description: "Top 5 categories this week with WoW change.",
+      icon: TrendingUp, colSpan: 1, title: "Trending complaints (top 5)",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium w-6">#</th>
+            <th className="py-1 font-medium">Category</th>
+            <th className="py-1 font-medium text-right">Volume</th>
+            <th className="py-1 font-medium text-right">WoW</th>
+          </tr></thead>
+          <tbody>
+            {trendingTypes.map((r) => {
+              const up = r.wow >= 0;
+              return (
+                <tr key={r.rank} className="border-t border-border">
+                  <td className="py-1.5 tabular-nums">{r.rank}</td>
+                  <td className="py-1.5 truncate">{r.name}</td>
+                  <td className="py-1.5 text-right tabular-nums">{r.volume}</td>
+                  <td className={cn("py-1.5 text-right tabular-nums font-semibold", up ? "text-emerald-600" : "text-red-600")}>
+                    {up ? "↑" : "↓"} {Math.abs(r.wow).toFixed(1)}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "trending-locations", kind: "panel", label: "Trending locations", description: "Ward spikes week-over-week with top callout.",
+      icon: MapPin, colSpan: 2, title: "Trending locations",
+      render: () => {
+        const top = trendingLocations[0];
+        return (
+          <div className="space-y-3">
+            {top && (
+              <div className="rounded-sm border border-primary/40 bg-primary/5 p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Top spike</div>
+                  <div className="text-[14px] font-semibold text-foreground">{top.ward}</div>
+                  <div className="text-[12px] text-muted-foreground">{top.count} complaints</div>
+                </div>
+                <div className="text-[20px] font-bold text-primary">{top.spike.toFixed(1)}×</div>
+              </div>
+            )}
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {trendingLocations.map((l) => {
+                const intensity = Math.min(1, (l.spike - 1) / 2);
+                return (
+                  <div key={l.ward} className="rounded-sm border border-border p-2 text-center"
+                    style={{ backgroundColor: `color-mix(in oklab, var(--color-chart-4) ${Math.round(intensity * 65)}%, var(--surface))` }}>
+                    <div className="text-[11px] font-semibold">{l.ward}</div>
+                    <div className="text-[11px] text-muted-foreground">{l.spike.toFixed(1)}×</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. resolution time.",
+      icon: Users, colSpan: 2, title: "Open complaints by employee",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Employee</th>
+            <th className="py-1 font-medium text-right">Open</th>
+            <th className="py-1 font-medium text-right">% of total</th>
+            <th className="py-1 font-medium text-right">Avg. resolution</th>
+          </tr></thead>
+          <tbody>
+            {openByEmployee.map((e) => (
+              <tr key={e.id} className="border-t border-border">
+                <td className="py-1.5">{e.name}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.open}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
+                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "—"}</td>
+              </tr>
+            ))}
+            {openByEmployee.length === 0 && (
+              <tr><td colSpan={4} className="py-3 text-center text-muted-foreground">No assignments</td></tr>
+            )}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure rate and avg. resolution per type.",
+      icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Complaint type</th>
+            <th className="py-1 font-medium text-right">Closure</th>
+            <th className="py-1 font-medium text-right">Avg. resolution</th>
+          </tr></thead>
+          <tbody>
+            {resolutionByType.map((r) => (
+              <tr key={r.name} className="border-t border-border">
+                <td className="py-1.5">{r.name}</td>
+                <td className="py-1.5 text-right tabular-nums">{r.closure.toFixed(1)}%</td>
+                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "over-time", kind: "panel", label: "Complaints logged over time", description: "Time-series with daily / weekly / monthly toggle.",
+      icon: LineChartIcon, colSpan: 3, title: "Complaints logged over time",
+      action: (
+        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+          {(["daily", "weekly", "monthly"] as const).map((g) => (
+            <button key={g} onClick={() => setOverTimeGran(g)}
+              className={cn("px-2 py-1 capitalize", overTimeGran === g ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+              {g}
+            </button>
+          ))}
+        </div>
+      ),
+      render: () => (
+        <div className="h-[260px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={overTimeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Line type="monotone" dataKey="filed" stroke="var(--color-chart-1)" strokeWidth={2} dot={{ r: 3 }} name="Logged" />
+              <Line type="monotone" dataKey="resolved" stroke="var(--color-chart-3)" strokeWidth={2} dot={{ r: 3 }} name="Resolved" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ),
+    },
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -462,9 +813,16 @@ function DashboardPage() {
 
   // Default visible set: stats first, then key charts. Resets each mount.
   const defaultIds = useMemo(
-    () => ["total", "open", "resolved", "breached", "avg-resolution", "reopen", "trend", "wards", "dept", "recent", "sla"],
+    () => [
+      "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
+      "trend", "wards", "dept", "geo-map", "by-status", "by-type", "by-sla",
+      "by-channel", "open-breakdown", "time-of-day", "day-of-week",
+      "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
+      "over-time", "recent", "sla",
+    ],
     [],
   );
+
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
