@@ -120,7 +120,7 @@ function DashboardPage() {
   const fmtHHMM = (hours: number) => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
   };
 
   const resolutionRate = s.total ? Math.round((s.resolved / s.total) * 1000) / 10 : 0;
