@@ -18,6 +18,7 @@ import {
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
+  PieChart, Pie, Cell, Legend,
 } from "recharts";
 
 type KpiKind = "stat" | "panel";
