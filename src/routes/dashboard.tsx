@@ -1047,6 +1047,7 @@ function DashboardPage() {
             const userSize = sizes[id];
             const defaultSpan: 1 | 2 | 3 = k.kind === "panel" ? (k.colSpan ?? 1) : 1;
             const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? defaultSpan;
+            const effectiveRowSpan: 1 | 2 | 3 = userSize?.rowSpan ?? 1;
             const spanClass =
               gridCols === 6
                 ? effectiveSpan === 3
@@ -1056,6 +1057,7 @@ function DashboardPage() {
                     : ""
                 : colSpanClass(effectiveSpan);
             const isResizing = resizingId === id;
+            const panelContentHeight = ROW_STEP * effectiveRowSpan;
             return (
               <div
                 key={id}
@@ -1091,7 +1093,7 @@ function DashboardPage() {
                     padded={k.padded}
                     onRemove={() => removeKpi(id)}
                   >
-                    <div className="h-[280px] overflow-auto">
+                    <div style={{ height: panelContentHeight }} className="overflow-auto">
                       {k.render?.()}
                     </div>
                   </Panel>
@@ -1100,17 +1102,50 @@ function DashboardPage() {
                 {isResizing && (
                   <div className="pointer-events-none absolute top-1 left-1 z-20 rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
                     {effectiveSpan}/{gridCols === 6 ? 6 : 3}
+                    {k.kind === "panel" && resizingAxis !== "x" && ` · ${effectiveRowSpan}/3`}
                   </div>
                 )}
 
+                {/* Right edge — horizontal resize */}
                 <div
-                  onPointerDown={(e) => startResize(id, k.kind, e)}
+                  onPointerDown={(e) => startResize(id, k.kind, "x", e)}
                   onPointerEnter={() => setHandleHoverId(id)}
                   onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
                   onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
                   title="Drag to resize width · double-click to reset"
                   className={cn(
-                    "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-20 flex items-end justify-end p-0.5 cursor-ew-resize rounded-bl-sm",
+                    "absolute top-2 bottom-4 -right-0.5 w-2 z-20 cursor-ew-resize",
+                    "opacity-0 group-hover:opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
+                    isResizing && resizingAxis === "x" && "opacity-100 bg-primary/10",
+                  )}
+                />
+
+                {/* Bottom edge — vertical resize (panels only) */}
+                {k.kind === "panel" && (
+                  <div
+                    onPointerDown={(e) => startResize(id, k.kind, "y", e)}
+                    onPointerEnter={() => setHandleHoverId(id)}
+                    onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
+                    onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
+                    title="Drag to resize height · double-click to reset"
+                    className={cn(
+                      "absolute left-2 right-4 -bottom-0.5 h-2 z-20 cursor-ns-resize",
+                      "opacity-0 group-hover:opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
+                      isResizing && resizingAxis === "y" && "opacity-100 bg-primary/10",
+                    )}
+                  />
+                )}
+
+                {/* Bottom-right corner — both axes */}
+                <div
+                  onPointerDown={(e) => startResize(id, k.kind, k.kind === "panel" ? "xy" : "x", e)}
+                  onPointerEnter={() => setHandleHoverId(id)}
+                  onPointerLeave={() => { if (resizingId !== id) setHandleHoverId(null); }}
+                  onDoubleClick={(e) => { e.stopPropagation(); resetSize(id); }}
+                  title="Drag to resize · double-click to reset"
+                  className={cn(
+                    "absolute -bottom-0.5 -right-0.5 h-5 w-5 z-30 flex items-end justify-end p-0.5 rounded-bl-sm",
+                    k.kind === "panel" ? "cursor-nwse-resize" : "cursor-ew-resize",
                     "opacity-60 hover:opacity-100 hover:bg-primary/10 transition-opacity",
                     isResizing && "opacity-100",
                   )}
