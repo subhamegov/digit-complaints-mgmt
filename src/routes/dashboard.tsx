@@ -612,6 +612,46 @@ function DashboardPage() {
               <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded-sm">
                 {pts.length} shown · click a pin
               </div>
+              {mapSelected && (() => {
+                const ct = complaintTypeOf(mapSelected.typeCode);
+                const filed = new Date(mapSelected.filedOn);
+                const pics = Math.max(1, mapSelected.attachments || 2);
+                return (
+                  <div className="absolute inset-0 z-20 bg-background/95 backdrop-blur-sm rounded-sm flex flex-col">
+                    <div className="flex items-center justify-between gap-2 p-3 border-b border-border">
+                      <div className="text-[13px] font-semibold text-foreground truncate">{ct?.name ?? mapSelected.typeCode}</div>
+                      <button type="button" onClick={() => setMapSelected(null)} className="shrink-0 rounded-sm p-1 hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="Close">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-3 space-y-3 text-[12px]">
+                      <div className="text-muted-foreground">{mapSelected.id} · {mapSelected.status.replaceAll("_", " ")}{mapSelected.slaState ? ` · SLA ${mapSelected.slaState}` : ""}</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><div className="text-muted-foreground">Type</div><div className="font-medium text-foreground">{ct?.department ?? "—"}</div></div>
+                        <div><div className="text-muted-foreground">Sub-type</div><div className="font-medium text-foreground">{ct?.name ?? mapSelected.typeCode}</div></div>
+                        <div><div className="text-muted-foreground">Date filed</div><div className="font-medium text-foreground">{filed.toLocaleDateString()} · {filed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div></div>
+                        <div><div className="text-muted-foreground">Ward / locality</div><div className="font-medium text-foreground">{mapSelected.ward} · {mapSelected.locality}</div></div>
+                        <div className="col-span-2"><div className="text-muted-foreground">Address</div><div className="font-medium text-foreground">{mapSelected.address}</div></div>
+                        <div className="col-span-2"><div className="text-muted-foreground">Description</div><div className="text-foreground">{mapSelected.description}</div></div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground mb-1.5">Pictures ({pics})</div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {Array.from({ length: Math.min(3, pics) }).map((_, i) => (
+                            <img
+                              key={i}
+                              src={`https://picsum.photos/seed/${encodeURIComponent(mapSelected.id + "-" + i)}/240/160`}
+                              alt={`Complaint photo ${i + 1}`}
+                              className="aspect-[3/2] w-full rounded-sm object-cover border border-border"
+                              loading="lazy"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         );
