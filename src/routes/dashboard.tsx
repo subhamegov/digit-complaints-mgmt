@@ -313,6 +313,7 @@ function DashboardPage() {
   // View toggles for new widgets
   const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
   const [mapView, setMapView] = useState<"open" | "closed" | "logged">("open");
+  const [mapSelected, setMapSelected] = useState<Complaint | null>(null);
   const [statusView, setStatusView] = useState<"table" | "bar">("table");
   const [typeView, setTypeView] = useState<"table" | "bar">("table");
   const [slaView, setSlaView] = useState<"table" | "bar">("table");
