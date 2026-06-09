@@ -532,16 +532,58 @@ function DashboardPage() {
               <span className="ml-auto">Red intensity reflects SLA breach severity.</span>
             </div>
             <div className="relative flex-1 min-h-[240px] rounded-sm border border-border overflow-hidden"
-              style={{ background: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 8%, var(--surface)), var(--surface))" }}>
+              style={{ background: "#e8efe4" }}>
               <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                 <defs>
-                  <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border)" strokeWidth="0.15" />
+                  <pattern id="cm-grid" width="6" height="6" patternUnits="userSpaceOnUse">
+                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#cdd6c4" strokeWidth="0.12" />
                   </pattern>
                 </defs>
-                <rect width="100" height="100" fill="url(#grid)" />
-                <path d="M0,55 C20,50 30,65 50,60 C70,55 85,70 100,62" stroke="color-mix(in oklab, var(--primary) 30%, transparent)" strokeWidth="0.4" fill="none" />
-                <path d="M30,0 C32,20 28,40 35,60 C38,80 34,95 36,100" stroke="color-mix(in oklab, var(--primary) 25%, transparent)" strokeWidth="0.4" fill="none" />
+                {/* land + grid */}
+                <rect width="100" height="100" fill="url(#cm-grid)" />
+                {/* park */}
+                <path d="M58,12 Q72,10 78,22 Q82,34 70,40 Q58,42 54,30 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
+                <path d="M8,72 Q18,68 26,76 Q30,86 18,90 Q6,88 6,80 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
+                {/* river */}
+                <path d="M-2,82 C18,78 32,92 50,84 C68,76 80,90 102,84 L102,100 L-2,100 Z" fill="#bcd9ef" stroke="#88b3d4" strokeWidth="0.2" />
+                {/* blocks */}
+                <g fill="#f4f1e7" stroke="#d8d2bf" strokeWidth="0.15">
+                  <rect x="6" y="8" width="18" height="12" rx="0.5" />
+                  <rect x="28" y="8" width="14" height="12" rx="0.5" />
+                  <rect x="6" y="24" width="12" height="14" rx="0.5" />
+                  <rect x="22" y="24" width="20" height="14" rx="0.5" />
+                  <rect x="6" y="42" width="36" height="14" rx="0.5" />
+                  <rect x="46" y="46" width="22" height="14" rx="0.5" />
+                  <rect x="72" y="46" width="22" height="14" rx="0.5" />
+                  <rect x="46" y="64" width="48" height="12" rx="0.5" />
+                </g>
+                {/* primary roads */}
+                <g stroke="#ffffff" strokeWidth="1.6" fill="none" strokeLinecap="round">
+                  <path d="M0,22 L100,22" />
+                  <path d="M0,62 C30,58 60,66 100,60" />
+                  <path d="M44,0 L44,100" />
+                </g>
+                <g stroke="#e3b34a" strokeWidth="0.5" fill="none" strokeLinecap="round" strokeDasharray="2 2">
+                  <path d="M0,22 L100,22" />
+                  <path d="M44,0 L44,100" />
+                </g>
+                {/* secondary roads */}
+                <g stroke="#ffffff" strokeWidth="0.8" fill="none" strokeLinecap="round">
+                  <path d="M0,40 L100,40" />
+                  <path d="M20,0 L20,100" />
+                  <path d="M70,0 L70,62" />
+                  <path d="M0,78 L44,78" />
+                </g>
+                {/* labels */}
+                <g fill="#7a8a6e" fontSize="2.4" fontFamily="ui-sans-serif, system-ui">
+                  <text x="62" y="28">Central Park</text>
+                  <text x="9" y="83">Riverside</text>
+                  <text x="46" y="92" fill="#5b86a8">River</text>
+                  <text x="2" y="6" fontSize="2">Ward 1</text>
+                  <text x="80" y="6" fontSize="2">Ward 4</text>
+                  <text x="2" y="58" fontSize="2">Ward 7</text>
+                  <text x="80" y="74" fontSize="2">Ward 9</text>
+                </g>
               </svg>
               <div className="absolute inset-0">
                 {pts.map((c) => {
@@ -551,23 +593,25 @@ function DashboardPage() {
                   const y = (h2 % 1000) / 10;
                   const col = colorFor(c);
                   return (
-                    <div
+                    <button
                       key={c.id}
+                      type="button"
+                      onClick={() => setMapSelected(c)}
                       title={`${c.id} · ${col.label}${c.slaState ? " · SLA " + c.slaState : ""}`}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full hover:scale-125 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
                       style={{
                         left: `${x}%`, top: `${y}%`,
-                        width: 10, height: 10,
+                        width: 11, height: 11,
                         background: col.fill,
                         border: `1.5px solid ${col.stroke}`,
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
                       }}
                     />
                   );
                 })}
               </div>
-              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded-sm">
-                {pts.length} shown
+              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded-sm">
+                {pts.length} shown · click a pin
               </div>
             </div>
           </div>
