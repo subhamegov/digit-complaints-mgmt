@@ -7,6 +7,7 @@ import {
   ActionButton, OwnerCell, DataTable, nextActionFor,
 } from "@/components/pgr/primitives";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
