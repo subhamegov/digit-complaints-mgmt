@@ -232,14 +232,20 @@ function loadPersisted(): { role?: Role; tenantCode?: string; jurisdictionCode?:
 }
 
 export function RbacProvider({ children }: { children: ReactNode }) {
-  const persisted = loadPersisted();
-  const [role, setRoleState] = useState<Role>((persisted.role as Role) ?? "GRO");
-  const [tenant, setTenantState] = useState<Tenant>(
-    TENANTS.find((t) => t.code === persisted.tenantCode) ?? TENANTS[0],
-  );
-  const [jurisdiction, setJurisdictionState] = useState<Jurisdiction>(
-    JURISDICTIONS.find((j) => j.code === persisted.jurisdictionCode) ?? JURISDICTIONS[0],
-  );
+  // Initialize with deterministic defaults so SSR and first client render match.
+  // Persisted values (from localStorage) hydrate after mount.
+  const [role, setRoleState] = useState<Role>("GRO");
+  const [tenant, setTenantState] = useState<Tenant>(TENANTS[0]);
+  const [jurisdiction, setJurisdictionState] = useState<Jurisdiction>(JURISDICTIONS[0]);
+
+  useEffect(() => {
+    const persisted = loadPersisted();
+    if (persisted.role) setRoleState(persisted.role as Role);
+    const t = TENANTS.find((x) => x.code === persisted.tenantCode);
+    if (t) setTenantState(t);
+    const j = JURISDICTIONS.find((x) => x.code === persisted.jurisdictionCode);
+    if (j) setJurisdictionState(j);
+  }, []);
 
   const persist = (next: { role?: Role; tenant?: Tenant; jurisdiction?: Jurisdiction }) => {
     if (typeof window === "undefined") return;
