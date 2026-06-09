@@ -893,7 +893,7 @@ function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
