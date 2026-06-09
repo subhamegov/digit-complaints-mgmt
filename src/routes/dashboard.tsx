@@ -617,7 +617,7 @@ function DashboardPage() {
                 const filed = new Date(mapSelected.filedOn);
                 const pics = Math.max(1, mapSelected.attachments || 2);
                 return (
-                  <div className="absolute top-2 right-2 z-20 w-[240px] max-w-[calc(100%-1rem)] max-h-[calc(100%-1rem)] bg-background/95 backdrop-blur-sm rounded-sm border border-border shadow-lg flex flex-col">
+                  <div className="absolute top-2 right-2 z-20 w-[260px] max-w-[calc(100%-1rem)] h-[280px] max-h-[calc(100%-1rem)] bg-background/95 backdrop-blur-sm rounded-sm border border-border shadow-lg flex flex-col">
                     <div className="flex items-center justify-between gap-2 p-3 border-b border-border">
                       <div className="text-[13px] font-semibold text-foreground truncate">{ct?.name ?? mapSelected.typeCode}</div>
                       <button type="button" onClick={() => setMapSelected(null)} className="shrink-0 rounded-sm p-1 hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="Close">
