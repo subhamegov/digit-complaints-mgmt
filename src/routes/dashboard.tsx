@@ -1334,48 +1334,6 @@ function DashboardPage() {
           </>
         )}
       </div>
-      <Dialog open={!!mapSelected} onOpenChange={(o) => !o && setMapSelected(null)}>
-        <DialogContent className="max-w-lg">
-          {mapSelected && (() => {
-            const ct = complaintTypeOf(mapSelected.typeCode);
-            const filed = new Date(mapSelected.filedOn);
-            const pics = Math.max(1, mapSelected.attachments || 2);
-            return (
-              <>
-                <DialogHeader>
-                  <DialogTitle className="text-base">{ct?.name ?? mapSelected.typeCode}</DialogTitle>
-                  <DialogDescription>
-                    {mapSelected.id} · {mapSelected.status.replaceAll("_", " ")}
-                    {mapSelected.slaState ? ` · SLA ${mapSelected.slaState}` : ""}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-3 text-[12px]">
-                  <div><div className="text-muted-foreground">Type</div><div className="font-medium">{ct?.department ?? "—"}</div></div>
-                  <div><div className="text-muted-foreground">Sub-type</div><div className="font-medium">{ct?.name ?? mapSelected.typeCode}</div></div>
-                  <div><div className="text-muted-foreground">Date filed</div><div className="font-medium">{filed.toLocaleDateString()} · {filed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div></div>
-                  <div><div className="text-muted-foreground">Ward / locality</div><div className="font-medium">{mapSelected.ward} · {mapSelected.locality}</div></div>
-                  <div className="col-span-2"><div className="text-muted-foreground">Address</div><div className="font-medium">{mapSelected.address}</div></div>
-                  <div className="col-span-2"><div className="text-muted-foreground">Description</div><div>{mapSelected.description}</div></div>
-                </div>
-                <div>
-                  <div className="text-[12px] text-muted-foreground mb-1.5">Pictures ({pics})</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {Array.from({ length: Math.min(3, pics) }).map((_, i) => (
-                      <img
-                        key={i}
-                        src={`https://picsum.photos/seed/${encodeURIComponent(mapSelected.id + "-" + i)}/240/160`}
-                        alt={`Complaint photo ${i + 1}`}
-                        className="aspect-[3/2] w-full rounded-sm object-cover border border-border"
-                        loading="lazy"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
