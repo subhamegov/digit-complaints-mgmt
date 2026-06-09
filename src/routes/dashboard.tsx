@@ -7,6 +7,7 @@ import {
   ActionButton, OwnerCell, DataTable, nextActionFor,
 } from "@/components/pgr/primitives";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
@@ -312,6 +313,7 @@ function DashboardPage() {
   // View toggles for new widgets
   const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
   const [mapView, setMapView] = useState<"open" | "closed" | "logged">("open");
+  const [mapSelected, setMapSelected] = useState<Complaint | null>(null);
   const [statusView, setStatusView] = useState<"table" | "bar">("table");
   const [typeView, setTypeView] = useState<"table" | "bar">("table");
   const [slaView, setSlaView] = useState<"table" | "bar">("table");
@@ -530,16 +532,58 @@ function DashboardPage() {
               <span className="ml-auto">Red intensity reflects SLA breach severity.</span>
             </div>
             <div className="relative flex-1 min-h-[240px] rounded-sm border border-border overflow-hidden"
-              style={{ background: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 8%, var(--surface)), var(--surface))" }}>
+              style={{ background: "#e8efe4" }}>
               <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                 <defs>
-                  <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border)" strokeWidth="0.15" />
+                  <pattern id="cm-grid" width="6" height="6" patternUnits="userSpaceOnUse">
+                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#cdd6c4" strokeWidth="0.12" />
                   </pattern>
                 </defs>
-                <rect width="100" height="100" fill="url(#grid)" />
-                <path d="M0,55 C20,50 30,65 50,60 C70,55 85,70 100,62" stroke="color-mix(in oklab, var(--primary) 30%, transparent)" strokeWidth="0.4" fill="none" />
-                <path d="M30,0 C32,20 28,40 35,60 C38,80 34,95 36,100" stroke="color-mix(in oklab, var(--primary) 25%, transparent)" strokeWidth="0.4" fill="none" />
+                {/* land + grid */}
+                <rect width="100" height="100" fill="url(#cm-grid)" />
+                {/* park */}
+                <path d="M58,12 Q72,10 78,22 Q82,34 70,40 Q58,42 54,30 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
+                <path d="M8,72 Q18,68 26,76 Q30,86 18,90 Q6,88 6,80 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
+                {/* river */}
+                <path d="M-2,82 C18,78 32,92 50,84 C68,76 80,90 102,84 L102,100 L-2,100 Z" fill="#bcd9ef" stroke="#88b3d4" strokeWidth="0.2" />
+                {/* blocks */}
+                <g fill="#f4f1e7" stroke="#d8d2bf" strokeWidth="0.15">
+                  <rect x="6" y="8" width="18" height="12" rx="0.5" />
+                  <rect x="28" y="8" width="14" height="12" rx="0.5" />
+                  <rect x="6" y="24" width="12" height="14" rx="0.5" />
+                  <rect x="22" y="24" width="20" height="14" rx="0.5" />
+                  <rect x="6" y="42" width="36" height="14" rx="0.5" />
+                  <rect x="46" y="46" width="22" height="14" rx="0.5" />
+                  <rect x="72" y="46" width="22" height="14" rx="0.5" />
+                  <rect x="46" y="64" width="48" height="12" rx="0.5" />
+                </g>
+                {/* primary roads */}
+                <g stroke="#ffffff" strokeWidth="1.6" fill="none" strokeLinecap="round">
+                  <path d="M0,22 L100,22" />
+                  <path d="M0,62 C30,58 60,66 100,60" />
+                  <path d="M44,0 L44,100" />
+                </g>
+                <g stroke="#e3b34a" strokeWidth="0.5" fill="none" strokeLinecap="round" strokeDasharray="2 2">
+                  <path d="M0,22 L100,22" />
+                  <path d="M44,0 L44,100" />
+                </g>
+                {/* secondary roads */}
+                <g stroke="#ffffff" strokeWidth="0.8" fill="none" strokeLinecap="round">
+                  <path d="M0,40 L100,40" />
+                  <path d="M20,0 L20,100" />
+                  <path d="M70,0 L70,62" />
+                  <path d="M0,78 L44,78" />
+                </g>
+                {/* labels */}
+                <g fill="#7a8a6e" fontSize="2.4" fontFamily="ui-sans-serif, system-ui">
+                  <text x="62" y="28">Central Park</text>
+                  <text x="9" y="83">Riverside</text>
+                  <text x="46" y="92" fill="#5b86a8">River</text>
+                  <text x="2" y="6" fontSize="2">Ward 1</text>
+                  <text x="80" y="6" fontSize="2">Ward 4</text>
+                  <text x="2" y="58" fontSize="2">Ward 7</text>
+                  <text x="80" y="74" fontSize="2">Ward 9</text>
+                </g>
               </svg>
               <div className="absolute inset-0">
                 {pts.map((c) => {
@@ -549,23 +593,25 @@ function DashboardPage() {
                   const y = (h2 % 1000) / 10;
                   const col = colorFor(c);
                   return (
-                    <div
+                    <button
                       key={c.id}
+                      type="button"
+                      onClick={() => setMapSelected(c)}
                       title={`${c.id} · ${col.label}${c.slaState ? " · SLA " + c.slaState : ""}`}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full hover:scale-125 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
                       style={{
                         left: `${x}%`, top: `${y}%`,
-                        width: 10, height: 10,
+                        width: 11, height: 11,
                         background: col.fill,
                         border: `1.5px solid ${col.stroke}`,
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
                       }}
                     />
                   );
                 })}
               </div>
-              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded-sm">
-                {pts.length} shown
+              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded-sm">
+                {pts.length} shown · click a pin
               </div>
             </div>
           </div>
@@ -1289,6 +1335,48 @@ function DashboardPage() {
           </>
         )}
       </div>
+      <Dialog open={!!mapSelected} onOpenChange={(o) => !o && setMapSelected(null)}>
+        <DialogContent className="max-w-lg">
+          {mapSelected && (() => {
+            const ct = complaintTypeOf(mapSelected.typeCode);
+            const filed = new Date(mapSelected.filedOn);
+            const pics = Math.max(1, mapSelected.attachments || 2);
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-base">{ct?.name ?? mapSelected.typeCode}</DialogTitle>
+                  <DialogDescription>
+                    {mapSelected.id} · {mapSelected.status.replaceAll("_", " ")}
+                    {mapSelected.slaState ? ` · SLA ${mapSelected.slaState}` : ""}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-3 text-[12px]">
+                  <div><div className="text-muted-foreground">Type</div><div className="font-medium">{ct?.department ?? "—"}</div></div>
+                  <div><div className="text-muted-foreground">Sub-type</div><div className="font-medium">{ct?.name ?? mapSelected.typeCode}</div></div>
+                  <div><div className="text-muted-foreground">Date filed</div><div className="font-medium">{filed.toLocaleDateString()} · {filed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div></div>
+                  <div><div className="text-muted-foreground">Ward / locality</div><div className="font-medium">{mapSelected.ward} · {mapSelected.locality}</div></div>
+                  <div className="col-span-2"><div className="text-muted-foreground">Address</div><div className="font-medium">{mapSelected.address}</div></div>
+                  <div className="col-span-2"><div className="text-muted-foreground">Description</div><div>{mapSelected.description}</div></div>
+                </div>
+                <div>
+                  <div className="text-[12px] text-muted-foreground mb-1.5">Pictures ({pics})</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Array.from({ length: Math.min(3, pics) }).map((_, i) => (
+                      <img
+                        key={i}
+                        src={`https://picsum.photos/seed/${encodeURIComponent(mapSelected.id + "-" + i)}/240/160`}
+                        alt={`Complaint photo ${i + 1}`}
+                        className="aspect-[3/2] w-full rounded-sm object-cover border border-border"
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
