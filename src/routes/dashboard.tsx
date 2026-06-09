@@ -905,7 +905,7 @@ function DashboardPage() {
   const defaultIds = useMemo(
     () => [
       "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
-      "trend", "wards", "dept", "geo-map", "by-status", "by-type", "by-sla",
+      "trend", "wards", "dept", "geo-map", "complaint-map", "by-status", "by-type", "by-sla",
       "by-channel", "open-breakdown", "time-of-day", "day-of-week",
       "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
       "over-time", "recent", "sla",
