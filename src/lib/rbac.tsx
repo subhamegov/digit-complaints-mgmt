@@ -14,7 +14,7 @@
  * their column definitions; nav items declare `requires` in the registry.
  */
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Role =
   | "CITIZEN" // Citizen — files and tracks own complaints
