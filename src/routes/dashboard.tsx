@@ -311,6 +311,7 @@ function DashboardPage() {
 
   // View toggles for new widgets
   const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
+  const [mapView, setMapView] = useState<"open" | "closed" | "logged">("open");
   const [statusView, setStatusView] = useState<"table" | "bar">("table");
   const [typeView, setTypeView] = useState<"table" | "bar">("table");
   const [slaView, setSlaView] = useState<"table" | "bar">("table");
@@ -482,6 +483,94 @@ function DashboardPage() {
           })}
         </div>
       ),
+    },
+    {
+      id: "complaint-map", kind: "panel", label: "Complaint map", description: "Geo-located complaints colored by status and SLA.",
+      icon: MapPin, colSpan: 2, title: "Complaint map",
+      action: (
+        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
+          {(["open", "closed", "logged"] as const).map((v) => (
+            <button key={v} onClick={() => setMapView(v)}
+              className={cn("px-2 py-1 capitalize", mapView === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
+              {v}
+            </button>
+          ))}
+        </div>
+      ),
+      render: () => {
+        const isOpen = (c: Complaint) => ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
+        const isClosed = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
+        const pts = filteredComplaints.filter((c) =>
+          mapView === "open" ? isOpen(c) : mapView === "closed" ? isClosed(c) : true,
+        );
+        const hash = (s: string) => {
+          let h = 2166136261;
+          for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
+          return h >>> 0;
+        };
+        const colorFor = (c: Complaint) => {
+          if (isClosed(c)) return { fill: "var(--color-chart-3)", stroke: "var(--color-chart-3)", label: "Closed" };
+          if (c.status === "OPEN") return { fill: "#ffffff", stroke: "var(--border)", label: "Logged" };
+          const intensity = c.slaState === "BREACHED" ? 1 : c.slaState === "NEARING" ? 0.7 : 0.4;
+          return {
+            fill: `color-mix(in oklab, var(--destructive) ${Math.round(intensity * 100)}%, var(--surface))`,
+            stroke: "var(--destructive)",
+            label: "Open",
+          };
+        };
+        const openCount = filteredComplaints.filter(isOpen).length;
+        const closedCount = filteredComplaints.filter(isClosed).length;
+        const loggedCount = filteredComplaints.length;
+        return (
+          <div className="flex flex-col gap-2 h-full">
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground flex-wrap">
+              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-white border border-border" />Logged {loggedCount}</span>
+              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--destructive)" }} />Open {openCount}</span>
+              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--color-chart-3)" }} />Closed {closedCount}</span>
+              <span className="ml-auto">Red intensity reflects SLA breach severity.</span>
+            </div>
+            <div className="relative flex-1 min-h-[240px] rounded-sm border border-border overflow-hidden"
+              style={{ background: "linear-gradient(135deg, color-mix(in oklab, var(--primary) 8%, var(--surface)), var(--surface))" }}>
+              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                <defs>
+                  <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border)" strokeWidth="0.15" />
+                  </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#grid)" />
+                <path d="M0,55 C20,50 30,65 50,60 C70,55 85,70 100,62" stroke="color-mix(in oklab, var(--primary) 30%, transparent)" strokeWidth="0.4" fill="none" />
+                <path d="M30,0 C32,20 28,40 35,60 C38,80 34,95 36,100" stroke="color-mix(in oklab, var(--primary) 25%, transparent)" strokeWidth="0.4" fill="none" />
+              </svg>
+              <div className="absolute inset-0">
+                {pts.map((c) => {
+                  const h1 = hash(c.id);
+                  const h2 = hash(c.id + "y");
+                  const x = (h1 % 1000) / 10;
+                  const y = (h2 % 1000) / 10;
+                  const col = colorFor(c);
+                  return (
+                    <div
+                      key={c.id}
+                      title={`${c.id} · ${col.label}${c.slaState ? " · SLA " + c.slaState : ""}`}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        left: `${x}%`, top: `${y}%`,
+                        width: 10, height: 10,
+                        background: col.fill,
+                        border: `1.5px solid ${col.stroke}`,
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded-sm">
+                {pts.length} shown
+              </div>
+            </div>
+          </div>
+        );
+      },
     },
     {
       id: "by-status", kind: "panel", label: "Complaints by status", description: "Status distribution as table or bar chart.",
@@ -804,7 +893,7 @@ function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -816,7 +905,7 @@ function DashboardPage() {
   const defaultIds = useMemo(
     () => [
       "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
-      "trend", "wards", "dept", "geo-map", "by-status", "by-type", "by-sla",
+      "trend", "wards", "dept", "geo-map", "complaint-map", "by-status", "by-type", "by-sla",
       "by-channel", "open-breakdown", "time-of-day", "day-of-week",
       "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
       "over-time", "recent", "sla",
