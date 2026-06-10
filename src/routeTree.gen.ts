@@ -55,6 +55,7 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
+import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
 import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
 import { Route as AdminWorkflowConfigSlaMapsRouteImport } from './routes/admin.workflow-config.sla-maps'
@@ -298,6 +299,12 @@ const AdminAccountsRoute = AdminAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminWorkflowConfigIndexRoute =
+  AdminWorkflowConfigIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
 const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -409,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -450,7 +458,6 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -525,6 +533,7 @@ export interface FileRoutesById {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -585,6 +594,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/workflow-config/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -626,7 +636,6 @@ export interface FileRouteTypes {
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
-    | '/admin/workflow-config'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
@@ -642,6 +651,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards'
+    | '/admin/workflow-config'
   id:
     | '__root__'
     | '/'
@@ -700,6 +710,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/workflow-config/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1045,6 +1056,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/workflow-config/': {
+      id: '/admin/workflow-config/'
+      path: '/'
+      fullPath: '/admin/workflow-config/'
+      preLoaderRoute: typeof AdminWorkflowConfigIndexRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
     '/admin/dashboards/': {
       id: '/admin/dashboards/'
       path: '/'
@@ -1136,12 +1154,14 @@ interface AdminWorkflowConfigRouteChildren {
   AdminWorkflowConfigRoleHierarchyRoute: typeof AdminWorkflowConfigRoleHierarchyRoute
   AdminWorkflowConfigSlaMapsRoute: typeof AdminWorkflowConfigSlaMapsRoute
   AdminWorkflowConfigVisualizationRoute: typeof AdminWorkflowConfigVisualizationRoute
+  AdminWorkflowConfigIndexRoute: typeof AdminWorkflowConfigIndexRoute
 }
 
 const AdminWorkflowConfigRouteChildren: AdminWorkflowConfigRouteChildren = {
   AdminWorkflowConfigRoleHierarchyRoute: AdminWorkflowConfigRoleHierarchyRoute,
   AdminWorkflowConfigSlaMapsRoute: AdminWorkflowConfigSlaMapsRoute,
   AdminWorkflowConfigVisualizationRoute: AdminWorkflowConfigVisualizationRoute,
+  AdminWorkflowConfigIndexRoute: AdminWorkflowConfigIndexRoute,
 }
 
 const AdminWorkflowConfigRouteWithChildren =
