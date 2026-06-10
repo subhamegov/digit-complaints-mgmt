@@ -56,6 +56,8 @@ import { Route as AdminAuthenticationRouteImport } from './routes/admin.authenti
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
+import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
+import { Route as AdminWorkflowConfigSlaMapsRouteImport } from './routes/admin.workflow-config.sla-maps'
 import { Route as AdminTemplatesWorkflowsRouteImport } from './routes/admin.templates.workflows'
 import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templates.use-cases'
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
@@ -300,6 +302,18 @@ const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminDashboardsRoute,
 } as any)
+const AdminWorkflowConfigVisualizationRoute =
+  AdminWorkflowConfigVisualizationRouteImport.update({
+    id: '/visualization',
+    path: '/visualization',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
+const AdminWorkflowConfigSlaMapsRoute =
+  AdminWorkflowConfigSlaMapsRouteImport.update({
+    id: '/sla-maps',
+    path: '/sla-maps',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
 const AdminTemplatesWorkflowsRoute = AdminTemplatesWorkflowsRouteImport.update({
   id: '/templates/workflows',
   path: '/templates/workflows',
@@ -372,7 +386,7 @@ export interface FileRoutesByFullPath {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -384,6 +398,8 @@ export interface FileRoutesByFullPath {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -426,7 +442,7 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -438,6 +454,8 @@ export interface FileRoutesByTo {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
 }
 export interface FileRoutesById {
@@ -482,7 +500,7 @@ export interface FileRoutesById {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -494,6 +512,8 @@ export interface FileRoutesById {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
 }
 export interface FileRouteTypes {
@@ -551,6 +571,8 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -605,6 +627,8 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards'
   id:
     | '__root__'
@@ -660,6 +684,8 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
   fileRoutesById: FileRoutesById
 }
@@ -1013,6 +1039,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardsIndexRouteImport
       parentRoute: typeof AdminDashboardsRoute
     }
+    '/admin/workflow-config/visualization': {
+      id: '/admin/workflow-config/visualization'
+      path: '/visualization'
+      fullPath: '/admin/workflow-config/visualization'
+      preLoaderRoute: typeof AdminWorkflowConfigVisualizationRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
+    '/admin/workflow-config/sla-maps': {
+      id: '/admin/workflow-config/sla-maps'
+      path: '/sla-maps'
+      fullPath: '/admin/workflow-config/sla-maps'
+      preLoaderRoute: typeof AdminWorkflowConfigSlaMapsRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
     '/admin/templates/workflows': {
       id: '/admin/templates/workflows'
       path: '/templates/workflows'
@@ -1072,6 +1112,19 @@ const AdminDashboardsRouteWithChildren = AdminDashboardsRoute._addFileChildren(
   AdminDashboardsRouteChildren,
 )
 
+interface AdminWorkflowConfigRouteChildren {
+  AdminWorkflowConfigSlaMapsRoute: typeof AdminWorkflowConfigSlaMapsRoute
+  AdminWorkflowConfigVisualizationRoute: typeof AdminWorkflowConfigVisualizationRoute
+}
+
+const AdminWorkflowConfigRouteChildren: AdminWorkflowConfigRouteChildren = {
+  AdminWorkflowConfigSlaMapsRoute: AdminWorkflowConfigSlaMapsRoute,
+  AdminWorkflowConfigVisualizationRoute: AdminWorkflowConfigVisualizationRoute,
+}
+
+const AdminWorkflowConfigRouteWithChildren =
+  AdminWorkflowConfigRoute._addFileChildren(AdminWorkflowConfigRouteChildren)
+
 interface AdminRouteChildren {
   AdminAccountsRoute: typeof AdminAccountsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
@@ -1102,7 +1155,7 @@ interface AdminRouteChildren {
   AdminUserStatsRoute: typeof AdminUserStatsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminValidationRulesRoute: typeof AdminValidationRulesRoute
-  AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRoute
+  AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRouteWithChildren
   AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
   AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
   AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
@@ -1140,7 +1193,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUserStatsRoute: AdminUserStatsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminValidationRulesRoute: AdminValidationRulesRoute,
-  AdminWorkflowConfigRoute: AdminWorkflowConfigRoute,
+  AdminWorkflowConfigRoute: AdminWorkflowConfigRouteWithChildren,
   AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
   AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
   AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
@@ -1171,3 +1224,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
