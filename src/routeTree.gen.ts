@@ -55,7 +55,11 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
+import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
+import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
+import { Route as AdminWorkflowConfigSlaMapsRouteImport } from './routes/admin.workflow-config.sla-maps'
+import { Route as AdminWorkflowConfigRoleHierarchyRouteImport } from './routes/admin.workflow-config.role-hierarchy'
 import { Route as AdminTemplatesWorkflowsRouteImport } from './routes/admin.templates.workflows'
 import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templates.use-cases'
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
@@ -295,11 +299,35 @@ const AdminAccountsRoute = AdminAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminWorkflowConfigIndexRoute =
+  AdminWorkflowConfigIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
 const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminDashboardsRoute,
 } as any)
+const AdminWorkflowConfigVisualizationRoute =
+  AdminWorkflowConfigVisualizationRouteImport.update({
+    id: '/visualization',
+    path: '/visualization',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
+const AdminWorkflowConfigSlaMapsRoute =
+  AdminWorkflowConfigSlaMapsRouteImport.update({
+    id: '/sla-maps',
+    path: '/sla-maps',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
+const AdminWorkflowConfigRoleHierarchyRoute =
+  AdminWorkflowConfigRoleHierarchyRouteImport.update({
+    id: '/role-hierarchy',
+    path: '/role-hierarchy',
+    getParentRoute: () => AdminWorkflowConfigRoute,
+  } as any)
 const AdminTemplatesWorkflowsRoute = AdminTemplatesWorkflowsRouteImport.update({
   id: '/templates/workflows',
   path: '/templates/workflows',
@@ -372,7 +400,7 @@ export interface FileRoutesByFullPath {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -384,7 +412,11 @@ export interface FileRoutesByFullPath {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -426,7 +458,6 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -438,7 +469,11 @@ export interface FileRoutesByTo {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -482,7 +517,7 @@ export interface FileRoutesById {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
-  '/admin/workflow-config': typeof AdminWorkflowConfigRoute
+  '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -494,7 +529,11 @@ export interface FileRoutesById {
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
+  '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
+  '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -551,7 +590,11 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/role-hierarchy'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/workflow-config/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -593,7 +636,6 @@ export interface FileRouteTypes {
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
-    | '/admin/workflow-config'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
@@ -605,7 +647,11 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/role-hierarchy'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards'
+    | '/admin/workflow-config'
   id:
     | '__root__'
     | '/'
@@ -660,7 +706,11 @@ export interface FileRouteTypes {
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/workflow-config/role-hierarchy'
+    | '/admin/workflow-config/sla-maps'
+    | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/workflow-config/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1006,12 +1056,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/workflow-config/': {
+      id: '/admin/workflow-config/'
+      path: '/'
+      fullPath: '/admin/workflow-config/'
+      preLoaderRoute: typeof AdminWorkflowConfigIndexRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
     '/admin/dashboards/': {
       id: '/admin/dashboards/'
       path: '/'
       fullPath: '/admin/dashboards/'
       preLoaderRoute: typeof AdminDashboardsIndexRouteImport
       parentRoute: typeof AdminDashboardsRoute
+    }
+    '/admin/workflow-config/visualization': {
+      id: '/admin/workflow-config/visualization'
+      path: '/visualization'
+      fullPath: '/admin/workflow-config/visualization'
+      preLoaderRoute: typeof AdminWorkflowConfigVisualizationRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
+    '/admin/workflow-config/sla-maps': {
+      id: '/admin/workflow-config/sla-maps'
+      path: '/sla-maps'
+      fullPath: '/admin/workflow-config/sla-maps'
+      preLoaderRoute: typeof AdminWorkflowConfigSlaMapsRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
+    }
+    '/admin/workflow-config/role-hierarchy': {
+      id: '/admin/workflow-config/role-hierarchy'
+      path: '/role-hierarchy'
+      fullPath: '/admin/workflow-config/role-hierarchy'
+      preLoaderRoute: typeof AdminWorkflowConfigRoleHierarchyRouteImport
+      parentRoute: typeof AdminWorkflowConfigRoute
     }
     '/admin/templates/workflows': {
       id: '/admin/templates/workflows'
@@ -1072,6 +1150,23 @@ const AdminDashboardsRouteWithChildren = AdminDashboardsRoute._addFileChildren(
   AdminDashboardsRouteChildren,
 )
 
+interface AdminWorkflowConfigRouteChildren {
+  AdminWorkflowConfigRoleHierarchyRoute: typeof AdminWorkflowConfigRoleHierarchyRoute
+  AdminWorkflowConfigSlaMapsRoute: typeof AdminWorkflowConfigSlaMapsRoute
+  AdminWorkflowConfigVisualizationRoute: typeof AdminWorkflowConfigVisualizationRoute
+  AdminWorkflowConfigIndexRoute: typeof AdminWorkflowConfigIndexRoute
+}
+
+const AdminWorkflowConfigRouteChildren: AdminWorkflowConfigRouteChildren = {
+  AdminWorkflowConfigRoleHierarchyRoute: AdminWorkflowConfigRoleHierarchyRoute,
+  AdminWorkflowConfigSlaMapsRoute: AdminWorkflowConfigSlaMapsRoute,
+  AdminWorkflowConfigVisualizationRoute: AdminWorkflowConfigVisualizationRoute,
+  AdminWorkflowConfigIndexRoute: AdminWorkflowConfigIndexRoute,
+}
+
+const AdminWorkflowConfigRouteWithChildren =
+  AdminWorkflowConfigRoute._addFileChildren(AdminWorkflowConfigRouteChildren)
+
 interface AdminRouteChildren {
   AdminAccountsRoute: typeof AdminAccountsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
@@ -1102,7 +1197,7 @@ interface AdminRouteChildren {
   AdminUserStatsRoute: typeof AdminUserStatsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminValidationRulesRoute: typeof AdminValidationRulesRoute
-  AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRoute
+  AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRouteWithChildren
   AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
   AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
   AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
@@ -1140,7 +1235,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUserStatsRoute: AdminUserStatsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminValidationRulesRoute: AdminValidationRulesRoute,
-  AdminWorkflowConfigRoute: AdminWorkflowConfigRoute,
+  AdminWorkflowConfigRoute: AdminWorkflowConfigRouteWithChildren,
   AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
   AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
   AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
