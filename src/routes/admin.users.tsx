@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ADMIN_ROLE_OPTIONS as ROLE_OPTIONS } from "@/lib/admin-roles";
 
 export const Route = createFileRoute("/admin/users")({
   head: () => ({ meta: [{ title: "Users — Account Administrator" }] }),
@@ -65,14 +66,6 @@ type AdminUser = {
   status: UserStatus;
   lastActive: string;
 };
-
-const ROLE_OPTIONS = [
-  { key: "ROLE_STATE_ADMIN", label: "State Administrator" },
-  { key: "ROLE_DEPT_ADMIN", label: "Department Administrator" },
-  { key: "ROLE_SUPERVISOR", label: "Supervisor" },
-  { key: "ROLE_COMPLAINT_OFFICER", label: "Complaint Officer" },
-  { key: "ROLE_CALL_CENTRE_AGENT", label: "Call Centre Agent" },
-];
 
 const DEPARTMENTS = [
   "Public Works",
