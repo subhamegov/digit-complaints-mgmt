@@ -33,7 +33,8 @@ interface NavItem {
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { to: "/dashboard", labelCode: "COMMON_DASHBOARD", icon: LayoutDashboard, requires: ["PGR_DASHBOARD_VIEW"] },
+  { to: "/admin/dashboards", labelCode: "Dashboards", icon: LayoutDashboard, requires: ["PGR_DASHBOARD_VIEW"] },
+  { to: "/dashboard", labelCode: "  └  Live Dashboard", icon: LayoutDashboard, requires: ["PGR_DASHBOARD_VIEW"] },
   { to: "/inbox", labelCode: "COMMON_INBOX", icon: Inbox, requires: ["PGR_INBOX_VIEW"] },
   { to: "/tasks", labelCode: "COMMON_MY_TASKS", icon: ListChecks, requires: ["PGR_TASKS_VIEW"] },
   { to: "/sla", labelCode: "CS_SLA_STATUS", icon: Timer, requires: ["PGR_SLA_VIEW"] },
