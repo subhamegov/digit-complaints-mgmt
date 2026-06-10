@@ -46,7 +46,7 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-function DashboardPage() {
+export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
   const canCustomize = role === "TEST_USER";
 
