@@ -47,6 +47,7 @@ import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminGeographiesRouteImport } from './routes/admin.geographies'
 import { Route as AdminDomainsRouteImport } from './routes/admin.domains'
 import { Route as AdminDocumentationRouteImport } from './routes/admin.documentation'
+import { Route as AdminDashboardsRouteImport } from './routes/admin.dashboards'
 import { Route as AdminConfigurationRegistryRouteImport } from './routes/admin.configuration-registry'
 import { Route as AdminComplaintsConfigRouteImport } from './routes/admin.complaints-config'
 import { Route as AdminCommunicationsRouteImport } from './routes/admin.communications'
@@ -251,6 +252,11 @@ const AdminDocumentationRoute = AdminDocumentationRouteImport.update({
   path: '/documentation',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDashboardsRoute = AdminDashboardsRouteImport.update({
+  id: '/dashboards',
+  path: '/dashboards',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminConfigurationRegistryRoute =
   AdminConfigurationRegistryRouteImport.update({
     id: '/configuration-registry',
@@ -332,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/dashboards': typeof AdminDashboardsRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/dashboards': typeof AdminDashboardsRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -437,6 +445,7 @@ export interface FileRoutesById {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/dashboards': typeof AdminDashboardsRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/communications'
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
+    | '/admin/dashboards'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/admin/communications'
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
+    | '/admin/dashboards'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/admin/communications'
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
+    | '/admin/dashboards'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -916,6 +928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDocumentationRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboards': {
+      id: '/admin/dashboards'
+      path: '/dashboards'
+      fullPath: '/admin/dashboards'
+      preLoaderRoute: typeof AdminDashboardsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/configuration-registry': {
       id: '/admin/configuration-registry'
       path: '/configuration-registry'
@@ -1011,6 +1030,7 @@ interface AdminRouteChildren {
   AdminCommunicationsRoute: typeof AdminCommunicationsRoute
   AdminComplaintsConfigRoute: typeof AdminComplaintsConfigRoute
   AdminConfigurationRegistryRoute: typeof AdminConfigurationRegistryRoute
+  AdminDashboardsRoute: typeof AdminDashboardsRoute
   AdminDocumentationRoute: typeof AdminDocumentationRoute
   AdminDomainsRoute: typeof AdminDomainsRoute
   AdminGeographiesRoute: typeof AdminGeographiesRoute
@@ -1048,6 +1068,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCommunicationsRoute: AdminCommunicationsRoute,
   AdminComplaintsConfigRoute: AdminComplaintsConfigRoute,
   AdminConfigurationRegistryRoute: AdminConfigurationRegistryRoute,
+  AdminDashboardsRoute: AdminDashboardsRoute,
   AdminDocumentationRoute: AdminDocumentationRoute,
   AdminDomainsRoute: AdminDomainsRoute,
   AdminGeographiesRoute: AdminGeographiesRoute,
@@ -1100,3 +1121,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
