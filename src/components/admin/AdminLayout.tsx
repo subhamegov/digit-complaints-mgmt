@@ -42,6 +42,7 @@ import {
   X,
   Inbox,
   HeartPulse,
+  LayoutDashboard,
 } from "lucide-react";
 import { useRbac, type Permission } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
@@ -71,6 +72,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     title: "Console",
     items: [
       { to: "/admin/home",               labelCode: "ADMIN_NAV_HOME",                label: "Home",                    icon: Home },
+      { to: "/admin/dashboards",         labelCode: "ADMIN_NAV_DASHBOARDS",          label: "Dashboards",              icon: LayoutDashboard },
       { to: "/admin/users",              labelCode: "ADMIN_NAV_USERS",               label: "Users",                   icon: Users },
       { to: "/admin/roles",              labelCode: "ADMIN_NAV_ROLES",               label: "Roles & Permissions",     icon: ShieldCheck },
       { to: "/admin/complaints-config",  labelCode: "ADMIN_NAV_COMPLAINTS",          label: "Complaints",              icon: Inbox },
