@@ -1,16 +1,12 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
-  LayoutDashboard,
+  Home,
   Inbox,
-  ListChecks,
   BarChart3,
-  Timer,
-  AlertTriangle,
   Settings,
   Users,
   ScrollText,
-  Plus,
   Search,
   Bell,
   ChevronDown,
@@ -20,6 +16,12 @@ import {
   ShieldCheck,
   Menu,
   X,
+  GitBranch,
+  Globe2,
+  FormInput,
+  Plug,
+  BookOpen,
+  Plus,
 } from "lucide-react";
 import { useRbac, ROLE_LABEL, type Role, type Permission, TENANTS, JURISDICTIONS } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
@@ -33,21 +35,22 @@ interface NavItem {
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { to: "/admin/dashboards", labelCode: "Dashboards", icon: LayoutDashboard, requires: ["PGR_DASHBOARD_VIEW"] },
-  { to: "/dashboard", labelCode: "  └  Live Dashboard", icon: LayoutDashboard, requires: ["PGR_DASHBOARD_VIEW"] },
-  { to: "/inbox", labelCode: "COMMON_INBOX", icon: Inbox, requires: ["PGR_INBOX_VIEW"] },
-  { to: "/tasks", labelCode: "COMMON_MY_TASKS", icon: ListChecks, requires: ["PGR_TASKS_VIEW"] },
-  { to: "/sla", labelCode: "CS_SLA_STATUS", icon: Timer, requires: ["PGR_SLA_VIEW"] },
-  { to: "/escalations", labelCode: "CS_ESCALATIONS", icon: AlertTriangle, requires: ["PGR_ESCALATION_VIEW"] },
-  { to: "/reports", labelCode: "COMMON_REPORTS", icon: BarChart3, requires: ["PGR_REPORTS_VIEW"] },
+  { to: "/admin/home",              labelCode: "Home",                   icon: Home },
+  { to: "/admin/users",             labelCode: "Users",                  icon: Users },
+  { to: "/admin/roles",             labelCode: "Roles & Permissions",    icon: ShieldCheck },
+  { to: "/admin/complaints-config", labelCode: "Complaints",             icon: Inbox },
+  { to: "/admin/workflow-config",   labelCode: "Workflow Configuration", icon: GitBranch },
+  { to: "/admin/sources",           labelCode: "Sources",                icon: Globe2 },
+  { to: "/admin/channels",          labelCode: "Channels",               icon: Bell },
+  { to: "/admin/communications",    labelCode: "Communications",         icon: FormInput },
+  { to: "/admin/integrations",      labelCode: "Integrations",           icon: Plug },
+  { to: "/admin/knowledge-base",    labelCode: "Knowledge Base",         icon: BookOpen },
+  { to: "/admin/monitoring",        labelCode: "Monitoring & Analytics", icon: BarChart3 },
+  { to: "/admin/audit-log",         labelCode: "Audit",                  icon: ScrollText },
+  { to: "/admin/settings",          labelCode: "Settings",               icon: Settings },
 ];
 
-const ADMIN_NAV: NavItem[] = [
-  { to: "/config/complaint-types", labelCode: "CS_COMPLAINT_TYPE", icon: Settings, requires: ["MDMS_COMPLAINT_TYPE_MANAGE"] },
-  { to: "/config/workflow", labelCode: "Workflow & SLA", icon: ShieldCheck, requires: ["MDMS_WORKFLOW_MANAGE"] },
-  { to: "/users", labelCode: "COMMON_USERS", icon: Users, requires: ["HRMS_USER_MANAGE"] },
-  { to: "/audit", labelCode: "COMMON_AUDIT_LOG", icon: ScrollText, requires: ["AUDIT_LOG_VIEW"] },
-];
+const ADMIN_NAV: NavItem[] = [];
 
 function SidebarContextSwitchers() {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
