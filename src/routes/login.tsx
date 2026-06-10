@@ -100,7 +100,7 @@ function LoginPage() {
               </select>
             </Field>
 
-            <button type="submit" className="h-9 w-full rounded-sm bg-primary text-[13px] font-medium text-primary-foreground hover:opacity-90">
+            <button type="submit" className="h-9 w-full rounded-sm bg-primary text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40">
               {t("COMMON_SIGN_IN")}
             </button>
 
