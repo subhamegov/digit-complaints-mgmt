@@ -55,11 +55,13 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
+import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
 import { Route as AdminTemplatesWorkflowsRouteImport } from './routes/admin.templates.workflows'
 import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templates.use-cases'
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
 import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
+import { Route as AdminDashboardsLiveRouteImport } from './routes/admin.dashboards.live'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
@@ -293,6 +295,11 @@ const AdminAccountsRoute = AdminAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminDashboardsRoute,
+} as any)
 const AdminTemplatesWorkflowsRoute = AdminTemplatesWorkflowsRouteImport.update({
   id: '/templates/workflows',
   path: '/templates/workflows',
@@ -318,6 +325,11 @@ const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
   path: '/templates/forms',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDashboardsLiveRoute = AdminDashboardsLiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => AdminDashboardsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -338,7 +350,7 @@ export interface FileRoutesByFullPath {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
-  '/admin/dashboards': typeof AdminDashboardsRoute
+  '/admin/dashboards': typeof AdminDashboardsRouteWithChildren
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -366,11 +378,13 @@ export interface FileRoutesByFullPath {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/dashboards/': typeof AdminDashboardsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -391,7 +405,6 @@ export interface FileRoutesByTo {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
-  '/admin/dashboards': typeof AdminDashboardsRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -419,11 +432,13 @@ export interface FileRoutesByTo {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
+  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/dashboards': typeof AdminDashboardsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -445,7 +460,7 @@ export interface FileRoutesById {
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
-  '/admin/dashboards': typeof AdminDashboardsRoute
+  '/admin/dashboards': typeof AdminDashboardsRouteWithChildren
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -473,11 +488,13 @@ export interface FileRoutesById {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
   '/admin/templates/use-cases': typeof AdminTemplatesUseCasesRoute
   '/admin/templates/workflows': typeof AdminTemplatesWorkflowsRoute
+  '/admin/dashboards/': typeof AdminDashboardsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -528,11 +545,13 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/dashboards/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -553,7 +572,6 @@ export interface FileRouteTypes {
     | '/admin/communications'
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
-    | '/admin/dashboards'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -581,11 +599,13 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox'
+    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/dashboards'
   id:
     | '__root__'
     | '/'
@@ -634,11 +654,13 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
     | '/admin/templates/use-cases'
     | '/admin/templates/workflows'
+    | '/admin/dashboards/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -984,6 +1006,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboards/': {
+      id: '/admin/dashboards/'
+      path: '/'
+      fullPath: '/admin/dashboards/'
+      preLoaderRoute: typeof AdminDashboardsIndexRouteImport
+      parentRoute: typeof AdminDashboardsRoute
+    }
     '/admin/templates/workflows': {
       id: '/admin/templates/workflows'
       path: '/templates/workflows'
@@ -1019,8 +1048,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTemplatesFormsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboards/live': {
+      id: '/admin/dashboards/live'
+      path: '/live'
+      fullPath: '/admin/dashboards/live'
+      preLoaderRoute: typeof AdminDashboardsLiveRouteImport
+      parentRoute: typeof AdminDashboardsRoute
+    }
   }
 }
+
+interface AdminDashboardsRouteChildren {
+  AdminDashboardsLiveRoute: typeof AdminDashboardsLiveRoute
+  AdminDashboardsIndexRoute: typeof AdminDashboardsIndexRoute
+}
+
+const AdminDashboardsRouteChildren: AdminDashboardsRouteChildren = {
+  AdminDashboardsLiveRoute: AdminDashboardsLiveRoute,
+  AdminDashboardsIndexRoute: AdminDashboardsIndexRoute,
+}
+
+const AdminDashboardsRouteWithChildren = AdminDashboardsRoute._addFileChildren(
+  AdminDashboardsRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminAccountsRoute: typeof AdminAccountsRoute
@@ -1030,7 +1080,7 @@ interface AdminRouteChildren {
   AdminCommunicationsRoute: typeof AdminCommunicationsRoute
   AdminComplaintsConfigRoute: typeof AdminComplaintsConfigRoute
   AdminConfigurationRegistryRoute: typeof AdminConfigurationRegistryRoute
-  AdminDashboardsRoute: typeof AdminDashboardsRoute
+  AdminDashboardsRoute: typeof AdminDashboardsRouteWithChildren
   AdminDocumentationRoute: typeof AdminDocumentationRoute
   AdminDomainsRoute: typeof AdminDomainsRoute
   AdminGeographiesRoute: typeof AdminGeographiesRoute
@@ -1068,7 +1118,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCommunicationsRoute: AdminCommunicationsRoute,
   AdminComplaintsConfigRoute: AdminComplaintsConfigRoute,
   AdminConfigurationRegistryRoute: AdminConfigurationRegistryRoute,
-  AdminDashboardsRoute: AdminDashboardsRoute,
+  AdminDashboardsRoute: AdminDashboardsRouteWithChildren,
   AdminDocumentationRoute: AdminDocumentationRoute,
   AdminDomainsRoute: AdminDomainsRoute,
   AdminGeographiesRoute: AdminGeographiesRoute,
@@ -1121,13 +1171,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
