@@ -518,9 +518,12 @@ export function DashboardPage() {
       icon: ThumbsUp, intent: "positive",
       getValue: () => canCustomize ? `${tu.onTimeRate}%` : `${resolutionRate}%`,
       getDelta: () => canCustomize
-        ? `Breached open: ${tu.openPastSla} · At risk 24–48h: ${tu.atRisk}`
+        ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
     },
+    { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Past deadline" },
+    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "Avg across assigned" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
     { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
