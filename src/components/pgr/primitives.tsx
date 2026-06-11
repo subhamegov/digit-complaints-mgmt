@@ -101,12 +101,14 @@ export function StatCard({
   value,
   delta,
   intent = "neutral",
+  info,
   onRemove,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
+  info?: string;
   onRemove?: () => void;
 }) {
   const intentMap = {
@@ -127,8 +129,16 @@ export function StatCard({
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="flex items-center gap-1.5 pr-6">
+        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+        {info && (
+          <span title={info} className="inline-flex cursor-help text-muted-foreground/70 hover:text-foreground">
+            <Info className="h-3 w-3" />
+          </span>
+        )}
+      </div>
       <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
+      {info && <div className="mt-1.5 text-[11px] leading-snug text-muted-foreground line-clamp-2">{info}</div>}
       {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
     </div>
   );
