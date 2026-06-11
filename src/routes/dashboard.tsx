@@ -542,9 +542,28 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "wards", kind: "panel", label: "By locality", description: "Complaint volume by ward.",
+      id: "wards", kind: "panel", label: "By locality", description: "Complaint volume and on-time % by ward.",
       icon: MapPin, colSpan: 1, title: "By locality",
-      render: () => (
+      render: () => canCustomize ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Ward</th>
+            <th className="py-1 font-medium text-right">Logged</th>
+            <th className="py-1 font-medium text-right">Open</th>
+            <th className="py-1 font-medium text-right">On-time %</th>
+          </tr></thead>
+          <tbody>
+            {wards.map((w) => (
+              <tr key={w.ward} className="border-t border-border">
+                <td className="py-1.5 truncate">{w.ward}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.total}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.open}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.onTimePct.toFixed(1)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
         <ul className="space-y-2 text-[12px]">
           {wards.map((w) => (
             <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
@@ -604,10 +623,14 @@ export function DashboardPage() {
     {
       id: "sla", kind: "panel", label: "SLA at risk", description: "Complaints approaching or past SLA in next 24h.",
       icon: ListChecks, colSpan: 3, title: "SLA at risk — next 24 hours", padded: false,
-      render: () => (
+      render: () => {
+        const rows = canCustomize
+          ? [...filteredComplaints].filter(c => c.status !== "RESOLVED" && c.status !== "CLOSED" && c.status !== "REJECTED").sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
+          : filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6);
+        return (
         <DataTable<Complaint>
           emptyMessage={t("EMPTY_INBOX")}
-          rows={filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
+          rows={rows}
           columns={[
             { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
             { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
