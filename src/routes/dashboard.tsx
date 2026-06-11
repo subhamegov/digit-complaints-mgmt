@@ -239,15 +239,18 @@ export function DashboardPage() {
 
   const trendingTypes = useMemo(() => {
     const m = new Map<string, number>();
-    for (const c of filteredComplaints) m.set(c.typeCode, (m.get(c.typeCode) ?? 0) + 1);
-    const ranked = Array.from(m, ([code, count]) => ({ code, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+    for (const c of filteredComplaints) {
+      const ct = complaintTypeOf(c.typeCode);
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      m.set(sub, (m.get(sub) ?? 0) + 1);
+    }
+    const ranked = Array.from(m, ([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
     return ranked.map((r, i) => {
-      // deterministic pseudo-WoW from code length
-      const seed = (r.code.length * 7) % 50;
+      const seed = (r.name.length * 7) % 50;
       const wow = ((seed - 20) + (i * 1.7));
       return {
         rank: i + 1,
-        name: complaintTypeOf(r.code)?.name ?? r.code,
+        name: r.name,
         volume: r.count,
         wow: Math.round(wow * 10) / 10,
       };
