@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo, useRef, Fragment } from "react";
+import { useState, useMemo, useRef, useEffect, Fragment } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
@@ -1277,6 +1277,12 @@ export function DashboardPage() {
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+
+  // Role is hydrated from storage AFTER first render, so re-sync the visible
+  // widget set whenever the role-specific defaults change.
+  useEffect(() => {
+    setVisibleIds(defaultIds);
+  }, [defaultIds]);
 
   const removeKpi = (id: string) => setVisibleIds((prev) => prev.filter((x) => x !== id));
   const addKpi = (id: string) => {
