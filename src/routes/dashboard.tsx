@@ -1309,6 +1309,18 @@ export function DashboardPage() {
                       <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
                     )}
                   </ul>
+                  <div className="mt-1 border-t border-border px-2 pt-1.5 pb-1">
+                    <button
+                      onClick={() => {
+                        setVisibleIds(defaultIds);
+                        setSizes({});
+                        setPickerOpen(false);
+                      }}
+                      className="w-full rounded-sm px-2 py-1.5 text-left text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      Reset to default layout
+                    </button>
+                  </div>
                 </PopoverContent>
               </Popover>
             )}
