@@ -268,20 +268,18 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const openByEmployee = useMemo(() => {
-    const m = new Map<string, { open: number; totalResHrs: number; resCount: number; reassign: number; assignedCount: number }>();
+    const m = new Map<string, { open: number; totalRespHrs: number; respCount: number; assignedCount: number }>();
     for (const c of filteredComplaints) {
       const id = c.assignedOfficerId;
       if (!id) continue;
-      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0, reassign: 0, assignedCount: 0 };
+      const e = m.get(id) ?? { open: 0, totalRespHrs: 0, respCount: 0, assignedCount: 0 };
       e.assignedCount++;
       if (["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)) e.open++;
-      if (c.status === "RESOLVED" || c.status === "CLOSED") {
-        e.resCount++;
-        e.totalResHrs += c.slaHours - c.slaRemainingHrs;
+      const pa = (c as TestComplaint).stageHours?.pendingAssignment;
+      if (typeof pa === "number" && pa > 0) {
+        e.respCount++;
+        e.totalRespHrs += pa;
       }
-      // TestComplaint carries reassignCount; legacy COMPLAINTS rows don't.
-      const rc = (c as TestComplaint).reassignCount;
-      if (typeof rc === "number") e.reassign += rc;
       m.set(id, e);
     }
     const totalOpen = Array.from(m.values()).reduce((a, b) => a + b.open, 0) || 1;
@@ -290,8 +288,7 @@ export function DashboardPage() {
       name: officerOf(id)?.name ?? id,
       open: v.open,
       pct: Math.round((v.open / totalOpen) * 1000) / 10,
-      avgHrs: v.resCount ? Math.round((v.totalResHrs / v.resCount) * 10) / 10 : 0,
-      churn: v.assignedCount ? Math.round((v.reassign / v.assignedCount) * 1000) / 10 : 0,
+      avgHrs: v.respCount ? Math.round((v.totalRespHrs / v.respCount) * 10) / 10 : 0,
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
