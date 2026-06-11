@@ -15,6 +15,7 @@ import {
   trend7d, COMPLAINTS, complaintTypeOf, OFFICERS, officerOf,
   type Complaint,
 } from "@/lib/mock-data";
+import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
@@ -56,13 +57,17 @@ export function DashboardPage() {
   const [geoFilter, setGeoFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
 
+  // Test User reads from its own coherent 60-row seed so every widget
+  // reconciles against ONE dataset. Other roles keep the legacy COMPLAINTS.
+  const sourceComplaints: Complaint[] = canCustomize ? TEST_USER_COMPLAINTS : COMPLAINTS;
+
   // Apply filters to the complaint dataset. Non-TEST_USER roles see the
   // unfiltered numbers (their filter bar is hidden).
   const filteredComplaints = useMemo(() => {
     if (!canCustomize) return COMPLAINTS;
     const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
     const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
-    return COMPLAINTS.filter((c) => {
+    return sourceComplaints.filter((c) => {
       const filedTs = new Date(c.filedOn).getTime();
       if (fromTs !== null && filedTs < fromTs) return false;
       if (toTs !== null && filedTs > toTs) return false;
@@ -70,7 +75,7 @@ export function DashboardPage() {
       if (typeFilter && c.typeCode !== typeFilter) return false;
       return true;
     });
-  }, [canCustomize, fromDate, toDate, geoFilter, typeFilter]);
+  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter]);
 
   const s = useMemo(() => {
     const total = filteredComplaints.length;
@@ -99,18 +104,35 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const wards = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const c of filteredComplaints) map.set(c.ward, (map.get(c.ward) ?? 0) + 1);
-    return Array.from(map, ([ward, total]) => ({ ward, total }));
+    const map = new Map<string, { total: number; open: number; resolvedOnTime: number; resolved: number }>();
+    for (const c of filteredComplaints) {
+      const m = map.get(c.ward) ?? { total: 0, open: 0, resolvedOnTime: 0, resolved: 0 };
+      m.total++;
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      if (isResolved) {
+        m.resolved++;
+        if (c.slaState !== "BREACHED") m.resolvedOnTime++;
+      } else if (["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status)) {
+        m.open++;
+      }
+      map.set(c.ward, m);
+    }
+    return Array.from(map, ([ward, v]) => ({
+      ward,
+      total: v.total,
+      open: v.open,
+      onTimePct: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
+    }));
   }, [filteredComplaints]);
 
   // Full ward list for the geography selector so options don't disappear
   // after filtering by ward.
   const allWards = useMemo(() => {
+    if (canCustomize) return [...TEST_USER_WARDS];
     const set = new Set<string>();
     for (const c of COMPLAINTS) set.add(c.ward);
     return Array.from(set).sort();
-  }, []);
+  }, [canCustomize]);
 
   const trend = trend7d();
   const recent = filteredComplaints.slice(0, 6);
@@ -243,16 +265,20 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const openByEmployee = useMemo(() => {
-    const m = new Map<string, { open: number; totalResHrs: number; resCount: number }>();
+    const m = new Map<string, { open: number; totalResHrs: number; resCount: number; reassign: number; assignedCount: number }>();
     for (const c of filteredComplaints) {
       const id = c.assignedOfficerId;
       if (!id) continue;
-      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0 };
+      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0, reassign: 0, assignedCount: 0 };
+      e.assignedCount++;
       if (["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)) e.open++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resCount++;
         e.totalResHrs += c.slaHours - c.slaRemainingHrs;
       }
+      // TestComplaint carries reassignCount; legacy COMPLAINTS rows don't.
+      const rc = (c as TestComplaint).reassignCount;
+      if (typeof rc === "number") e.reassign += rc;
       m.set(id, e);
     }
     const totalOpen = Array.from(m.values()).reduce((a, b) => a + b.open, 0) || 1;
@@ -262,18 +288,20 @@ export function DashboardPage() {
       open: v.open,
       pct: Math.round((v.open / totalOpen) * 1000) / 10,
       avgHrs: v.resCount ? Math.round((v.totalResHrs / v.resCount) * 10) / 10 : 0,
+      churn: v.assignedCount ? Math.round((v.reassign / v.assignedCount) * 1000) / 10 : 0,
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
   const resolutionByType = useMemo(() => {
-    const m = new Map<string, { total: number; resolved: number; hrs: number }>();
+    const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
       const ct = complaintTypeOf(c.typeCode);
       if (!ct) continue;
-      const e = m.get(ct.code) ?? { total: 0, resolved: 0, hrs: 0 };
+      const e = m.get(ct.code) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
       e.total++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resolved++;
+        if (c.slaState !== "BREACHED") e.resolvedOnTime++;
         e.hrs += c.slaHours - c.slaRemainingHrs;
       }
       m.set(ct.code, e);
@@ -281,6 +309,7 @@ export function DashboardPage() {
     return Array.from(m, ([code, v]) => ({
       name: complaintTypeOf(code)?.name ?? code,
       closure: v.total ? Math.round((v.resolved / v.total) * 1000) / 10 : 0,
+      onTime: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
       avgHrs: v.resolved ? Math.round((v.hrs / v.resolved) * 10) / 10 : 0,
     })).sort((a, b) => b.closure - a.closure);
   }, [filteredComplaints]);
@@ -297,6 +326,128 @@ export function DashboardPage() {
       { day: "This wk", filed: sumF, resolved: sumR },
     ];
   }, [trend]);
+
+  // --- Test-User-only derived metrics (reconcile against filteredComplaints) ---
+  const tu = useMemo(() => {
+    const rows = filteredComplaints as TestComplaint[];
+    const isOpen = (c: Complaint) => ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status);
+    const isResolved = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
+    const resolved = rows.filter(isResolved);
+    const resolvedOnTime = resolved.filter((c) => c.slaState !== "BREACHED").length;
+    const openPastSla = rows.filter((c) => isOpen(c) && c.slaState === "BREACHED").length;
+    const atRisk = rows.filter((c) => isOpen(c) && c.slaRemainingHrs >= 0 && c.slaRemainingHrs <= 48).length;
+    const onTimeDenom = resolved.length + openPastSla;
+    const onTimeRate = onTimeDenom ? Math.round((resolvedOnTime / onTimeDenom) * 1000) / 10 : 0;
+
+    const resolutionTimes = resolved.map((c) => c.slaHours - c.slaRemainingHrs);
+    const avgResolution = resolutionTimes.length
+      ? Math.round((resolutionTimes.reduce((a, b) => a + b, 0) / resolutionTimes.length) * 10) / 10
+      : 0;
+    const medianResolution = Math.round(median(resolutionTimes) * 10) / 10;
+
+    const escalated = rows.filter((c) => (c as TestComplaint).escalated).length;
+    const escalationRate = rows.length ? Math.round((escalated / rows.length) * 1000) / 10 : 0;
+
+    const reopened = rows.filter((c) => c.reopenCount > 0 || c.status === "REOPENED").length;
+    const reopenRate = resolved.length ? Math.round((reopened / resolved.length) * 1000) / 10 : 0;
+
+    const csatScores = resolved.map((c) => c.csat).filter((v): v is number => typeof v === "number");
+    const csat = csatScores.length
+      ? Math.round((csatScores.reduce((a, b) => a + b, 0) / csatScores.length) * 10) / 10
+      : 0;
+
+    // Period span in days: from earliest filed to now (capped at filter range when set).
+    const now = Date.now();
+    const earliest = rows.reduce((min, c) => Math.min(min, new Date(c.filedOn).getTime()), now);
+    const days = Math.max(1, Math.round((now - earliest) / 86400_000));
+    const resolvedPerDay = Math.round((resolved.length / days) * 10) / 10;
+
+    const openRows = rows.filter(isOpen);
+    const oldestOpenHrs = openRows.reduce((max, c) => {
+      const age = (now - new Date(c.filedOn).getTime()) / 3600_000;
+      return age > max ? age : max;
+    }, 0);
+    const oldestOpenLabel = (() => {
+      const d = Math.floor(oldestOpenHrs / 24);
+      const h = Math.round(oldestOpenHrs % 24);
+      return d > 0 ? `${d}d ${h}h` : `${h}h`;
+    })();
+
+    // Per-stage timings (avg + median + sample size).
+    const stages = [
+      { key: "pendingAssignment", label: "Pending Assignment" },
+      { key: "assigned",          label: "Assigned" },
+      { key: "pendingResolution", label: "Pending Resolution" },
+    ] as const;
+    const stageTimings: { key: string; label: string; avg: number; median: number; n: number }[] = stages.map((st) => {
+      const samples = rows
+        .map((c) => (c as TestComplaint).stageHours?.[st.key])
+        .filter((v): v is number => typeof v === "number" && v > 0);
+      const avg = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : 0;
+      return {
+        key: st.key,
+        label: st.label,
+        avg: Math.round(avg * 10) / 10,
+        median: Math.round(median(samples) * 10) / 10,
+        n: samples.length,
+      };
+    });
+    // Add a Resolved (end-to-end) row so all four PGR states are represented.
+    stageTimings.push({
+      key: "resolved",
+      label: "Resolved (end-to-end)",
+      avg: avgResolution,
+      median: medianResolution,
+      n: resolved.length,
+    });
+    const bottleneckKey = stageTimings.slice(0, 3).reduce((acc, s) => s.avg > acc.avg ? s : acc, stageTimings[0]).key;
+
+    // Age buckets.
+    const ageBuckets = [
+      { key: "<1d",  label: "< 1 day",   value: 0 },
+      { key: "1-3d", label: "1–3 days",  value: 0 },
+      { key: "3-7d", label: "3–7 days",  value: 0 },
+      { key: ">7d",  label: "> 7 days",  value: 0 },
+    ];
+    for (const c of rows) {
+      const ageH = (now - new Date(c.filedOn).getTime()) / 3600_000;
+      if (ageH < 24) ageBuckets[0].value++;
+      else if (ageH < 72) ageBuckets[1].value++;
+      else if (ageH < 168) ageBuckets[2].value++;
+      else ageBuckets[3].value++;
+    }
+
+    // Type/subtype × status crosstab.
+    const statusCols: Complaint["status"][] = ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED","RESOLVED","CLOSED","REJECTED"];
+    const xtMap = new Map<string, { type: string; subtype: string; counts: Record<string, number>; total: number }>();
+    for (const c of rows) {
+      const ct = complaintTypeOf(c.typeCode);
+      if (!ct) continue;
+      const sub = (c as TestComplaint).subtype ?? ct.name;
+      const key = `${ct.name}::${sub}`;
+      const row = xtMap.get(key) ?? {
+        type: ct.name, subtype: sub,
+        counts: Object.fromEntries(statusCols.map((s) => [s, 0])),
+        total: 0,
+      };
+      row.counts[c.status] = (row.counts[c.status] ?? 0) + 1;
+      row.total++;
+      xtMap.set(key, row);
+    }
+    const typeStatusCrosstab = {
+      cols: statusCols,
+      rows: Array.from(xtMap.values()).sort((a, b) => b.total - a.total),
+    };
+
+    return {
+      onTimeRate, openPastSla, atRisk,
+      avgResolution, medianResolution,
+      escalationRate, reopenRate, csat,
+      resolvedPerDay, oldestOpenLabel,
+      stageTimings, bottleneckKey, ageBuckets, typeStatusCrosstab,
+    };
+  }, [filteredComplaints]);
+
   const overTimeMonthly = useMemo(() => {
     const sumF = trend.reduce((a, b) => a + b.filed, 0) * 4;
     const sumR = trend.reduce((a, b) => a + b.resolved, 0) * 4;
@@ -341,15 +492,30 @@ export function DashboardPage() {
 
     // Stat KPIs
     { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
-    { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => "4 nearing breach" },
-    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => "87% within SLA" },
+    { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
+    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `${tu.onTimeRate}% on-time` : "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
-    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(avgResolutionHrs), getDelta: () => "Target: 36h" },
-    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Percentage of complaints reopened after resolution.", icon: Repeat, intent: "neutral", getValue: () => `${s.reopenRate}%`, getDelta: () => `CSAT ${s.satisfaction}/5` },
+    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs), getDelta: () => "Target: 36h" },
+    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5` },
     { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
-    { id: "resolution-rate", kind: "stat", label: "Resolution rate", description: "Resolved ÷ logged complaints, as a percentage.", icon: ThumbsUp, intent: "positive", getValue: () => `${resolutionRate}%`, getDelta: () => `${s.resolved}/${s.total} resolved` },
+    {
+      id: "resolution-rate", kind: "stat",
+      label: canCustomize ? "On-time resolution rate" : "Resolution rate",
+      description: canCustomize
+        ? "Resolved-within-SLA ÷ (resolved-within-SLA + open-past-SLA). Counts open-past-SLA complaints as failures-in-progress."
+        : "Resolved ÷ logged complaints, as a percentage.",
+      icon: ThumbsUp, intent: "positive",
+      getValue: () => canCustomize ? `${tu.onTimeRate}%` : `${resolutionRate}%`,
+      getDelta: () => canCustomize
+        ? `Breached open: ${tu.openPastSla} · At risk 24–48h: ${tu.atRisk}`
+        : `${s.resolved}/${s.total} resolved`,
+    },
 
-    { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp, intent: "warning", getValue: () => "9.2%", getDelta: () => "+1.1 pts" },
+    { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
+    { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
+    { id: "csat", kind: "stat", label: "Citizen satisfaction", description: "Mean citizen satisfaction (1–5) across resolved complaints.", icon: ThumbsUp, intent: "positive", getValue: () => canCustomize ? `${tu.csat}/5` : `${s.satisfaction}/5`, getDelta: () => "Across resolved" },
+    { id: "resolved-per-day", kind: "stat", label: "Resolved per day", description: "Resolved complaints ÷ days in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => canCustomize ? String(tu.resolvedPerDay) : "11", getDelta: () => "Rolling rate" },
+    { id: "oldest-open", kind: "stat", label: "Oldest open age", description: "Age of the oldest currently-open complaint.", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? tu.oldestOpenLabel : "9d 4h", getDelta: () => "Action required" },
     { id: "active-officers", kind: "stat", label: "Active field officers", description: "Officers with at least one assignment in the last 24 hours.", icon: Users, intent: "neutral", getValue: () => "142", getDelta: () => "12 on leave" },
     { id: "repeat-citizens", kind: "stat", label: "Repeat complainants", description: "Citizens filing more than one complaint in 30 days.", icon: Repeat, intent: "warning", getValue: () => "63", getDelta: () => "+8 vs last week" },
     { id: "ageing", kind: "stat", label: "Ageing > 7 days", description: "Open complaints older than 7 days awaiting closure.", icon: AlertTriangle, intent: "negative", getValue: () => "37", getDelta: () => "5 cross-dept" },
@@ -376,9 +542,28 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "wards", kind: "panel", label: "By locality", description: "Complaint volume by ward.",
+      id: "wards", kind: "panel", label: "By locality", description: "Complaint volume and on-time % by ward.",
       icon: MapPin, colSpan: 1, title: "By locality",
-      render: () => (
+      render: () => canCustomize ? (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Ward</th>
+            <th className="py-1 font-medium text-right">Logged</th>
+            <th className="py-1 font-medium text-right">Open</th>
+            <th className="py-1 font-medium text-right">On-time %</th>
+          </tr></thead>
+          <tbody>
+            {wards.map((w) => (
+              <tr key={w.ward} className="border-t border-border">
+                <td className="py-1.5 truncate">{w.ward}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.total}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.open}</td>
+                <td className="py-1.5 text-right tabular-nums">{w.onTimePct.toFixed(1)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
         <ul className="space-y-2 text-[12px]">
           {wards.map((w) => (
             <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
@@ -438,10 +623,14 @@ export function DashboardPage() {
     {
       id: "sla", kind: "panel", label: "SLA at risk", description: "Complaints approaching or past SLA in next 24h.",
       icon: ListChecks, colSpan: 3, title: "SLA at risk — next 24 hours", padded: false,
-      render: () => (
+      render: () => {
+        const rows = canCustomize
+          ? [...filteredComplaints].filter(c => c.status !== "RESOLVED" && c.status !== "CLOSED" && c.status !== "REJECTED").sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
+          : filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6);
+        return (
         <DataTable<Complaint>
           emptyMessage={t("EMPTY_INBOX")}
-          rows={filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6)}
+          rows={rows}
           columns={[
             { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
             { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
@@ -452,7 +641,8 @@ export function DashboardPage() {
             { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
           ]}
         />
-      ),
+        );
+      },
     },
 
     // --- New panels (KPIs 7-19) ---
@@ -901,7 +1091,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. resolution time.",
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share, avg. resolution and reassignment churn.",
       icon: Users, colSpan: 2, title: "Open complaints by employee",
       render: () => (
         <table className="w-full text-[12px]">
@@ -910,6 +1100,7 @@ export function DashboardPage() {
             <th className="py-1 font-medium text-right">Open</th>
             <th className="py-1 font-medium text-right">% of total</th>
             <th className="py-1 font-medium text-right">Avg. resolution</th>
+            {canCustomize && <th className="py-1 font-medium text-right">Reassign churn</th>}
           </tr></thead>
           <tbody>
             {openByEmployee.map((e) => (
@@ -917,24 +1108,23 @@ export function DashboardPage() {
                 <td className="py-1.5">{e.name}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.open}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
-                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "—"}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "0h"}</td>
+                {canCustomize && <td className="py-1.5 text-right tabular-nums">{e.churn.toFixed(1)}%</td>}
               </tr>
             ))}
-            {openByEmployee.length === 0 && (
-              <tr><td colSpan={4} className="py-3 text-center text-muted-foreground">No assignments</td></tr>
-            )}
           </tbody>
         </table>
       ),
     },
     {
-      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure rate and avg. resolution per type.",
+      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
             <th className="py-1 font-medium">Complaint type</th>
             <th className="py-1 font-medium text-right">Closure</th>
+            {canCustomize && <th className="py-1 font-medium text-right">On-time</th>}
             <th className="py-1 font-medium text-right">Avg. resolution</th>
           </tr></thead>
           <tbody>
@@ -942,11 +1132,88 @@ export function DashboardPage() {
               <tr key={r.name} className="border-t border-border">
                 <td className="py-1.5">{r.name}</td>
                 <td className="py-1.5 text-right tabular-nums">{r.closure.toFixed(1)}%</td>
-                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "—"}</td>
+                {canCustomize && <td className="py-1.5 text-right tabular-nums">{r.onTime.toFixed(1)}%</td>}
+                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "0h"}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      ),
+    },
+    {
+      id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state — exposes bottleneck stage.",
+      icon: Clock, colSpan: 2, title: "Average time per workflow stage",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Stage</th>
+            <th className="py-1 font-medium text-right">Avg dwell</th>
+            <th className="py-1 font-medium text-right">Median dwell</th>
+            <th className="py-1 font-medium text-right">Samples</th>
+          </tr></thead>
+          <tbody>
+            {tu.stageTimings.map((st) => (
+              <tr key={st.key} className={cn("border-t border-border", st.key === tu.bottleneckKey && "bg-status-breach-bg/40")}>
+                <td className="py-1.5">{st.label}{st.key === tu.bottleneckKey && <span className="ml-2 text-[10px] uppercase text-status-breach">Bottleneck</span>}</td>
+                <td className="py-1.5 text-right tabular-nums">{st.avg}h</td>
+                <td className="py-1.5 text-right tabular-nums">{st.median}h</td>
+                <td className="py-1.5 text-right tabular-nums">{st.n}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "type-status-crosstab", kind: "panel", label: "Type & sub-type by status", description: "Cross-tab of complaint type/sub-type rows × status columns.",
+      icon: BarChart3, colSpan: 3, title: "Type & sub-type by status",
+      render: () => {
+        const STATUS_SHORT: Record<string, string> = {
+          OPEN: "Pending", ASSIGNED: "Assigned", IN_PROGRESS: "In progress",
+          REOPENED: "Reopened", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
+        };
+        return (
+          <table className="w-full text-[12px]">
+            <thead><tr className="text-left text-muted-foreground">
+              <th className="py-1 font-medium">Type / Sub-type</th>
+              {tu.typeStatusCrosstab.cols.map((c) => (
+                <th key={c} className="py-1 font-medium text-right">{STATUS_SHORT[c]}</th>
+              ))}
+              <th className="py-1 font-medium text-right">Total</th>
+            </tr></thead>
+            <tbody>
+              {tu.typeStatusCrosstab.rows.map((row) => (
+                <tr key={`${row.type}-${row.subtype}`} className="border-t border-border">
+                  <td className="py-1.5">
+                    <div className="font-medium text-foreground">{row.type}</div>
+                    <div className="text-[11px] text-muted-foreground">{row.subtype}</div>
+                  </td>
+                  {tu.typeStatusCrosstab.cols.map((c) => (
+                    <td key={c} className="py-1.5 text-right tabular-nums">{row.counts[c] ?? 0}</td>
+                  ))}
+                  <td className="py-1.5 text-right tabular-nums font-semibold">{row.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      },
+    },
+    {
+      id: "by-age", kind: "panel", label: "Complaints by age", description: "Distribution of complaints by age buckets.",
+      icon: Clock, colSpan: 1, title: "Complaints by age",
+      render: () => (
+        <div className="h-[260px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={tu.ageBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-2)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       ),
     },
     {
@@ -978,7 +1245,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu, mapSelected]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
