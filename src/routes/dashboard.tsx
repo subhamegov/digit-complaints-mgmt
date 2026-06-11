@@ -1437,7 +1437,7 @@ export function DashboardPage() {
                     padded={k.padded}
                     onRemove={() => removeKpi(id)}
                   >
-                    <div style={{ height: panelContentHeight }} className="overflow-auto">
+                    <div style={{ height: panelContentHeight }} className="overflow-hidden min-w-0">
                       {k.render?.()}
                     </div>
                   </Panel>
