@@ -150,6 +150,7 @@ export function Panel({
   children,
   className,
   padded = true,
+  info,
   onRemove,
 }: {
   title?: string;
@@ -157,6 +158,7 @@ export function Panel({
   children: ReactNode;
   className?: string;
   padded?: boolean;
+  info?: string;
   onRemove?: () => void;
 }) {
   return (
@@ -172,9 +174,19 @@ export function Panel({
         </button>
       )}
       {title && (
-        <header className="flex items-center justify-between border-b border-border px-4 py-2.5">
-          <h2 className="text-[13px] font-semibold text-foreground">{title}</h2>
-          {action}
+        <header className="border-b border-border px-4 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h2 className="text-[13px] font-semibold text-foreground truncate">{title}</h2>
+              {info && (
+                <span title={info} className="inline-flex shrink-0 cursor-help text-muted-foreground/70 hover:text-foreground">
+                  <Info className="h-3.5 w-3.5" />
+                </span>
+              )}
+            </div>
+            {action}
+          </div>
+          {info && <p className="mt-1 text-[11px] leading-snug text-muted-foreground pr-6">{info}</p>}
         </header>
       )}
       <div className={padded ? "p-4" : ""}>{children}</div>
