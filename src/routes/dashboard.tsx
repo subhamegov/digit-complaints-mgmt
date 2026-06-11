@@ -296,22 +296,22 @@ export function DashboardPage() {
     const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
       const ct = complaintTypeOf(c.typeCode);
-      if (!ct) continue;
-      const e = m.get(ct.code) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      const e = m.get(sub) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
       e.total++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resolved++;
         if (c.slaState !== "BREACHED") e.resolvedOnTime++;
         e.hrs += c.slaHours - c.slaRemainingHrs;
       }
-      m.set(ct.code, e);
+      m.set(sub, e);
     }
-    return Array.from(m, ([code, v]) => ({
-      name: complaintTypeOf(code)?.name ?? code,
+    return Array.from(m, ([name, v]) => ({
+      name,
       closure: v.total ? Math.round((v.resolved / v.total) * 1000) / 10 : 0,
       onTime: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
       avgHrs: v.resolved ? Math.round((v.hrs / v.resolved) * 10) / 10 : 0,
-    })).sort((a, b) => b.closure - a.closure);
+    })).sort((a, b) => a.closure - b.closure);
   }, [filteredComplaints]);
 
   // Time-series with daily/weekly/monthly synthesis from trend7d.
