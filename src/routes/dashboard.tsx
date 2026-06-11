@@ -1409,6 +1409,7 @@ export function DashboardPage() {
                     value={k.getValue?.() ?? ""}
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
+                    info={k.description}
                     onRemove={() => removeKpi(id)}
                   />
                 ) : (
@@ -1416,6 +1417,7 @@ export function DashboardPage() {
                     title={k.title}
                     action={k.action}
                     padded={k.padded}
+                    info={k.description}
                     onRemove={() => removeKpi(id)}
                   >
                     <div style={{ height: panelContentHeight }} className="overflow-auto">
