@@ -377,7 +377,7 @@ export function DashboardPage() {
     const stages = [
       { key: "pendingAssignment", label: "Pending Assignment" },
       { key: "assigned",          label: "Assigned" },
-      { key: "pendingResolution", label: "Pending Resolution" },
+      { key: "pendingResolution", label: "Pending Reassignment" },
     ] as const;
     const stageTimings: { key: string; label: string; avg: number; median: number; n: number }[] = stages.map((st) => {
       const samples = rows
