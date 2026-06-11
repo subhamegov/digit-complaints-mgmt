@@ -1,34 +1,57 @@
-## Goal
+## Scope (Test User only)
 
-Treat every box on the TEST_USER dashboard — stat cards (Total, Open, Resolved, Breached) and chart boxes (Complaints Filed vs Resolved, By Locality, By Department, Recent, SLA, etc.) — as a single concept called a **KPI**. One flat grid, one picker, one drag/remove model.
+Only the Test User role sees these changes (`role === "TEST_USER"`). All other roles keep the current dashboard untouched. No restructuring, no section headings — the dashboard keeps its current widget layout and ordering. Reuse existing components and tokens (StatCard, Panel, DataTable, Tabs, recharts, current chart colors).
 
-Scope: TEST_USER role only. All other roles keep their current static dashboard untouched.
+## 1. One coherent seed dataset
 
-## Changes (all in `src/routes/dashboard.tsx`)
+New file `src/lib/test-user-seed.ts`:
 
-1. **Collapse the two concepts into one registry**
-   - Replace the separate `KPI_*` and `panelDefs` / `PANEL_LABELS` structures with a single `KPI_REGISTRY` keyed by id. Each entry: `{ id, label, description, size: "stat" | "chart-sm" | "chart-lg", render() }`.
-   - Stat entries (`total`, `open`, `resolved`, `breached`) take 1 column. Chart entries take 2 or 3 columns via `col-span-*`.
+- ~60 deterministic complaints (seeded RNG so numbers are stable).
+- Distributed across:
+  - Wards: **Heritage City, Financial District, Town Square, East Village**
+  - Departments + complaint types: existing `COMPLAINT_TYPES` catalog.
+  - Officers: **Ramesh, Gurmeet, Mohan, Surinder, Baljeet, Pritam** (reuse existing IDs).
+  - Channels: Mobile App, Web, Call, Counter, WhatsApp.
+  - Workflow stages: Pending Assignment → Assigned → Pending Resolution → Resolved/Closed, plus Reopened and Rejected.
+  - SLA states: within, nearing, breached-open, resolved-within, resolved-late.
+  - Ages: spread <1d / 1–3d / 3–7d / >7d (drives the new age widget).
+- Each row carries per-stage dwell hours, reassignment count, and a 1–5 CSAT on resolved rows — so satisfaction, per-stage timings, and churn all reconcile from the same rows.
 
-2. **Single flat 3-column grid**
-   - Remove the "Overview" wrapper panel and the panel/KPI split.
-   - One `visibleKpiIds: string[]` state drives a single `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` grid.
-   - Each tile uses the same card primitive with a top-right ✕ remove button and is draggable for reordering. Reorder uses the existing drag handler pattern (one set of handlers, not two).
+`DashboardPage` swaps `COMPLAINTS` → `TEST_USER_COMPLAINTS` only when `canCustomize`. Geography filter options become the four new ward names for Test User.
 
-3. **Unified "Add KPI" picker**
-   - One button + popover listing every KPI not currently visible (both stats and charts), each with its `label` + `description` + a small preview thumbnail (reuse the render function at reduced scale, or a static mini preview).
-   - Clicking adds the id to `visibleKpiIds` and closes the popover.
+## 2. Widget changes (in place; same layout, same order)
 
-4. **Filters bar** — unchanged (date range, ward, complaint type) stays above the grid, TEST_USER only.
+Stat cards (KPI_REGISTRY) — modify/add, no reordering of existing tiles:
 
-5. **Gating** — keep `canCustomize = role === "TEST_USER"`. Non-TEST_USER roles render the original static layout exactly as today.
+- **On-time resolution rate** (new, replaces the existing `resolution-rate` 13.3% card in the same slot). Formula: `resolvedWithinSLA / (resolvedWithinSLA + openPastSLA)`. Sub-stats inside the card (uses `delta` line, two short stats): "Breached open: N · At-risk 24–48h: N". Normal card size.
+- **Median resolution time** (new card).
+- **Escalation rate %** (new card) = escalated / total.
+- **Reopen rate %** — update existing reopen card's formula to `reopened / resolved`.
+- **Citizen satisfaction** (new card) — mean CSAT across resolved-with-CSAT rows.
+- **Complaints resolved per day** (new card) = resolved / days in selected period (defaults to 7).
+- **Oldest open age** (new card) — age of the oldest currently-open complaint, `Xd Yh`.
+- Keep: total, open, resolved, avg first response, trending top 5.
 
-6. **Cleanup**
-   - Delete `DEFAULT_PANEL_IDS`, `ALL_PANEL_IDS`, `PANEL_LABELS`, `panelDefs`, `panelDragId`, `panelPickerOpen`, `addPanel`, `removePanel`, `handlePanelDrop`, and the second "Add panel" button.
-   - Default `visibleKpiIds` for TEST_USER = `["total", "open", "resolved", "breached", "trend", "wards"]` (or current default set), all flowing in one grid.
+Panels — modify in place, do not duplicate:
 
-## Out of scope
-- No changes to other roles, no backend changes, no new KPI content — just unifying the model and UI for existing boxes.
+- **Resolution rate by complaint type** (`resolution-by-type`): add **On-time %** column.
+- **By locality / wards**: add **On-time %** column alongside the existing logged count + bar.
+- **Open complaints by employee** (`open-by-employee`): add **Reassignment churn** column.
+- **Average time per workflow stage** (new panel `stage-timings`): one row per PGR state (Pending Assignment, Assigned, Pending Resolution, Resolved) with avg dwell, median dwell, sample count; bottleneck row highlighted.
+- **Complaint type & subtype by status** (new panel `type-status-crosstab`): type/subtype rows × status columns + total.
+- **Complaints by age** (new panel `by-age`): bar chart with <1d / 1–3d / 3–7d / >7d buckets.
+- **SLA at risk** (`sla` panel) for Test User: default sort by time-to-breach ascending.
 
-## Result
-One mental model: every box is a KPI. One Add button, one remove ✕, one drag-to-reorder, one flat grid.
+Kept as-is (driven by the new dataset, so numbers reconcile): by-type, by-subtype, by-channel, by-geography, by-status, by-sla, time-of-day, day-of-week, complaints logged over time, trending locations, complaint map.
+
+## 3. Data integrity rules
+
+- Every widget — including citizen satisfaction and per-stage timings — reads from the same `TEST_USER_COMPLAINTS` array, so totals reconcile across the dashboard.
+- No empty states, no "—" cells, no zero-only breakdowns: seed guarantees ≥1 row per ward, department, channel, status, age bucket, and stage.
+
+## Files touched
+
+- `src/lib/test-user-seed.ts` (new)
+- `src/routes/dashboard.tsx` (Test-User-gated data swap, formula updates, in-place column additions, three new panels registered into the existing default list at sensible positions without removing or reordering other tiles)
+
+No changes to navigation, other routes, or design tokens.
