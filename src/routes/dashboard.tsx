@@ -1105,7 +1105,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share, avg. resolution and reassignment churn.",
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. response time.",
       icon: Users, colSpan: 2, title: "Open complaints by employee",
       render: () => (
         <table className="w-full text-[12px]">
@@ -1113,8 +1113,7 @@ export function DashboardPage() {
             <th className="py-1 font-medium">Employee</th>
             <th className="py-1 font-medium text-right">Open</th>
             <th className="py-1 font-medium text-right">% of total</th>
-            <th className="py-1 font-medium text-right">Avg. resolution</th>
-            {canCustomize && <th className="py-1 font-medium text-right">Reassign churn</th>}
+            <th className="py-1 font-medium text-right">Avg. response time</th>
           </tr></thead>
           <tbody>
             {openByEmployee.map((e) => (
@@ -1123,7 +1122,6 @@ export function DashboardPage() {
                 <td className="py-1.5 text-right tabular-nums">{e.open}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
                 <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "0h"}</td>
-                {canCustomize && <td className="py-1.5 text-right tabular-nums">{e.churn.toFixed(1)}%</td>}
               </tr>
             ))}
           </tbody>
