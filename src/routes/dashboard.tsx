@@ -474,9 +474,9 @@ export function DashboardPage() {
 
   // View toggles for new widgets
   const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
-  const [statusView, setStatusView] = useState<"table" | "bar">("table");
-  const [typeView, setTypeView] = useState<"table" | "bar">("table");
-  const [slaView, setSlaView] = useState<"table" | "bar">("table");
+  const [statusView, setStatusView] = useState<"table" | "bar">("bar");
+  const [typeView, setTypeView] = useState<"table" | "bar">("bar");
+  const [slaView, setSlaView] = useState<"table" | "bar">("bar");
   const [overTimeGran, setOverTimeGran] = useState<"daily" | "weekly" | "monthly">("daily");
   const [typeExpanded, setTypeExpanded] = useState<Record<string, boolean>>({});
 
