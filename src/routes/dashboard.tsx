@@ -868,33 +868,35 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "trending-complaints", kind: "panel", label: "Trending complaints", description: "Top 5 categories this week with WoW change.",
+      id: "trending-complaints", kind: "panel", label: "Trending complaints", description: "Top 5 sub-types this week with WoW change.",
       icon: TrendingUp, colSpan: 1, title: "Trending complaints (top 5)",
-      render: () => (
-        <table className="w-full text-[12px]">
-          <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium w-6">#</th>
-            <th className="py-1 font-medium">Sub-type</th>
-            <th className="py-1 font-medium text-right">Volume</th>
-            <th className="py-1 font-medium text-right">WoW</th>
-          </tr></thead>
-          <tbody>
+      render: () => {
+        const maxVol = Math.max(...trendingTypes.map((r) => r.volume), 1);
+        return (
+          <ul className="space-y-2.5 text-[12px]">
             {trendingTypes.map((r) => {
               const up = r.wow >= 0;
               return (
-                <tr key={r.rank} className="border-t border-border">
-                  <td className="py-1.5 tabular-nums">{r.rank}</td>
-                  <td className="py-1.5 truncate">{r.name}</td>
-                  <td className="py-1.5 text-right tabular-nums">{r.volume}</td>
-                  <td className={cn("py-1.5 text-right tabular-nums font-semibold", up ? "text-emerald-600" : "text-red-600")}>
-                    {up ? "↑" : "↓"} {Math.abs(r.wow).toFixed(1)}%
-                  </td>
-                </tr>
+                <li key={r.rank} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-foreground"><span className="text-muted-foreground tabular-nums mr-1.5">{r.rank}.</span>{r.name}</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="tabular-nums font-medium">{r.volume}</span>
+                      <span className={cn("inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
+                        up ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-red-500/15 text-red-700 dark:text-red-400")}>
+                        {up ? "↑" : "↓"} {Math.abs(r.wow).toFixed(1)}%
+                      </span>
+                    </span>
+                  </div>
+                  <span className="block h-1.5 rounded-sm bg-muted overflow-hidden">
+                    <span className="block h-full rounded-sm bg-primary" style={{ width: `${(r.volume / maxVol) * 100}%` }} />
+                  </span>
+                </li>
               );
             })}
-          </tbody>
-        </table>
-      ),
+          </ul>
+        );
+      },
     },
     {
       id: "trending-locations", kind: "panel", label: "Trending locations", description: "Ward spikes week-over-week with top callout.",
@@ -932,107 +934,135 @@ export function DashboardPage() {
     {
       id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. response time.",
       icon: Users, colSpan: 2, title: "Open complaints by employee",
-      render: () => (
-        <table className="w-full text-[12px]">
-          <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Employee</th>
-            <th className="py-1 font-medium text-right">Open</th>
-            <th className="py-1 font-medium text-right">% of total</th>
-            <th className="py-1 font-medium text-right">Avg. response time</th>
-          </tr></thead>
-          <tbody>
+      render: () => {
+        const maxOpen = Math.max(...openByEmployee.map((e) => e.open), 1);
+        return (
+          <ul className="space-y-2 text-[12px]">
             {openByEmployee.map((e) => (
-              <tr key={e.id} className="border-t border-border">
-                <td className="py-1.5">{e.name}</td>
-                <td className="py-1.5 text-right tabular-nums">{e.open}</td>
-                <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
-                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "0h"}</td>
-              </tr>
+              <li key={e.id} className="grid grid-cols-[140px_1fr_auto] items-center gap-3">
+                <span className="truncate text-foreground">{e.name}</span>
+                <span className="relative h-3 rounded-sm bg-muted overflow-hidden">
+                  <span className="block h-full rounded-sm bg-primary" style={{ width: `${(e.open / maxOpen) * 100}%` }} />
+                </span>
+                <span className="flex items-center gap-3 text-[11px]">
+                  <span className="tabular-nums text-foreground font-medium w-8 text-right">{e.open}</span>
+                  <span className="tabular-nums text-muted-foreground w-10 text-right">{e.pct.toFixed(0)}%</span>
+                  <span className="tabular-nums text-muted-foreground w-12 text-right">{e.avgHrs ? `${e.avgHrs}h` : "—"}</span>
+                </span>
+              </li>
             ))}
-          </tbody>
-        </table>
-      ),
+          </ul>
+        );
+      },
     },
     {
-      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
+      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure %, on-time % and avg. resolution per sub-type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
-        <table className="w-full text-[12px]">
-          <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Complaint sub-type</th>
-            <th className="py-1 font-medium text-right">Closure</th>
-            {canCustomize && <th className="py-1 font-medium text-right">On-time</th>}
-            <th className="py-1 font-medium text-right">Avg. resolution</th>
-          </tr></thead>
-          <tbody>
-            {resolutionByType.map((r) => (
-              <tr key={r.name} className="border-t border-border">
-                <td className="py-1.5">{r.name}</td>
-                <td className="py-1.5 text-right tabular-nums">{r.closure.toFixed(1)}%</td>
-                {canCustomize && <td className="py-1.5 text-right tabular-nums">{r.onTime.toFixed(1)}%</td>}
-                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "0h"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul className="space-y-2 text-[12px]">
+          {resolutionByType.map((r) => {
+            const closureColor = r.closure >= 85 ? "bg-emerald-500" : r.closure >= 70 ? "bg-amber-500" : "bg-red-500";
+            return (
+              <li key={r.name} className="grid grid-cols-[180px_1fr_auto] items-center gap-3">
+                <span className="truncate text-foreground">{r.name}</span>
+                <span className="relative h-3 rounded-sm bg-muted overflow-hidden">
+                  <span className={cn("block h-full rounded-sm", closureColor)} style={{ width: `${Math.min(100, r.closure)}%` }} />
+                </span>
+                <span className="flex items-center gap-3 text-[11px]">
+                  <span className="tabular-nums text-foreground font-medium w-12 text-right">{r.closure.toFixed(0)}%</span>
+                  {canCustomize && <span className="tabular-nums text-muted-foreground w-12 text-right">{r.onTime.toFixed(0)}% OT</span>}
+                  <span className="tabular-nums text-muted-foreground w-12 text-right">{r.avgHrs ? `${r.avgHrs}h` : "—"}</span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       ),
     },
     {
       id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state — exposes bottleneck stage.",
       icon: Clock, colSpan: 2, title: "Average time per workflow stage",
-      render: () => (
-        <table className="w-full text-[12px]">
-          <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Stage</th>
-            <th className="py-1 font-medium text-right">Avg dwell</th>
-            <th className="py-1 font-medium text-right">Median dwell</th>
-            <th className="py-1 font-medium text-right">Samples</th>
-          </tr></thead>
-          <tbody>
-            {tu.stageTimings.map((st) => (
-              <tr key={st.key} className={cn("border-t border-border", st.key === tu.bottleneckKey && "bg-status-breach-bg/40")}>
-                <td className="py-1.5">{st.label}{st.key === tu.bottleneckKey && <span className="ml-2 text-[10px] uppercase text-status-breach">Bottleneck</span>}</td>
-                <td className="py-1.5 text-right tabular-nums">{st.avg}h</td>
-                <td className="py-1.5 text-right tabular-nums">{st.median}h</td>
-                <td className="py-1.5 text-right tabular-nums">{st.n}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ),
+      render: () => {
+        const maxAvg = Math.max(...tu.stageTimings.map((s2) => s2.avg), 1);
+        return (
+          <ul className="space-y-2 text-[12px]">
+            {tu.stageTimings.map((st) => {
+              const isBottleneck = st.key === tu.bottleneckKey;
+              return (
+                <li key={st.key} className="grid grid-cols-[180px_1fr_auto] items-center gap-3">
+                  <span className="truncate text-foreground flex items-center gap-2">
+                    {st.label}
+                    {isBottleneck && <span className="text-[9px] uppercase font-semibold text-status-breach bg-status-breach-bg px-1 py-0.5 rounded-sm">Bottleneck</span>}
+                  </span>
+                  <span className="relative h-3 rounded-sm bg-muted overflow-hidden">
+                    <span className={cn("block h-full rounded-sm", isBottleneck ? "bg-status-breach" : "bg-primary")} style={{ width: `${(st.avg / maxAvg) * 100}%` }} />
+                  </span>
+                  <span className="flex items-center gap-3 text-[11px]">
+                    <span className="tabular-nums text-foreground font-medium w-12 text-right">{st.avg}h</span>
+                    <span className="tabular-nums text-muted-foreground w-14 text-right">med {st.median}h</span>
+                    <span className="tabular-nums text-muted-foreground w-10 text-right">n={st.n}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        );
+      },
     },
     {
-      id: "type-status-crosstab", kind: "panel", label: "Type & sub-type by status", description: "Cross-tab of complaint type/sub-type rows × status columns.",
+      id: "type-status-crosstab", kind: "panel", label: "Type & sub-type by status", description: "Heat-map of complaint type/sub-type rows × status columns.",
       icon: BarChart3, colSpan: 3, title: "Type & sub-type by status",
       render: () => {
         const STATUS_SHORT: Record<string, string> = {
           OPEN: "Pending Assignment", ASSIGNED: "Assigned", IN_PROGRESS: "Pending Reassign",
           REOPENED: "Pending Reassign", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
         };
+        const maxCell = Math.max(
+          1,
+          ...tu.typeStatusCrosstab.rows.flatMap((row) => tu.typeStatusCrosstab.cols.map((c) => row.counts[c] ?? 0)),
+        );
         return (
-          <table className="w-full text-[12px]">
-            <thead><tr className="text-left text-muted-foreground">
-              <th className="py-1 font-medium">Type / Sub-type</th>
-              {tu.typeStatusCrosstab.cols.map((c) => (
-                <th key={c} className="py-1 font-medium text-right">{STATUS_SHORT[c]}</th>
-              ))}
-              <th className="py-1 font-medium text-right">Total</th>
-            </tr></thead>
-            <tbody>
-              {tu.typeStatusCrosstab.rows.map((row) => (
-                <tr key={`${row.type}-${row.subtype}`} className="border-t border-border">
-                  <td className="py-1.5">
-                    <div className="font-medium text-foreground">{row.type}</div>
-                    <div className="text-[11px] text-muted-foreground">{row.subtype}</div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[12px] border-separate border-spacing-0">
+              <thead>
+                <tr className="text-left text-muted-foreground">
+                  <th className="py-1 pr-3 font-medium sticky left-0 bg-background">Type / Sub-type</th>
                   {tu.typeStatusCrosstab.cols.map((c) => (
-                    <td key={c} className="py-1.5 text-right tabular-nums">{row.counts[c] ?? 0}</td>
+                    <th key={c} className="py-1 px-1 font-medium text-center text-[10px] uppercase tracking-wide">{STATUS_SHORT[c]}</th>
                   ))}
-                  <td className="py-1.5 text-right tabular-nums font-semibold">{row.total}</td>
+                  <th className="py-1 pl-2 font-medium text-right">Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {tu.typeStatusCrosstab.rows.map((row) => (
+                  <tr key={`${row.type}-${row.subtype}`}>
+                    <td className="py-1 pr-3 sticky left-0 bg-background border-t border-border">
+                      <div className="font-medium text-foreground">{row.type}</div>
+                      <div className="text-[11px] text-muted-foreground">{row.subtype}</div>
+                    </td>
+                    {tu.typeStatusCrosstab.cols.map((c) => {
+                      const v = row.counts[c] ?? 0;
+                      const intensity = v / maxCell;
+                      return (
+                        <td key={c} className="p-0.5 border-t border-border">
+                          <div
+                            className="rounded-sm text-center tabular-nums text-[11px] font-medium py-1"
+                            style={{
+                              backgroundColor: v === 0 ? "transparent" : `color-mix(in oklab, var(--primary) ${Math.round(15 + intensity * 70)}%, var(--surface))`,
+                              color: intensity > 0.55 ? "var(--primary-foreground)" : "var(--foreground)",
+                            }}
+                          >
+                            {v || ""}
+                          </div>
+                        </td>
+                      );
+                    })}
+                    <td className="py-1 pl-2 text-right tabular-nums font-semibold border-t border-border">{row.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         );
       },
     },
