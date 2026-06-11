@@ -439,11 +439,22 @@ export function DashboardPage() {
       rows: Array.from(xtMap.values()).sort((a, b) => b.total - a.total),
     };
 
+    // Avg time to first assignment: pendingAssignment hours across rows that
+    // have moved past OPEN (i.e., have actually been assigned at least once).
+    const firstAssignSamples = rows
+      .filter((c) => c.status !== "OPEN" && c.status !== "REJECTED")
+      .map((c) => (c as TestComplaint).stageHours?.pendingAssignment)
+      .filter((v): v is number => typeof v === "number" && v > 0);
+    const firstAssignmentHrs = firstAssignSamples.length
+      ? Math.round((firstAssignSamples.reduce((a, b) => a + b, 0) / firstAssignSamples.length) * 10) / 10
+      : 0;
+
     return {
       onTimeRate, openPastSla, atRisk,
       avgResolution, medianResolution,
       escalationRate, reopenRate, csat,
       resolvedPerDay, oldestOpenLabel,
+      firstAssignmentHrs,
       stageTimings, bottleneckKey, ageBuckets, typeStatusCrosstab,
     };
   }, [filteredComplaints]);
