@@ -1255,14 +1255,23 @@ export function DashboardPage() {
 
   // Default visible set: stats first, then key charts. Resets each mount.
   const defaultIds = useMemo(
-    () => [
-      "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
-      "trend", "wards", "dept", "geo-map", "complaint-map", "by-status", "by-type", "by-sla",
-      "by-channel", "open-breakdown", "time-of-day", "day-of-week",
-      "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
-      "over-time", "recent", "sla",
-    ],
-    [],
+    () => canCustomize
+      ? [
+        "resolution-rate", "total", "open", "resolved", "first-response", "median-resolution",
+        "escalation-rate", "reopen", "csat", "resolved-per-day", "oldest-open",
+        "trending-complaints", "resolution-by-type", "wards", "stage-timings",
+        "type-status-crosstab", "open-by-employee", "trending-locations",
+        "by-age", "by-type", "by-channel", "geo-map", "by-status", "by-sla",
+        "time-of-day", "day-of-week", "over-time", "sla",
+      ]
+      : [
+        "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
+        "trend", "wards", "dept", "geo-map", "complaint-map", "by-status", "by-type", "by-sla",
+        "by-channel", "open-breakdown", "time-of-day", "day-of-week",
+        "trending-complaints", "trending-locations", "open-by-employee", "resolution-by-type",
+        "over-time", "recent", "sla",
+      ],
+    [canCustomize],
   );
 
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
