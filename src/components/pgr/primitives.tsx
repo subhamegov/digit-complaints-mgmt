@@ -4,7 +4,7 @@ import type { ComplaintStatus, SlaState, Priority, Complaint } from "@/lib/mock-
 import { officerOf } from "@/lib/mock-data";
 import { t } from "@/lib/i18n";
 import { useRbac, type Permission } from "@/lib/rbac";
-import { X, Info } from "lucide-react";
+import { X } from "lucide-react";
 
 const STATUS_TOKEN: Record<ComplaintStatus, { bg: string; fg: string; label: string }> = {
   OPEN:        { bg: "bg-status-open-bg",     fg: "text-status-open",     label: "STATUS_OPEN" },
@@ -101,14 +101,12 @@ export function StatCard({
   value,
   delta,
   intent = "neutral",
-  info,
   onRemove,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
-  info?: string;
   onRemove?: () => void;
 }) {
   const intentMap = {
@@ -129,16 +127,8 @@ export function StatCard({
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-      <div className="flex items-center gap-1.5 pr-6">
-        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-        {info && (
-          <span title={info} className="inline-flex cursor-help text-muted-foreground/70 hover:text-foreground">
-            <Info className="h-3 w-3" />
-          </span>
-        )}
-      </div>
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
-      {info && <div className="mt-1.5 text-[11px] leading-snug text-muted-foreground line-clamp-2">{info}</div>}
       {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
     </div>
   );
@@ -150,7 +140,6 @@ export function Panel({
   children,
   className,
   padded = true,
-  info,
   onRemove,
 }: {
   title?: string;
@@ -158,7 +147,6 @@ export function Panel({
   children: ReactNode;
   className?: string;
   padded?: boolean;
-  info?: string;
   onRemove?: () => void;
 }) {
   return (
@@ -174,19 +162,9 @@ export function Panel({
         </button>
       )}
       {title && (
-        <header className="border-b border-border px-4 py-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <h2 className="text-[13px] font-semibold text-foreground truncate">{title}</h2>
-              {info && (
-                <span title={info} className="inline-flex shrink-0 cursor-help text-muted-foreground/70 hover:text-foreground">
-                  <Info className="h-3.5 w-3.5" />
-                </span>
-              )}
-            </div>
-            {action}
-          </div>
-          {info && <p className="mt-1 text-[11px] leading-snug text-muted-foreground pr-6">{info}</p>}
+        <header className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <h2 className="text-[13px] font-semibold text-foreground">{title}</h2>
+          {action}
         </header>
       )}
       <div className={padded ? "p-4" : ""}>{children}</div>
