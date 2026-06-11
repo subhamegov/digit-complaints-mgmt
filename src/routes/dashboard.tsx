@@ -1091,7 +1091,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. resolution time.",
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share, avg. resolution and reassignment churn.",
       icon: Users, colSpan: 2, title: "Open complaints by employee",
       render: () => (
         <table className="w-full text-[12px]">
@@ -1100,6 +1100,7 @@ export function DashboardPage() {
             <th className="py-1 font-medium text-right">Open</th>
             <th className="py-1 font-medium text-right">% of total</th>
             <th className="py-1 font-medium text-right">Avg. resolution</th>
+            {canCustomize && <th className="py-1 font-medium text-right">Reassign churn</th>}
           </tr></thead>
           <tbody>
             {openByEmployee.map((e) => (
@@ -1107,24 +1108,23 @@ export function DashboardPage() {
                 <td className="py-1.5">{e.name}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.open}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
-                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "—"}</td>
+                <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "0h"}</td>
+                {canCustomize && <td className="py-1.5 text-right tabular-nums">{e.churn.toFixed(1)}%</td>}
               </tr>
             ))}
-            {openByEmployee.length === 0 && (
-              <tr><td colSpan={4} className="py-3 text-center text-muted-foreground">No assignments</td></tr>
-            )}
           </tbody>
         </table>
       ),
     },
     {
-      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure rate and avg. resolution per type.",
+      id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
             <th className="py-1 font-medium">Complaint type</th>
             <th className="py-1 font-medium text-right">Closure</th>
+            {canCustomize && <th className="py-1 font-medium text-right">On-time</th>}
             <th className="py-1 font-medium text-right">Avg. resolution</th>
           </tr></thead>
           <tbody>
@@ -1132,11 +1132,88 @@ export function DashboardPage() {
               <tr key={r.name} className="border-t border-border">
                 <td className="py-1.5">{r.name}</td>
                 <td className="py-1.5 text-right tabular-nums">{r.closure.toFixed(1)}%</td>
-                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "—"}</td>
+                {canCustomize && <td className="py-1.5 text-right tabular-nums">{r.onTime.toFixed(1)}%</td>}
+                <td className="py-1.5 text-right tabular-nums">{r.avgHrs ? `${r.avgHrs}h` : "0h"}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      ),
+    },
+    {
+      id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state — exposes bottleneck stage.",
+      icon: Clock, colSpan: 2, title: "Average time per workflow stage",
+      render: () => (
+        <table className="w-full text-[12px]">
+          <thead><tr className="text-left text-muted-foreground">
+            <th className="py-1 font-medium">Stage</th>
+            <th className="py-1 font-medium text-right">Avg dwell</th>
+            <th className="py-1 font-medium text-right">Median dwell</th>
+            <th className="py-1 font-medium text-right">Samples</th>
+          </tr></thead>
+          <tbody>
+            {tu.stageTimings.map((st) => (
+              <tr key={st.key} className={cn("border-t border-border", st.key === tu.bottleneckKey && "bg-status-breach-bg/40")}>
+                <td className="py-1.5">{st.label}{st.key === tu.bottleneckKey && <span className="ml-2 text-[10px] uppercase text-status-breach">Bottleneck</span>}</td>
+                <td className="py-1.5 text-right tabular-nums">{st.avg}h</td>
+                <td className="py-1.5 text-right tabular-nums">{st.median}h</td>
+                <td className="py-1.5 text-right tabular-nums">{st.n}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ),
+    },
+    {
+      id: "type-status-crosstab", kind: "panel", label: "Type & sub-type by status", description: "Cross-tab of complaint type/sub-type rows × status columns.",
+      icon: BarChart3, colSpan: 3, title: "Type & sub-type by status",
+      render: () => {
+        const STATUS_SHORT: Record<string, string> = {
+          OPEN: "Pending", ASSIGNED: "Assigned", IN_PROGRESS: "In progress",
+          REOPENED: "Reopened", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
+        };
+        return (
+          <table className="w-full text-[12px]">
+            <thead><tr className="text-left text-muted-foreground">
+              <th className="py-1 font-medium">Type / Sub-type</th>
+              {tu.typeStatusCrosstab.cols.map((c) => (
+                <th key={c} className="py-1 font-medium text-right">{STATUS_SHORT[c]}</th>
+              ))}
+              <th className="py-1 font-medium text-right">Total</th>
+            </tr></thead>
+            <tbody>
+              {tu.typeStatusCrosstab.rows.map((row) => (
+                <tr key={`${row.type}-${row.subtype}`} className="border-t border-border">
+                  <td className="py-1.5">
+                    <div className="font-medium text-foreground">{row.type}</div>
+                    <div className="text-[11px] text-muted-foreground">{row.subtype}</div>
+                  </td>
+                  {tu.typeStatusCrosstab.cols.map((c) => (
+                    <td key={c} className="py-1.5 text-right tabular-nums">{row.counts[c] ?? 0}</td>
+                  ))}
+                  <td className="py-1.5 text-right tabular-nums font-semibold">{row.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      },
+    },
+    {
+      id: "by-age", kind: "panel", label: "Complaints by age", description: "Distribution of complaints by age buckets.",
+      icon: Clock, colSpan: 1, title: "Complaints by age",
+      render: () => (
+        <div className="h-[260px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={tu.ageBuckets} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Bar dataKey="value" fill="var(--color-chart-2)" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       ),
     },
     {
@@ -1168,7 +1245,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu, mapSelected]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
