@@ -1181,8 +1181,8 @@ export function DashboardPage() {
       icon: BarChart3, colSpan: 3, title: "Type & sub-type by status",
       render: () => {
         const STATUS_SHORT: Record<string, string> = {
-          OPEN: "Pending", ASSIGNED: "Assigned", IN_PROGRESS: "In progress",
-          REOPENED: "Reopened", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
+          OPEN: "Pending Assignment", ASSIGNED: "Assigned", IN_PROGRESS: "Pending Reassign",
+          REOPENED: "Pending Reassign", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
         };
         return (
           <table className="w-full text-[12px]">
