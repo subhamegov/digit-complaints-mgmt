@@ -1119,15 +1119,36 @@ export function DashboardPage() {
     [canCustomize],
   );
 
+  const STORAGE_KEY = canCustomize ? "pgr.dashboard.testUser.v1" : null;
+
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Role is hydrated from storage AFTER first render, so re-sync the visible
-  // widget set whenever the role-specific defaults change.
+  // Hydrate from localStorage (test user only). Falls back to role defaults.
   useEffect(() => {
-    setVisibleIds(defaultIds);
-  }, [defaultIds]);
+    if (!STORAGE_KEY) {
+      setVisibleIds(defaultIds);
+      setHydrated(true);
+      return;
+    }
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw) as { visibleIds?: string[]; sizes?: Record<string, { colSpan?: 1 | 2 | 3; rowSpan?: 1 | 2 | 3 }> };
+        const known = new Set(KPI_REGISTRY.map((k) => k.id));
+        const ids = (parsed.visibleIds ?? []).filter((x) => known.has(x));
+        setVisibleIds(ids.length ? ids : defaultIds);
+        if (parsed.sizes) setSizes(parsed.sizes);
+      } else {
+        setVisibleIds(defaultIds);
+      }
+    } catch {
+      setVisibleIds(defaultIds);
+    }
+    setHydrated(true);
+  }, [STORAGE_KEY, defaultIds, KPI_REGISTRY]);
 
   const removeKpi = (id: string) => setVisibleIds((prev) => prev.filter((x) => x !== id));
   const addKpi = (id: string) => {
@@ -1156,7 +1177,16 @@ export function DashboardPage() {
   // Disable native drag while pointer is on a resize handle.
   const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
+  // Persist visible KPI list + sizes for the test user across sessions.
+  useEffect(() => {
+    if (!STORAGE_KEY || !hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ visibleIds, sizes }));
+    } catch { /* quota / private mode — ignore */ }
+  }, [STORAGE_KEY, hydrated, visibleIds, sizes]);
+
   const ROW_STEP = 280; // px per rowSpan unit
+
 
   const startResize = (
     id: string,
@@ -1279,6 +1309,18 @@ export function DashboardPage() {
                       <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
                     )}
                   </ul>
+                  <div className="mt-1 border-t border-border px-2 pt-1.5 pb-1">
+                    <button
+                      onClick={() => {
+                        setVisibleIds(defaultIds);
+                        setSizes({});
+                        setPickerOpen(false);
+                      }}
+                      className="w-full rounded-sm px-2 py-1.5 text-left text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      Reset to default layout
+                    </button>
+                  </div>
                 </PopoverContent>
               </Popover>
             )}
