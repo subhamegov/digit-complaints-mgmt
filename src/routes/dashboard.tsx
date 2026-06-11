@@ -156,8 +156,8 @@ export function DashboardPage() {
   const STATUS_LABEL: Record<Complaint["status"], string> = {
     OPEN: "Pending Assignment",
     ASSIGNED: "Assigned",
-    IN_PROGRESS: "Pending Resolution",
-    REOPENED: "Reopened",
+    IN_PROGRESS: "Pending Reassignment",
+    REOPENED: "Pending Reassignment",
     RESOLVED: "Resolved",
     CLOSED: "Closed",
     REJECTED: "Rejected",
@@ -239,15 +239,18 @@ export function DashboardPage() {
 
   const trendingTypes = useMemo(() => {
     const m = new Map<string, number>();
-    for (const c of filteredComplaints) m.set(c.typeCode, (m.get(c.typeCode) ?? 0) + 1);
-    const ranked = Array.from(m, ([code, count]) => ({ code, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+    for (const c of filteredComplaints) {
+      const ct = complaintTypeOf(c.typeCode);
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      m.set(sub, (m.get(sub) ?? 0) + 1);
+    }
+    const ranked = Array.from(m, ([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
     return ranked.map((r, i) => {
-      // deterministic pseudo-WoW from code length
-      const seed = (r.code.length * 7) % 50;
+      const seed = (r.name.length * 7) % 50;
       const wow = ((seed - 20) + (i * 1.7));
       return {
         rank: i + 1,
-        name: complaintTypeOf(r.code)?.name ?? r.code,
+        name: r.name,
         volume: r.count,
         wow: Math.round(wow * 10) / 10,
       };
@@ -265,20 +268,18 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const openByEmployee = useMemo(() => {
-    const m = new Map<string, { open: number; totalResHrs: number; resCount: number; reassign: number; assignedCount: number }>();
+    const m = new Map<string, { open: number; totalRespHrs: number; respCount: number; assignedCount: number }>();
     for (const c of filteredComplaints) {
       const id = c.assignedOfficerId;
       if (!id) continue;
-      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0, reassign: 0, assignedCount: 0 };
+      const e = m.get(id) ?? { open: 0, totalRespHrs: 0, respCount: 0, assignedCount: 0 };
       e.assignedCount++;
       if (["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)) e.open++;
-      if (c.status === "RESOLVED" || c.status === "CLOSED") {
-        e.resCount++;
-        e.totalResHrs += c.slaHours - c.slaRemainingHrs;
+      const pa = (c as TestComplaint).stageHours?.pendingAssignment;
+      if (typeof pa === "number" && pa > 0) {
+        e.respCount++;
+        e.totalRespHrs += pa;
       }
-      // TestComplaint carries reassignCount; legacy COMPLAINTS rows don't.
-      const rc = (c as TestComplaint).reassignCount;
-      if (typeof rc === "number") e.reassign += rc;
       m.set(id, e);
     }
     const totalOpen = Array.from(m.values()).reduce((a, b) => a + b.open, 0) || 1;
@@ -287,8 +288,7 @@ export function DashboardPage() {
       name: officerOf(id)?.name ?? id,
       open: v.open,
       pct: Math.round((v.open / totalOpen) * 1000) / 10,
-      avgHrs: v.resCount ? Math.round((v.totalResHrs / v.resCount) * 10) / 10 : 0,
-      churn: v.assignedCount ? Math.round((v.reassign / v.assignedCount) * 1000) / 10 : 0,
+      avgHrs: v.respCount ? Math.round((v.totalRespHrs / v.respCount) * 10) / 10 : 0,
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
@@ -296,22 +296,22 @@ export function DashboardPage() {
     const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
       const ct = complaintTypeOf(c.typeCode);
-      if (!ct) continue;
-      const e = m.get(ct.code) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      const e = m.get(sub) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
       e.total++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resolved++;
         if (c.slaState !== "BREACHED") e.resolvedOnTime++;
         e.hrs += c.slaHours - c.slaRemainingHrs;
       }
-      m.set(ct.code, e);
+      m.set(sub, e);
     }
-    return Array.from(m, ([code, v]) => ({
-      name: complaintTypeOf(code)?.name ?? code,
+    return Array.from(m, ([name, v]) => ({
+      name,
       closure: v.total ? Math.round((v.resolved / v.total) * 1000) / 10 : 0,
       onTime: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
       avgHrs: v.resolved ? Math.round((v.hrs / v.resolved) * 10) / 10 : 0,
-    })).sort((a, b) => b.closure - a.closure);
+    })).sort((a, b) => a.closure - b.closure);
   }, [filteredComplaints]);
 
   // Time-series with daily/weekly/monthly synthesis from trend7d.
@@ -377,7 +377,7 @@ export function DashboardPage() {
     const stages = [
       { key: "pendingAssignment", label: "Pending Assignment" },
       { key: "assigned",          label: "Assigned" },
-      { key: "pendingResolution", label: "Pending Resolution" },
+      { key: "pendingResolution", label: "Pending Reassignment" },
     ] as const;
     const stageTimings: { key: string; label: string; avg: number; median: number; n: number }[] = stages.map((st) => {
       const samples = rows
@@ -523,7 +523,7 @@ export function DashboardPage() {
     },
     { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
     { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Past deadline" },
-    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "Avg across assigned" },
+    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
     { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
@@ -1049,7 +1049,7 @@ export function DashboardPage() {
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
             <th className="py-1 font-medium w-6">#</th>
-            <th className="py-1 font-medium">Category</th>
+            <th className="py-1 font-medium">Sub-type</th>
             <th className="py-1 font-medium text-right">Volume</th>
             <th className="py-1 font-medium text-right">WoW</th>
           </tr></thead>
@@ -1105,7 +1105,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share, avg. resolution and reassignment churn.",
+      id: "open-by-employee", kind: "panel", label: "Open complaints by employee", description: "Per-employee open share and avg. response time.",
       icon: Users, colSpan: 2, title: "Open complaints by employee",
       render: () => (
         <table className="w-full text-[12px]">
@@ -1113,8 +1113,7 @@ export function DashboardPage() {
             <th className="py-1 font-medium">Employee</th>
             <th className="py-1 font-medium text-right">Open</th>
             <th className="py-1 font-medium text-right">% of total</th>
-            <th className="py-1 font-medium text-right">Avg. resolution</th>
-            {canCustomize && <th className="py-1 font-medium text-right">Reassign churn</th>}
+            <th className="py-1 font-medium text-right">Avg. response time</th>
           </tr></thead>
           <tbody>
             {openByEmployee.map((e) => (
@@ -1123,7 +1122,6 @@ export function DashboardPage() {
                 <td className="py-1.5 text-right tabular-nums">{e.open}</td>
                 <td className="py-1.5 text-right tabular-nums">{e.pct.toFixed(1)}%</td>
                 <td className="py-1.5 text-right tabular-nums">{e.avgHrs ? `${e.avgHrs}h` : "0h"}</td>
-                {canCustomize && <td className="py-1.5 text-right tabular-nums">{e.churn.toFixed(1)}%</td>}
               </tr>
             ))}
           </tbody>
@@ -1136,7 +1134,7 @@ export function DashboardPage() {
       render: () => (
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Complaint type</th>
+            <th className="py-1 font-medium">Complaint sub-type</th>
             <th className="py-1 font-medium text-right">Closure</th>
             {canCustomize && <th className="py-1 font-medium text-right">On-time</th>}
             <th className="py-1 font-medium text-right">Avg. resolution</th>
@@ -1183,8 +1181,8 @@ export function DashboardPage() {
       icon: BarChart3, colSpan: 3, title: "Type & sub-type by status",
       render: () => {
         const STATUS_SHORT: Record<string, string> = {
-          OPEN: "Pending", ASSIGNED: "Assigned", IN_PROGRESS: "In progress",
-          REOPENED: "Reopened", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
+          OPEN: "Pending Assignment", ASSIGNED: "Assigned", IN_PROGRESS: "Pending Reassign",
+          REOPENED: "Pending Reassign", RESOLVED: "Resolved", CLOSED: "Closed", REJECTED: "Rejected",
         };
         return (
           <table className="w-full text-[12px]">
