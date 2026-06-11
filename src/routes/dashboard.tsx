@@ -439,11 +439,22 @@ export function DashboardPage() {
       rows: Array.from(xtMap.values()).sort((a, b) => b.total - a.total),
     };
 
+    // Avg time to first assignment: pendingAssignment hours across rows that
+    // have moved past OPEN (i.e., have actually been assigned at least once).
+    const firstAssignSamples = rows
+      .filter((c) => c.status !== "OPEN" && c.status !== "REJECTED")
+      .map((c) => (c as TestComplaint).stageHours?.pendingAssignment)
+      .filter((v): v is number => typeof v === "number" && v > 0);
+    const firstAssignmentHrs = firstAssignSamples.length
+      ? Math.round((firstAssignSamples.reduce((a, b) => a + b, 0) / firstAssignSamples.length) * 10) / 10
+      : 0;
+
     return {
       onTimeRate, openPastSla, atRisk,
       avgResolution, medianResolution,
       escalationRate, reopenRate, csat,
       resolvedPerDay, oldestOpenLabel,
+      firstAssignmentHrs,
       stageTimings, bottleneckKey, ageBuckets, typeStatusCrosstab,
     };
   }, [filteredComplaints]);
@@ -507,9 +518,12 @@ export function DashboardPage() {
       icon: ThumbsUp, intent: "positive",
       getValue: () => canCustomize ? `${tu.onTimeRate}%` : `${resolutionRate}%`,
       getDelta: () => canCustomize
-        ? `Breached open: ${tu.openPastSla} · At risk 24–48h: ${tu.atRisk}`
+        ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
     },
+    { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Past deadline" },
+    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "Avg across assigned" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
     { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
@@ -1257,7 +1271,8 @@ export function DashboardPage() {
   const defaultIds = useMemo(
     () => canCustomize
       ? [
-        "resolution-rate", "total", "open", "resolved", "first-response", "median-resolution",
+        "resolution-rate", "total", "at-risk-open", "breached-sla", "open", "resolved",
+        "first-response", "first-assignment", "median-resolution",
         "escalation-rate", "reopen", "csat", "resolved-per-day", "oldest-open",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
         "type-status-crosstab", "open-by-employee", "trending-locations",
