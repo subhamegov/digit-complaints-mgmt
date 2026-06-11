@@ -1177,7 +1177,16 @@ export function DashboardPage() {
   // Disable native drag while pointer is on a resize handle.
   const [handleHoverId, setHandleHoverId] = useState<string | null>(null);
 
+  // Persist visible KPI list + sizes for the test user across sessions.
+  useEffect(() => {
+    if (!STORAGE_KEY || !hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ visibleIds, sizes }));
+    } catch { /* quota / private mode — ignore */ }
+  }, [STORAGE_KEY, hydrated, visibleIds, sizes]);
+
   const ROW_STEP = 280; // px per rowSpan unit
+
 
   const startResize = (
     id: string,
