@@ -6,6 +6,7 @@ import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor,
 } from "@/components/pgr/primitives";
+import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
@@ -473,8 +474,6 @@ export function DashboardPage() {
 
   // View toggles for new widgets
   const [geoView, setGeoView] = useState<"logged" | "open" | "resolved">("logged");
-  const [mapView, setMapView] = useState<"open" | "closed" | "logged">("open");
-  const [mapSelected, setMapSelected] = useState<Complaint | null>(null);
   const [statusView, setStatusView] = useState<"table" | "bar">("table");
   const [typeView, setTypeView] = useState<"table" | "bar">("table");
   const [slaView, setSlaView] = useState<"table" | "bar">("table");
@@ -690,176 +689,9 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "complaint-map", kind: "panel", label: "Complaint map", description: "Geo-located complaints colored by status and SLA.",
-      icon: MapPin, colSpan: 2, title: "Complaint map",
-      action: (
-        <div className="inline-flex rounded-sm border border-border overflow-hidden text-[11px]">
-          {(["open", "closed", "logged"] as const).map((v) => (
-            <button key={v} onClick={() => setMapView(v)}
-              className={cn("px-2 py-1 capitalize", mapView === v ? "bg-primary text-primary-foreground" : "bg-surface text-muted-foreground hover:text-foreground")}>
-              {v}
-            </button>
-          ))}
-        </div>
-      ),
-      render: () => {
-        const isOpen = (c: Complaint) => ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
-        const isClosed = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
-        const pts = filteredComplaints.filter((c) =>
-          mapView === "open" ? isOpen(c) : mapView === "closed" ? isClosed(c) : true,
-        );
-        const hash = (s: string) => {
-          let h = 2166136261;
-          for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
-          return h >>> 0;
-        };
-        const colorFor = (c: Complaint) => {
-          if (isClosed(c)) return { fill: "var(--color-chart-3)", stroke: "var(--color-chart-3)", label: "Closed" };
-          if (c.status === "OPEN") return { fill: "#ffffff", stroke: "var(--border)", label: "Logged" };
-          const intensity = c.slaState === "BREACHED" ? 1 : c.slaState === "NEARING" ? 0.7 : 0.4;
-          return {
-            fill: `color-mix(in oklab, var(--destructive) ${Math.round(intensity * 100)}%, var(--surface))`,
-            stroke: "var(--destructive)",
-            label: "Open",
-          };
-        };
-        const openCount = filteredComplaints.filter(isOpen).length;
-        const closedCount = filteredComplaints.filter(isClosed).length;
-        const loggedCount = filteredComplaints.length;
-        return (
-          <div className="flex flex-col gap-2 h-full">
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground flex-wrap">
-              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-white border border-border" />Logged {loggedCount}</span>
-              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--destructive)" }} />Open {openCount}</span>
-              <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: "var(--color-chart-3)" }} />Closed {closedCount}</span>
-              <span className="ml-auto">Red intensity reflects SLA breach severity.</span>
-            </div>
-            <div className="relative flex-1 min-h-[240px] rounded-sm border border-border overflow-hidden"
-              style={{ background: "#e8efe4" }}>
-              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-                <defs>
-                  <pattern id="cm-grid" width="6" height="6" patternUnits="userSpaceOnUse">
-                    <path d="M 6 0 L 0 0 0 6" fill="none" stroke="#cdd6c4" strokeWidth="0.12" />
-                  </pattern>
-                </defs>
-                {/* land + grid */}
-                <rect width="100" height="100" fill="url(#cm-grid)" />
-                {/* park */}
-                <path d="M58,12 Q72,10 78,22 Q82,34 70,40 Q58,42 54,30 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
-                <path d="M8,72 Q18,68 26,76 Q30,86 18,90 Q6,88 6,80 Z" fill="#cfe3b8" stroke="#a8c98a" strokeWidth="0.2" />
-                {/* river */}
-                <path d="M-2,82 C18,78 32,92 50,84 C68,76 80,90 102,84 L102,100 L-2,100 Z" fill="#bcd9ef" stroke="#88b3d4" strokeWidth="0.2" />
-                {/* blocks */}
-                <g fill="#f4f1e7" stroke="#d8d2bf" strokeWidth="0.15">
-                  <rect x="6" y="8" width="18" height="12" rx="0.5" />
-                  <rect x="28" y="8" width="14" height="12" rx="0.5" />
-                  <rect x="6" y="24" width="12" height="14" rx="0.5" />
-                  <rect x="22" y="24" width="20" height="14" rx="0.5" />
-                  <rect x="6" y="42" width="36" height="14" rx="0.5" />
-                  <rect x="46" y="46" width="22" height="14" rx="0.5" />
-                  <rect x="72" y="46" width="22" height="14" rx="0.5" />
-                  <rect x="46" y="64" width="48" height="12" rx="0.5" />
-                </g>
-                {/* primary roads */}
-                <g stroke="#ffffff" strokeWidth="1.6" fill="none" strokeLinecap="round">
-                  <path d="M0,22 L100,22" />
-                  <path d="M0,62 C30,58 60,66 100,60" />
-                  <path d="M44,0 L44,100" />
-                </g>
-                <g stroke="#e3b34a" strokeWidth="0.5" fill="none" strokeLinecap="round" strokeDasharray="2 2">
-                  <path d="M0,22 L100,22" />
-                  <path d="M44,0 L44,100" />
-                </g>
-                {/* secondary roads */}
-                <g stroke="#ffffff" strokeWidth="0.8" fill="none" strokeLinecap="round">
-                  <path d="M0,40 L100,40" />
-                  <path d="M20,0 L20,100" />
-                  <path d="M70,0 L70,62" />
-                  <path d="M0,78 L44,78" />
-                </g>
-                {/* labels */}
-                <g fill="#7a8a6e" fontSize="2.4" fontFamily="ui-sans-serif, system-ui">
-                  <text x="62" y="28">Central Park</text>
-                  <text x="9" y="83">Riverside</text>
-                  <text x="46" y="92" fill="#5b86a8">River</text>
-                  <text x="2" y="6" fontSize="2">Ward 1</text>
-                  <text x="80" y="6" fontSize="2">Ward 4</text>
-                  <text x="2" y="58" fontSize="2">Ward 7</text>
-                  <text x="80" y="74" fontSize="2">Ward 9</text>
-                </g>
-              </svg>
-              <div className="absolute inset-0">
-                {pts.map((c) => {
-                  const h1 = hash(c.id);
-                  const h2 = hash(c.id + "y");
-                  const x = (h1 % 1000) / 10;
-                  const y = (h2 % 1000) / 10;
-                  const col = colorFor(c);
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setMapSelected(c)}
-                      title={`${c.id} · ${col.label}${c.slaState ? " · SLA " + c.slaState : ""}`}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full hover:scale-125 transition-transform focus:outline-none focus:ring-2 focus:ring-primary"
-                      style={{
-                        left: `${x}%`, top: `${y}%`,
-                        width: 11, height: 11,
-                        background: col.fill,
-                        border: `1.5px solid ${col.stroke}`,
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
-                      }}
-                    />
-                  );
-                })}
-              </div>
-              <div className="absolute bottom-1 right-2 text-[10px] text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded-sm">
-                {pts.length} shown · click a pin
-              </div>
-              {mapSelected && (() => {
-                const ct = complaintTypeOf(mapSelected.typeCode);
-                const filed = new Date(mapSelected.filedOn);
-                const pics = Math.max(1, mapSelected.attachments || 2);
-                return (
-                  <div className="absolute top-2 right-2 z-20 w-[260px] max-w-[calc(100%-1rem)] h-[280px] max-h-[calc(100%-1rem)] bg-background/95 backdrop-blur-sm rounded-sm border border-border shadow-lg flex flex-col">
-                    <div className="flex items-center justify-between gap-2 p-3 border-b border-border">
-                      <div className="text-[13px] font-semibold text-foreground truncate">{ct?.name ?? mapSelected.typeCode}</div>
-                      <button type="button" onClick={() => setMapSelected(null)} className="shrink-0 rounded-sm p-1 hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="Close">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-3 space-y-3 text-[12px]">
-                      <div className="text-muted-foreground">{mapSelected.id} · {mapSelected.status.replaceAll("_", " ")}{mapSelected.slaState ? ` · SLA ${mapSelected.slaState}` : ""}</div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div><div className="text-muted-foreground">Type</div><div className="font-medium text-foreground">{ct?.department ?? "—"}</div></div>
-                        <div><div className="text-muted-foreground">Sub-type</div><div className="font-medium text-foreground">{ct?.name ?? mapSelected.typeCode}</div></div>
-                        <div><div className="text-muted-foreground">Date filed</div><div className="font-medium text-foreground">{filed.toLocaleDateString()} · {filed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div></div>
-                        <div><div className="text-muted-foreground">Ward / locality</div><div className="font-medium text-foreground">{mapSelected.ward} · {mapSelected.locality}</div></div>
-                        <div className="col-span-2"><div className="text-muted-foreground">Address</div><div className="font-medium text-foreground">{mapSelected.address}</div></div>
-                        <div className="col-span-2"><div className="text-muted-foreground">Description</div><div className="text-foreground">{mapSelected.description}</div></div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground mb-1.5">Pictures ({pics})</div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {Array.from({ length: Math.min(3, pics) }).map((_, i) => (
-                            <img
-                              key={i}
-                              src={`https://picsum.photos/seed/${encodeURIComponent(mapSelected.id + "-" + i)}/240/160`}
-                              alt={`Complaint photo ${i + 1}`}
-                              className="aspect-[3/2] w-full rounded-sm object-cover border border-border"
-                              loading="lazy"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-        );
-      },
+      id: "complaint-map", kind: "panel", label: "Complaint map", description: "Bangalore boundary hierarchy with zoom-driven LOD; WoW or SLA breach coloring.",
+      icon: MapPin, colSpan: 2, title: "Complaint map · Bangalore",
+      render: () => <ComplaintMap complaints={filteredComplaints} />,
     },
     {
       id: "by-status", kind: "panel", label: "Complaints by status", description: "Status distribution as table or bar chart.",
@@ -1257,7 +1089,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, mapView, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu, mapSelected]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
