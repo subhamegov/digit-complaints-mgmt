@@ -6,6 +6,7 @@ import {
   PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor,
 } from "@/components/pgr/primitives";
+import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useRbac } from "@/lib/rbac";
