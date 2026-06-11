@@ -641,7 +641,8 @@ export function DashboardPage() {
             { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
           ]}
         />
-      ),
+        );
+      },
     },
 
     // --- New panels (KPIs 7-19) ---
