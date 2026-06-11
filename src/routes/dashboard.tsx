@@ -15,6 +15,7 @@ import {
   trend7d, COMPLAINTS, complaintTypeOf, OFFICERS, officerOf,
   type Complaint,
 } from "@/lib/mock-data";
+import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
@@ -56,13 +57,17 @@ export function DashboardPage() {
   const [geoFilter, setGeoFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
 
+  // Test User reads from its own coherent 60-row seed so every widget
+  // reconciles against ONE dataset. Other roles keep the legacy COMPLAINTS.
+  const sourceComplaints: Complaint[] = canCustomize ? TEST_USER_COMPLAINTS : COMPLAINTS;
+
   // Apply filters to the complaint dataset. Non-TEST_USER roles see the
   // unfiltered numbers (their filter bar is hidden).
   const filteredComplaints = useMemo(() => {
     if (!canCustomize) return COMPLAINTS;
     const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
     const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
-    return COMPLAINTS.filter((c) => {
+    return sourceComplaints.filter((c) => {
       const filedTs = new Date(c.filedOn).getTime();
       if (fromTs !== null && filedTs < fromTs) return false;
       if (toTs !== null && filedTs > toTs) return false;
@@ -70,7 +75,7 @@ export function DashboardPage() {
       if (typeFilter && c.typeCode !== typeFilter) return false;
       return true;
     });
-  }, [canCustomize, fromDate, toDate, geoFilter, typeFilter]);
+  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter]);
 
   const s = useMemo(() => {
     const total = filteredComplaints.length;
@@ -99,18 +104,35 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const wards = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const c of filteredComplaints) map.set(c.ward, (map.get(c.ward) ?? 0) + 1);
-    return Array.from(map, ([ward, total]) => ({ ward, total }));
+    const map = new Map<string, { total: number; open: number; resolvedOnTime: number; resolved: number }>();
+    for (const c of filteredComplaints) {
+      const m = map.get(c.ward) ?? { total: 0, open: 0, resolvedOnTime: 0, resolved: 0 };
+      m.total++;
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      if (isResolved) {
+        m.resolved++;
+        if (c.slaState !== "BREACHED") m.resolvedOnTime++;
+      } else if (["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status)) {
+        m.open++;
+      }
+      map.set(c.ward, m);
+    }
+    return Array.from(map, ([ward, v]) => ({
+      ward,
+      total: v.total,
+      open: v.open,
+      onTimePct: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
+    }));
   }, [filteredComplaints]);
 
   // Full ward list for the geography selector so options don't disappear
   // after filtering by ward.
   const allWards = useMemo(() => {
+    if (canCustomize) return [...TEST_USER_WARDS];
     const set = new Set<string>();
     for (const c of COMPLAINTS) set.add(c.ward);
     return Array.from(set).sort();
-  }, []);
+  }, [canCustomize]);
 
   const trend = trend7d();
   const recent = filteredComplaints.slice(0, 6);
