@@ -1125,6 +1125,7 @@ export function DashboardPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; rowSpan?: 1 | 2 | 3 }>>({});
 
   // Hydrate from localStorage (test user only). Falls back to role defaults.
   useEffect(() => {
@@ -1140,7 +1141,7 @@ export function DashboardPage() {
         const known = new Set(KPI_REGISTRY.map((k) => k.id));
         const ids = (parsed.visibleIds ?? []).filter((x) => known.has(x));
         setVisibleIds(ids.length ? ids : defaultIds);
-        if (parsed.sizes) setSizes(parsed.sizes);
+        if (parsed.sizes) setSizes((current) => JSON.stringify(current) === JSON.stringify(parsed.sizes) ? current : parsed.sizes!);
       } else {
         setVisibleIds(defaultIds);
       }
@@ -1148,7 +1149,7 @@ export function DashboardPage() {
       setVisibleIds(defaultIds);
     }
     setHydrated(true);
-  }, [STORAGE_KEY, defaultIds, KPI_REGISTRY]);
+  }, [STORAGE_KEY]);
 
   const removeKpi = (id: string) => setVisibleIds((prev) => prev.filter((x) => x !== id));
   const addKpi = (id: string) => {
@@ -1171,7 +1172,6 @@ export function DashboardPage() {
 
   // Per-tile resize. Width snaps to grid columns (1..3). Height snaps to row steps (1..3).
   const gridRef = useRef<HTMLDivElement>(null);
-  const [sizes, setSizes] = useState<Record<string, { colSpan?: 1 | 2 | 3; rowSpan?: 1 | 2 | 3 }>>({});
   const [resizingId, setResizingId] = useState<string | null>(null);
   const [resizingAxis, setResizingAxis] = useState<"x" | "y" | "xy" | null>(null);
   // Disable native drag while pointer is on a resize handle.
