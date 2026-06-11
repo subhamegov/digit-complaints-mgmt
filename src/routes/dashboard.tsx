@@ -326,6 +326,128 @@ export function DashboardPage() {
       { day: "This wk", filed: sumF, resolved: sumR },
     ];
   }, [trend]);
+
+  // --- Test-User-only derived metrics (reconcile against filteredComplaints) ---
+  const tu = useMemo(() => {
+    const rows = filteredComplaints as TestComplaint[];
+    const isOpen = (c: Complaint) => ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status);
+    const isResolved = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
+    const resolved = rows.filter(isResolved);
+    const resolvedOnTime = resolved.filter((c) => c.slaState !== "BREACHED").length;
+    const openPastSla = rows.filter((c) => isOpen(c) && c.slaState === "BREACHED").length;
+    const atRisk = rows.filter((c) => isOpen(c) && c.slaRemainingHrs >= 0 && c.slaRemainingHrs <= 48).length;
+    const onTimeDenom = resolved.length + openPastSla;
+    const onTimeRate = onTimeDenom ? Math.round((resolvedOnTime / onTimeDenom) * 1000) / 10 : 0;
+
+    const resolutionTimes = resolved.map((c) => c.slaHours - c.slaRemainingHrs);
+    const avgResolution = resolutionTimes.length
+      ? Math.round((resolutionTimes.reduce((a, b) => a + b, 0) / resolutionTimes.length) * 10) / 10
+      : 0;
+    const medianResolution = Math.round(median(resolutionTimes) * 10) / 10;
+
+    const escalated = rows.filter((c) => (c as TestComplaint).escalated).length;
+    const escalationRate = rows.length ? Math.round((escalated / rows.length) * 1000) / 10 : 0;
+
+    const reopened = rows.filter((c) => c.reopenCount > 0 || c.status === "REOPENED").length;
+    const reopenRate = resolved.length ? Math.round((reopened / resolved.length) * 1000) / 10 : 0;
+
+    const csatScores = resolved.map((c) => c.csat).filter((v): v is number => typeof v === "number");
+    const csat = csatScores.length
+      ? Math.round((csatScores.reduce((a, b) => a + b, 0) / csatScores.length) * 10) / 10
+      : 0;
+
+    // Period span in days: from earliest filed to now (capped at filter range when set).
+    const now = Date.now();
+    const earliest = rows.reduce((min, c) => Math.min(min, new Date(c.filedOn).getTime()), now);
+    const days = Math.max(1, Math.round((now - earliest) / 86400_000));
+    const resolvedPerDay = Math.round((resolved.length / days) * 10) / 10;
+
+    const openRows = rows.filter(isOpen);
+    const oldestOpenHrs = openRows.reduce((max, c) => {
+      const age = (now - new Date(c.filedOn).getTime()) / 3600_000;
+      return age > max ? age : max;
+    }, 0);
+    const oldestOpenLabel = (() => {
+      const d = Math.floor(oldestOpenHrs / 24);
+      const h = Math.round(oldestOpenHrs % 24);
+      return d > 0 ? `${d}d ${h}h` : `${h}h`;
+    })();
+
+    // Per-stage timings (avg + median + sample size).
+    const stages = [
+      { key: "pendingAssignment", label: "Pending Assignment" },
+      { key: "assigned",          label: "Assigned" },
+      { key: "pendingResolution", label: "Pending Resolution" },
+    ] as const;
+    const stageTimings = stages.map((st) => {
+      const samples = rows
+        .map((c) => (c as TestComplaint).stageHours?.[st.key])
+        .filter((v): v is number => typeof v === "number" && v > 0);
+      const avg = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : 0;
+      return {
+        key: st.key,
+        label: st.label,
+        avg: Math.round(avg * 10) / 10,
+        median: Math.round(median(samples) * 10) / 10,
+        n: samples.length,
+      };
+    });
+    // Add a Resolved (end-to-end) row so all four PGR states are represented.
+    stageTimings.push({
+      key: "resolved",
+      label: "Resolved (end-to-end)",
+      avg: avgResolution,
+      median: medianResolution,
+      n: resolved.length,
+    });
+    const bottleneckKey = stageTimings.slice(0, 3).reduce((acc, s) => s.avg > acc.avg ? s : acc, stageTimings[0]).key;
+
+    // Age buckets.
+    const ageBuckets = [
+      { key: "<1d",  label: "< 1 day",   value: 0 },
+      { key: "1-3d", label: "1–3 days",  value: 0 },
+      { key: "3-7d", label: "3–7 days",  value: 0 },
+      { key: ">7d",  label: "> 7 days",  value: 0 },
+    ];
+    for (const c of rows) {
+      const ageH = (now - new Date(c.filedOn).getTime()) / 3600_000;
+      if (ageH < 24) ageBuckets[0].value++;
+      else if (ageH < 72) ageBuckets[1].value++;
+      else if (ageH < 168) ageBuckets[2].value++;
+      else ageBuckets[3].value++;
+    }
+
+    // Type/subtype × status crosstab.
+    const statusCols: Complaint["status"][] = ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED","RESOLVED","CLOSED","REJECTED"];
+    const xtMap = new Map<string, { type: string; subtype: string; counts: Record<string, number>; total: number }>();
+    for (const c of rows) {
+      const ct = complaintTypeOf(c.typeCode);
+      if (!ct) continue;
+      const sub = (c as TestComplaint).subtype ?? ct.name;
+      const key = `${ct.name}::${sub}`;
+      const row = xtMap.get(key) ?? {
+        type: ct.name, subtype: sub,
+        counts: Object.fromEntries(statusCols.map((s) => [s, 0])),
+        total: 0,
+      };
+      row.counts[c.status] = (row.counts[c.status] ?? 0) + 1;
+      row.total++;
+      xtMap.set(key, row);
+    }
+    const typeStatusCrosstab = {
+      cols: statusCols,
+      rows: Array.from(xtMap.values()).sort((a, b) => b.total - a.total),
+    };
+
+    return {
+      onTimeRate, openPastSla, atRisk,
+      avgResolution, medianResolution,
+      escalationRate, reopenRate, csat,
+      resolvedPerDay, oldestOpenLabel,
+      stageTimings, bottleneckKey, ageBuckets, typeStatusCrosstab,
+    };
+  }, [filteredComplaints]);
+
   const overTimeMonthly = useMemo(() => {
     const sumF = trend.reduce((a, b) => a + b.filed, 0) * 4;
     const sumR = trend.reduce((a, b) => a + b.resolved, 0) * 4;
