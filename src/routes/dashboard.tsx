@@ -156,8 +156,8 @@ export function DashboardPage() {
   const STATUS_LABEL: Record<Complaint["status"], string> = {
     OPEN: "Pending Assignment",
     ASSIGNED: "Assigned",
-    IN_PROGRESS: "Pending Resolution",
-    REOPENED: "Reopened",
+    IN_PROGRESS: "Pending Reassignment",
+    REOPENED: "Pending Reassignment",
     RESOLVED: "Resolved",
     CLOSED: "Closed",
     REJECTED: "Rejected",
