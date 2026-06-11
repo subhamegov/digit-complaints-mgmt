@@ -1049,7 +1049,7 @@ export function DashboardPage() {
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
             <th className="py-1 font-medium w-6">#</th>
-            <th className="py-1 font-medium">Category</th>
+            <th className="py-1 font-medium">Sub-type</th>
             <th className="py-1 font-medium text-right">Volume</th>
             <th className="py-1 font-medium text-right">WoW</th>
           </tr></thead>
