@@ -1134,7 +1134,7 @@ export function DashboardPage() {
       render: () => (
         <table className="w-full text-[12px]">
           <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Complaint type</th>
+            <th className="py-1 font-medium">Complaint sub-type</th>
             <th className="py-1 font-medium text-right">Closure</th>
             {canCustomize && <th className="py-1 font-medium text-right">On-time</th>}
             <th className="py-1 font-medium text-right">Avg. resolution</th>
