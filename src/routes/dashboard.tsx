@@ -379,7 +379,7 @@ export function DashboardPage() {
       { key: "assigned",          label: "Assigned" },
       { key: "pendingResolution", label: "Pending Resolution" },
     ] as const;
-    const stageTimings = stages.map((st) => {
+    const stageTimings: { key: string; label: string; avg: number; median: number; n: number }[] = stages.map((st) => {
       const samples = rows
         .map((c) => (c as TestComplaint).stageHours?.[st.key])
         .filter((v): v is number => typeof v === "number" && v > 0);
