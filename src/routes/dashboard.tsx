@@ -265,16 +265,20 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const openByEmployee = useMemo(() => {
-    const m = new Map<string, { open: number; totalResHrs: number; resCount: number }>();
+    const m = new Map<string, { open: number; totalResHrs: number; resCount: number; reassign: number; assignedCount: number }>();
     for (const c of filteredComplaints) {
       const id = c.assignedOfficerId;
       if (!id) continue;
-      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0 };
+      const e = m.get(id) ?? { open: 0, totalResHrs: 0, resCount: 0, reassign: 0, assignedCount: 0 };
+      e.assignedCount++;
       if (["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status)) e.open++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resCount++;
         e.totalResHrs += c.slaHours - c.slaRemainingHrs;
       }
+      // TestComplaint carries reassignCount; legacy COMPLAINTS rows don't.
+      const rc = (c as TestComplaint).reassignCount;
+      if (typeof rc === "number") e.reassign += rc;
       m.set(id, e);
     }
     const totalOpen = Array.from(m.values()).reduce((a, b) => a + b.open, 0) || 1;
@@ -284,18 +288,20 @@ export function DashboardPage() {
       open: v.open,
       pct: Math.round((v.open / totalOpen) * 1000) / 10,
       avgHrs: v.resCount ? Math.round((v.totalResHrs / v.resCount) * 10) / 10 : 0,
+      churn: v.assignedCount ? Math.round((v.reassign / v.assignedCount) * 1000) / 10 : 0,
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
   const resolutionByType = useMemo(() => {
-    const m = new Map<string, { total: number; resolved: number; hrs: number }>();
+    const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
       const ct = complaintTypeOf(c.typeCode);
       if (!ct) continue;
-      const e = m.get(ct.code) ?? { total: 0, resolved: 0, hrs: 0 };
+      const e = m.get(ct.code) ?? { total: 0, resolved: 0, resolvedOnTime: 0, hrs: 0 };
       e.total++;
       if (c.status === "RESOLVED" || c.status === "CLOSED") {
         e.resolved++;
+        if (c.slaState !== "BREACHED") e.resolvedOnTime++;
         e.hrs += c.slaHours - c.slaRemainingHrs;
       }
       m.set(ct.code, e);
@@ -303,6 +309,7 @@ export function DashboardPage() {
     return Array.from(m, ([code, v]) => ({
       name: complaintTypeOf(code)?.name ?? code,
       closure: v.total ? Math.round((v.resolved / v.total) * 1000) / 10 : 0,
+      onTime: v.resolved ? Math.round((v.resolvedOnTime / v.resolved) * 1000) / 10 : 0,
       avgHrs: v.resolved ? Math.round((v.hrs / v.resolved) * 10) / 10 : 0,
     })).sort((a, b) => b.closure - a.closure);
   }, [filteredComplaints]);
