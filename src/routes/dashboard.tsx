@@ -492,15 +492,30 @@ export function DashboardPage() {
 
     // Stat KPIs
     { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
-    { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => "4 nearing breach" },
-    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => "87% within SLA" },
+    { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
+    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `${tu.onTimeRate}% on-time` : "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
-    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(avgResolutionHrs), getDelta: () => "Target: 36h" },
-    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Percentage of complaints reopened after resolution.", icon: Repeat, intent: "neutral", getValue: () => `${s.reopenRate}%`, getDelta: () => `CSAT ${s.satisfaction}/5` },
+    { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs), getDelta: () => "Target: 36h" },
+    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5` },
     { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
-    { id: "resolution-rate", kind: "stat", label: "Resolution rate", description: "Resolved ÷ logged complaints, as a percentage.", icon: ThumbsUp, intent: "positive", getValue: () => `${resolutionRate}%`, getDelta: () => `${s.resolved}/${s.total} resolved` },
+    {
+      id: "resolution-rate", kind: "stat",
+      label: canCustomize ? "On-time resolution rate" : "Resolution rate",
+      description: canCustomize
+        ? "Resolved-within-SLA ÷ (resolved-within-SLA + open-past-SLA). Counts open-past-SLA complaints as failures-in-progress."
+        : "Resolved ÷ logged complaints, as a percentage.",
+      icon: ThumbsUp, intent: "positive",
+      getValue: () => canCustomize ? `${tu.onTimeRate}%` : `${resolutionRate}%`,
+      getDelta: () => canCustomize
+        ? `Breached open: ${tu.openPastSla} · At risk 24–48h: ${tu.atRisk}`
+        : `${s.resolved}/${s.total} resolved`,
+    },
 
-    { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3 within the SLA window.", icon: TrendingUp, intent: "warning", getValue: () => "9.2%", getDelta: () => "+1.1 pts" },
+    { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
+    { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
+    { id: "csat", kind: "stat", label: "Citizen satisfaction", description: "Mean citizen satisfaction (1–5) across resolved complaints.", icon: ThumbsUp, intent: "positive", getValue: () => canCustomize ? `${tu.csat}/5` : `${s.satisfaction}/5`, getDelta: () => "Across resolved" },
+    { id: "resolved-per-day", kind: "stat", label: "Resolved per day", description: "Resolved complaints ÷ days in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => canCustomize ? String(tu.resolvedPerDay) : "11", getDelta: () => "Rolling rate" },
+    { id: "oldest-open", kind: "stat", label: "Oldest open age", description: "Age of the oldest currently-open complaint.", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? tu.oldestOpenLabel : "9d 4h", getDelta: () => "Action required" },
     { id: "active-officers", kind: "stat", label: "Active field officers", description: "Officers with at least one assignment in the last 24 hours.", icon: Users, intent: "neutral", getValue: () => "142", getDelta: () => "12 on leave" },
     { id: "repeat-citizens", kind: "stat", label: "Repeat complainants", description: "Citizens filing more than one complaint in 30 days.", icon: Repeat, intent: "warning", getValue: () => "63", getDelta: () => "+8 vs last week" },
     { id: "ageing", kind: "stat", label: "Ageing > 7 days", description: "Open complaints older than 7 days awaiting closure.", icon: AlertTriangle, intent: "negative", getValue: () => "37", getDelta: () => "5 cross-dept" },
