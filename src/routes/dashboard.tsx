@@ -1119,15 +1119,36 @@ export function DashboardPage() {
     [canCustomize],
   );
 
+  const STORAGE_KEY = canCustomize ? "pgr.dashboard.testUser.v1" : null;
+
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Role is hydrated from storage AFTER first render, so re-sync the visible
-  // widget set whenever the role-specific defaults change.
+  // Hydrate from localStorage (test user only). Falls back to role defaults.
   useEffect(() => {
-    setVisibleIds(defaultIds);
-  }, [defaultIds]);
+    if (!STORAGE_KEY) {
+      setVisibleIds(defaultIds);
+      setHydrated(true);
+      return;
+    }
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw) as { visibleIds?: string[]; sizes?: Record<string, { colSpan?: 1 | 2 | 3; rowSpan?: 1 | 2 | 3 }> };
+        const known = new Set(KPI_REGISTRY.map((k) => k.id));
+        const ids = (parsed.visibleIds ?? []).filter((x) => known.has(x));
+        setVisibleIds(ids.length ? ids : defaultIds);
+        if (parsed.sizes) setSizes(parsed.sizes);
+      } else {
+        setVisibleIds(defaultIds);
+      }
+    } catch {
+      setVisibleIds(defaultIds);
+    }
+    setHydrated(true);
+  }, [STORAGE_KEY, defaultIds, KPI_REGISTRY]);
 
   const removeKpi = (id: string) => setVisibleIds((prev) => prev.filter((x) => x !== id));
   const addKpi = (id: string) => {
