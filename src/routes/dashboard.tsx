@@ -557,38 +557,31 @@ export function DashboardPage() {
     {
       id: "wards", kind: "panel", label: "By locality", description: "Complaint volume and on-time % by ward.",
       icon: MapPin, colSpan: 1, title: "By locality",
-      render: () => canCustomize ? (
-        <table className="w-full text-[12px]">
-          <thead><tr className="text-left text-muted-foreground">
-            <th className="py-1 font-medium">Ward</th>
-            <th className="py-1 font-medium text-right">Logged</th>
-            <th className="py-1 font-medium text-right">Open</th>
-            <th className="py-1 font-medium text-right">On-time %</th>
-          </tr></thead>
-          <tbody>
-            {wards.map((w) => (
-              <tr key={w.ward} className="border-t border-border">
-                <td className="py-1.5 truncate">{w.ward}</td>
-                <td className="py-1.5 text-right tabular-nums">{w.total}</td>
-                <td className="py-1.5 text-right tabular-nums">{w.open}</td>
-                <td className="py-1.5 text-right tabular-nums">{w.onTimePct.toFixed(1)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <ul className="space-y-2 text-[12px]">
-          {wards.map((w) => (
-            <li key={w.ward} className="grid grid-cols-[80px_1fr_28px] items-center gap-2">
-              <span className="truncate text-foreground">{w.ward}</span>
-              <span className="h-2 rounded-sm bg-muted">
-                <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / wardsMax) * 100}%` }} />
-              </span>
-              <span className="text-right tabular-nums text-muted-foreground">{w.total}</span>
-            </li>
-          ))}
-        </ul>
-      ),
+      render: () => {
+        const maxTot = Math.max(...wards.map((w) => w.total), 1);
+        return (
+          <ul className="space-y-2 text-[12px]">
+            {wards.map((w) => {
+              const onTimeColor = w.onTimePct >= 85 ? "text-emerald-600" : w.onTimePct >= 70 ? "text-amber-600" : "text-red-600";
+              return (
+                <li key={w.ward} className="grid grid-cols-[90px_1fr_auto] items-center gap-2">
+                  <span className="truncate text-foreground">{w.ward}</span>
+                  <span className="relative h-3 rounded-sm bg-muted overflow-hidden">
+                    <span className="block h-full rounded-sm bg-primary" style={{ width: `${(w.total / maxTot) * 100}%` }} />
+                    {canCustomize && (
+                      <span className="absolute inset-y-0 left-0 block h-full rounded-sm bg-status-breach/60" style={{ width: `${(w.open / maxTot) * 100}%` }} />
+                    )}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="tabular-nums text-foreground font-medium">{w.total}</span>
+                    {canCustomize && <span className={cn("tabular-nums text-[11px] w-12 text-right", onTimeColor)}>{w.onTimePct.toFixed(0)}%</span>}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        );
+      },
     },
     {
       id: "dept", kind: "panel", label: "By department", description: "Open vs resolved vs breached by department.",
