@@ -1278,6 +1278,12 @@ export function DashboardPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
 
+  // Role is hydrated from storage AFTER first render, so re-sync the visible
+  // widget set whenever the role-specific defaults change.
+  useEffect(() => {
+    setVisibleIds(defaultIds);
+  }, [defaultIds]);
+
   const removeKpi = (id: string) => setVisibleIds((prev) => prev.filter((x) => x !== id));
   const addKpi = (id: string) => {
     setVisibleIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
