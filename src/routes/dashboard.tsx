@@ -1409,6 +1409,7 @@ export function DashboardPage() {
                     value={k.getValue?.() ?? ""}
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
+                    info={k.description}
                     onRemove={() => removeKpi(id)}
                   />
                 ) : (
@@ -1416,6 +1417,7 @@ export function DashboardPage() {
                     title={k.title}
                     action={k.action}
                     padded={k.padded}
+                    info={k.description}
                     onRemove={() => removeKpi(id)}
                   >
                     <div style={{ height: panelContentHeight }} className="overflow-auto">
@@ -1507,7 +1509,7 @@ export function DashboardPage() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
               {KPI_REGISTRY.filter((k) => k.kind === "stat").slice(0, 6).map((k) => (
-                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
+                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} info={k.description} />
               ))}
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -1515,7 +1517,7 @@ export function DashboardPage() {
                 const span = k.colSpan === 3 ? "xl:col-span-3" : k.colSpan === 2 ? "xl:col-span-2" : "";
                 return (
                   <div key={k.id} className={span}>
-                    <Panel title={k.title} action={k.action} padded={k.padded}>
+                    <Panel title={k.title} action={k.action} padded={k.padded} info={k.description}>
                       {k.render?.()}
                     </Panel>
                   </div>
