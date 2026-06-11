@@ -1,57 +1,58 @@
-## Scope (Test User only)
+## Goal
 
-Only the Test User role sees these changes (`role === "TEST_USER"`). All other roles keep the current dashboard untouched. No restructuring, no section headings — the dashboard keeps its current widget layout and ordering. Reuse existing components and tokens (StatCard, Panel, DataTable, Tabs, recharts, current chart colors).
+Replace the current 3-tile landing on `/admin/workflow-config` with a **Workflows list** that surfaces all configured complaint workflows for the account, clearly marks the system-locked reference workflow, and keeps the three existing tools (Visualization, SLA Maps, Role Hierarchy) reachable as actions on each workflow row.
 
-## 1. One coherent seed dataset
+## What the user will see
 
-New file `src/lib/test-user-seed.ts`:
+A single page at `/admin/workflow-config` with:
 
-- ~60 deterministic complaints (seeded RNG so numbers are stable).
-- Distributed across:
-  - Wards: **Heritage City, Financial District, Town Square, East Village**
-  - Departments + complaint types: existing `COMPLAINT_TYPES` catalog.
-  - Officers: **Ramesh, Gurmeet, Mohan, Surinder, Baljeet, Pritam** (reuse existing IDs).
-  - Channels: Mobile App, Web, Call, Counter, WhatsApp.
-  - Workflow stages: Pending Assignment → Assigned → Pending Resolution → Resolved/Closed, plus Reopened and Rejected.
-  - SLA states: within, nearing, breached-open, resolved-within, resolved-late.
-  - Ages: spread <1d / 1–3d / 3–7d / >7d (drives the new age widget).
-- Each row carries per-stage dwell hours, reassignment count, and a 1–5 CSAT on resolved rows — so satisfaction, per-stage timings, and churn all reconcile from the same rows.
+1. **Header**: "Workflows" + subtitle "Workflow definitions installed for this account. The DIGIT reference workflow is locked and cannot be edited or deleted."
+2. **Primary action (top-right)**: `+ New workflow` (clones from a base).
+3. **Workflows table** with columns:
+   - **Name** (with a small "System" / lock badge on the reference workflow)
+   - **Code** (e.g. `PGR.STANDARD.V2`)
+   - **Type** (Reference / Custom)
+   - **States** (count, e.g. "7 states")
+   - **Transitions** (count)
+   - **Used by** (count of complaint categories bound to it)
+   - **Status** (Active / Draft / Archived)
+   - **Updated** (date + author)
+   - **Actions**: Visualize · SLA Maps · Role Hierarchy · Edit · Duplicate · Delete
+     - For the locked reference row: Edit and Delete are disabled with a tooltip "System workflow — clone to customize". Duplicate, Visualize, SLA Maps, Role Hierarchy remain enabled.
 
-`DashboardPage` swaps `COMPLAINTS` → `TEST_USER_COMPLAINTS` only when `canCustomize`. Geography filter options become the four new ward names for Test User.
+## The locked reference workflow
 
-## 2. Widget changes (in place; same layout, same order)
+Per the DIGIT PGR reference implementation, the standard banked workflow is **`PGR` business service** (a.k.a. **"DIGIT PGR Standard Workflow v2"**, code `PGR.STANDARD.V2`). This is the canonical state machine used by the DIGIT Public Grievance Redressal module and is bundled with the platform — every account inherits it and it cannot be deleted or structurally edited; account admins clone it to create custom variants.
 
-Stat cards (KPI_REGISTRY) — modify/add, no reordering of existing tiles:
+States: `OPEN → ASSIGNED → IN_PROGRESS → RESOLVED → (CLOSED | REOPENED) | REJECTED` — already defined in `src/routes/config.workflow.tsx` and reused for the visualizer.
 
-- **On-time resolution rate** (new, replaces the existing `resolution-rate` 13.3% card in the same slot). Formula: `resolvedWithinSLA / (resolvedWithinSLA + openPastSLA)`. Sub-stats inside the card (uses `delta` line, two short stats): "Breached open: N · At-risk 24–48h: N". Normal card size.
-- **Median resolution time** (new card).
-- **Escalation rate %** (new card) = escalated / total.
-- **Reopen rate %** — update existing reopen card's formula to `reopened / resolved`.
-- **Citizen satisfaction** (new card) — mean CSAT across resolved-with-CSAT rows.
-- **Complaints resolved per day** (new card) = resolved / days in selected period (defaults to 7).
-- **Oldest open age** (new card) — age of the oldest currently-open complaint, `Xd Yh`.
-- Keep: total, open, resolved, avg first response, trending top 5.
+## Seed rows for the list (mock data, account-scoped)
 
-Panels — modify in place, do not duplicate:
+| Name | Code | Type | States | Transitions | Used by | Status | Updated |
+|---|---|---|---|---|---|---|---|
+| DIGIT PGR Standard Workflow v2 *(locked)* | `PGR.STANDARD.V2` | Reference | 7 | 7 | 42 categories | Active | 2024-01-15 · DIGIT Platform |
+| Sanitation Fast-Track | `PGR.SANITATION.FT` | Custom | 6 | 6 | 8 categories | Active | 2026-04-22 · Vikram Mehta |
+| Water Supply – 2-Tier Escalation | `PGR.WATER.2TIER` | Custom | 8 | 9 | 5 categories | Active | 2026-05-30 · Vikram Mehta |
+| Street Lighting (pilot) | `PGR.LIGHTING.PILOT` | Custom | 7 | 7 | 0 categories | Draft | 2026-06-08 · Harpreet Kaur |
 
-- **Resolution rate by complaint type** (`resolution-by-type`): add **On-time %** column.
-- **By locality / wards**: add **On-time %** column alongside the existing logged count + bar.
-- **Open complaints by employee** (`open-by-employee`): add **Reassignment churn** column.
-- **Average time per workflow stage** (new panel `stage-timings`): one row per PGR state (Pending Assignment, Assigned, Pending Resolution, Resolved) with avg dwell, median dwell, sample count; bottleneck row highlighted.
-- **Complaint type & subtype by status** (new panel `type-status-crosstab`): type/subtype rows × status columns + total.
-- **Complaints by age** (new panel `by-age`): bar chart with <1d / 1–3d / 3–7d / >7d buckets.
-- **SLA at risk** (`sla` panel) for Test User: default sort by time-to-breach ascending.
+## Behavioural details
 
-Kept as-is (driven by the new dataset, so numbers reconcile): by-type, by-subtype, by-channel, by-geography, by-status, by-sla, time-of-day, day-of-week, complaints logged over time, trending locations, complaint map.
+- Clicking a row name opens the existing `/admin/workflow-config/visualization` page (passing the workflow code via search param so the visualizer can show that workflow; current visualizer already shows the standard one, so for now all rows route there).
+- "Duplicate" on the locked row toasts "Cloned 'DIGIT PGR Standard Workflow v2' → draft" (no real persistence; mock UX).
+- "Delete" on the locked row is disabled; tooltip explains why. On other rows it opens an alert-dialog confirm.
+- Row badge for the locked workflow: small `Lock` icon + "System" pill, plus a "Reference" type tag.
 
-## 3. Data integrity rules
+## Technical changes
 
-- Every widget — including citizen satisfaction and per-stage timings — reads from the same `TEST_USER_COMPLAINTS` array, so totals reconcile across the dashboard.
-- No empty states, no "—" cells, no zero-only breakdowns: seed guarantees ≥1 row per ward, department, channel, status, age bucket, and stage.
+- **Edit** `src/routes/admin.workflow-config.index.tsx`:
+  - Remove the 3-tile grid; replace with a `Panel` containing the workflows table (use existing `Panel` / table patterns from `src/components/pgr/primitives.tsx` and `src/routes/config.workflow.tsx` for visual consistency).
+  - Add an in-file `WORKFLOWS` constant with the four rows above.
+  - Per-row action menu via existing `DropdownMenu` (shadcn). Use `Lock`, `Eye`, `Gauge`, `ShieldCheck`, `Copy`, `Pencil`, `Trash2` icons from `lucide-react`.
+  - Disabled state on Edit/Delete for `type === "Reference"` with `title` tooltip.
+- **No route additions** — Visualization, SLA Maps, Role Hierarchy stay at their current child routes and are reached from row actions.
+- No other files changed.
 
-## Files touched
+## Out of scope
 
-- `src/lib/test-user-seed.ts` (new)
-- `src/routes/dashboard.tsx` (Test-User-gated data swap, formula updates, in-place column additions, three new panels registered into the existing default list at sensible positions without removing or reordering other tiles)
-
-No changes to navigation, other routes, or design tokens.
+- Real persistence / CRUD backend (mock only).
+- Per-workflow visualizer variants (the visualizer keeps showing the standard machine for now; wiring per-workflow data can be a follow-up).
