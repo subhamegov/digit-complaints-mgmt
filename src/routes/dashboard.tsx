@@ -57,6 +57,7 @@ export function DashboardPage() {
   const [toDate, setToDate] = useState("");
   const [geoFilter, setGeoFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Test User reads from its own coherent 60-row seed so every widget
   // reconciles against ONE dataset. Other roles keep the legacy COMPLAINTS.
@@ -68,15 +69,20 @@ export function DashboardPage() {
     if (!canCustomize) return COMPLAINTS;
     const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
     const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
+    const q = searchQuery.trim().toLowerCase();
     return sourceComplaints.filter((c) => {
       const filedTs = new Date(c.filedOn).getTime();
       if (fromTs !== null && filedTs < fromTs) return false;
       if (toTs !== null && filedTs > toTs) return false;
       if (geoFilter && c.ward !== geoFilter) return false;
       if (typeFilter && c.typeCode !== typeFilter) return false;
+      if (q) {
+        const hay = `${c.id} ${c.description ?? ""} ${c.ward ?? ""} ${c.typeCode ?? ""} ${(c as TestComplaint).citizen?.name ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     });
-  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter]);
+  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter, searchQuery]);
 
   const s = useMemo(() => {
     const total = filteredComplaints.length;
