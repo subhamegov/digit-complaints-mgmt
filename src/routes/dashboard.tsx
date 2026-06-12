@@ -1101,12 +1101,12 @@ export function DashboardPage() {
   const defaultIds = useMemo(
     () => canCustomize
       ? [
-        "resolution-rate", "total", "at-risk-open", "breached-sla", "open", "resolved",
-        "first-response", "first-assignment", "median-resolution",
-        "escalation-rate", "reopen", "csat", "resolved-per-day", "oldest-open",
+        "resolution-rate", "at-risk-open", "breached-sla", "open", "resolved",
+        "median-resolution",
+        "reopen", "csat", "resolved-per-day",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
-        "type-status-crosstab", "open-by-employee", "trending-locations",
-        "by-age", "by-type", "by-channel", "geo-map", "by-status", "by-sla",
+        "open-by-employee", "trending-locations",
+        "by-age", "by-channel", "by-sla",
         "time-of-day", "day-of-week", "over-time", "sla",
       ]
       : [
