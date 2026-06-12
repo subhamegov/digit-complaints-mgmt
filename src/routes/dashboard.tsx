@@ -1101,9 +1101,8 @@ export function DashboardPage() {
   const defaultIds = useMemo(
     () => canCustomize
       ? [
-        "resolution-rate", "at-risk-open", "breached-sla", "open", "resolved",
-        "median-resolution",
-        "reopen", "csat", "resolved-per-day",
+        "resolution-rate", "breached-sla", "resolved",
+        "reopen", "csat",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
         "open-by-employee", "trending-locations",
         "by-age", "by-channel", "by-sla",
