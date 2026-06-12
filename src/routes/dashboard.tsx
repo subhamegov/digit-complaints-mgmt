@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useRef, useEffect, Fragment } from "react";
-import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X } from "lucide-react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
-  PageHeader, StatCard, Panel, StatusBadge, SlaBadge,
+  StatCard, Panel, StatusBadge, SlaBadge,
   ActionButton, OwnerCell, DataTable, nextActionFor,
 } from "@/components/pgr/primitives";
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
@@ -57,6 +57,7 @@ export function DashboardPage() {
   const [toDate, setToDate] = useState("");
   const [geoFilter, setGeoFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Test User reads from its own coherent 60-row seed so every widget
   // reconciles against ONE dataset. Other roles keep the legacy COMPLAINTS.
@@ -68,15 +69,20 @@ export function DashboardPage() {
     if (!canCustomize) return COMPLAINTS;
     const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
     const toTs = toDate ? new Date(toDate + "T23:59:59").getTime() : null;
+    const q = searchQuery.trim().toLowerCase();
     return sourceComplaints.filter((c) => {
       const filedTs = new Date(c.filedOn).getTime();
       if (fromTs !== null && filedTs < fromTs) return false;
       if (toTs !== null && filedTs > toTs) return false;
       if (geoFilter && c.ward !== geoFilter) return false;
       if (typeFilter && c.typeCode !== typeFilter) return false;
+      if (q) {
+        const hay = `${c.id} ${c.description ?? ""} ${c.ward ?? ""} ${c.typeCode ?? ""} ${(c as TestComplaint).citizen?.name ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
       return true;
     });
-  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter]);
+  }, [canCustomize, sourceComplaints, fromDate, toDate, geoFilter, typeFilter, searchQuery]);
 
   const s = useMemo(() => {
     const total = filteredComplaints.length;
@@ -1227,110 +1233,134 @@ export function DashboardPage() {
 
   return (
     <div>
-      <PageHeader
-        title={t("CS_DASHBOARD_TITLE")}
-        subtitle={`Operational view · ${jurisdiction.name} · Last 7 days`}
-        primaryAction={
-          <div className="flex flex-col items-end gap-2">
-            {canCustomize && (
-              <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-                <PopoverTrigger asChild>
-                  <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-3 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
-                    <Plus className="h-3.5 w-3.5" /> Add KPI
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 p-1">
-                  <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available KPIs</div>
-                  <ul className="max-h-96 overflow-auto">
-                    {availableToAdd.map((k) => {
-                      const Icon = k.icon;
-                      return (
-                        <li key={k.id}>
-                          <HoverCard openDelay={120} closeDelay={60}>
-                            <HoverCardTrigger asChild>
-                              <button
-                                onClick={() => addKpi(k.id)}
-                                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
-                              >
-                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="flex-1 truncate">{k.label}</span>
-                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.kind === "stat" ? "Stat" : "Chart"}</span>
-                                <Plus className="h-3 w-3 text-muted-foreground" />
-                              </button>
-                            </HoverCardTrigger>
-                            <HoverCardContent side="left" align="start" className="w-72 p-3">
-                              {k.kind === "stat" ? (
-                                <div className="mb-2 w-fit">
-                                  <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
-                                </div>
-                              ) : (
-                                <div className="mb-2 rounded border border-border bg-muted/30 px-3 py-2 text-[12px] text-foreground inline-flex items-center gap-2">
-                                  <Icon className="h-3.5 w-3.5 text-muted-foreground" /> {k.title ?? k.label}
-                                </div>
-                              )}
-                              <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
-                            </HoverCardContent>
-                          </HoverCard>
-                        </li>
-                      );
-                    })}
-                    {availableToAdd.length === 0 && (
-                      <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
-                    )}
-                  </ul>
-                </PopoverContent>
-              </Popover>
-            )}
-            <div className="flex gap-2">
-              <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
-              <Link to="/complaints/new">
-                <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
-                  {t("ACTION_REGISTER")}
-                </ActionButton>
-              </Link>
-            </div>
-          </div>
-        }
-      />
+      <div className="border-b border-border bg-surface px-4 lg:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="min-w-0 flex items-baseline gap-2">
+          <h1 className="text-[15px] font-semibold leading-tight text-foreground truncate">{t("CS_DASHBOARD_TITLE")}</h1>
+          <span className="hidden sm:inline text-[11px] text-muted-foreground truncate">{jurisdiction.name} · Last 7 days</span>
+        </div>
+        <div className="relative ml-auto w-full sm:w-56 md:w-64 order-3 sm:order-none">
+          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search complaints, wards, citizens…"
+            aria-label="Search dashboard"
+            className="h-8 w-full rounded-sm border border-border bg-background pl-7 pr-7 text-[12px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex h-5 w-5 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {canCustomize && (
+            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
+                  <Plus className="h-3.5 w-3.5" /> Add KPI
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-1">
+                <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available KPIs</div>
+                <ul className="max-h-96 overflow-auto">
+                  {availableToAdd.map((k) => {
+                    const Icon = k.icon;
+                    return (
+                      <li key={k.id}>
+                        <HoverCard openDelay={120} closeDelay={60}>
+                          <HoverCardTrigger asChild>
+                            <button
+                              onClick={() => addKpi(k.id)}
+                              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                            >
+                              <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="flex-1 truncate">{k.label}</span>
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.kind === "stat" ? "Stat" : "Chart"}</span>
+                              <Plus className="h-3 w-3 text-muted-foreground" />
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent side="left" align="start" className="w-72 p-3">
+                            {k.kind === "stat" ? (
+                              <div className="mb-2 w-fit">
+                                <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
+                              </div>
+                            ) : (
+                              <div className="mb-2 rounded border border-border bg-muted/30 px-3 py-2 text-[12px] text-foreground inline-flex items-center gap-2">
+                                <Icon className="h-3.5 w-3.5 text-muted-foreground" /> {k.title ?? k.label}
+                              </div>
+                            )}
+                            <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </li>
+                    );
+                  })}
+                  {availableToAdd.length === 0 && (
+                    <li className="px-2 py-3 text-center text-[12px] text-muted-foreground">All KPIs added</li>
+                  )}
+                </ul>
+              </PopoverContent>
+            </Popover>
+          )}
+          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+          <Link to="/complaints/new">
+            <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
+              {t("ACTION_REGISTER")}
+            </ActionButton>
+          </Link>
+        </div>
+      </div>
 
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
         <DemoSetupBanner />
         <TestUserPrompt />
         {canCustomize && (
-          <div className="rounded border border-border bg-surface p-3 flex flex-wrap items-end gap-3">
-            <div className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
-              <Filter className="h-3.5 w-3.5 text-muted-foreground" /> Filters
+          <div className="rounded border border-border bg-surface px-3 py-2 flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
+              <Filter className="h-3.5 w-3.5" /> Filters
             </div>
-            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-              From
-              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
-            </label>
-            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-              To
-              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground" />
-            </label>
-            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-              Geography
-              <select value={geoFilter} onChange={(e) => setGeoFilter(e.target.value)}
-                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[140px]">
-                <option value="">All wards</option>
-                {allWards.map((w) => <option key={w} value={w}>{w}</option>)}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-              Complaint type
-              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-                className="h-8 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[180px]">
-                <option value="">All types</option>
-                {COMPLAINT_TYPES.filter((c) => c.active).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
-              </select>
-            </label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              aria-label="From date"
+              className="h-7 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground"
+            />
+            <span className="text-[11px] text-muted-foreground">→</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              aria-label="To date"
+              className="h-7 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground"
+            />
+            <select
+              value={geoFilter}
+              onChange={(e) => setGeoFilter(e.target.value)}
+              aria-label="Ward"
+              className="h-7 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[120px]"
+            >
+              <option value="">All wards</option>
+              {allWards.map((w) => <option key={w} value={w}>{w}</option>)}
+            </select>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              aria-label="Complaint type"
+              className="h-7 rounded-sm border border-border bg-background px-2 text-[12px] text-foreground min-w-[150px]"
+            >
+              <option value="">All types</option>
+              {COMPLAINT_TYPES.filter((c) => c.active).map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}
+            </select>
             {(fromDate || toDate || geoFilter || typeFilter) && (
               <button
                 onClick={() => { setFromDate(""); setToDate(""); setGeoFilter(""); setTypeFilter(""); }}
-                className="h-8 rounded-sm border border-border bg-surface px-3 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+                className="h-7 rounded-sm border border-border bg-surface px-2.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
               >
                 Clear
               </button>
