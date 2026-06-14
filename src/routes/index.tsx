@@ -52,7 +52,7 @@ function LandingPage() {
                 to="/login"
                 className="inline-flex h-10 items-center gap-2 rounded-sm bg-primary px-5 text-[14px] font-medium text-primary-foreground hover:opacity-90"
               >
-                Access Console <ArrowRight className="h-4 w-4" />
+                Experience Complaints <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
