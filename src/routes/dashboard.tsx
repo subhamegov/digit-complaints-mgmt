@@ -1115,7 +1115,51 @@ export function DashboardPage() {
             </div>
           </div>
         );
+    },
+    {
+      id: "resolution-time-by-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint sub-types with the highest average resolution time.",
+      icon: Clock, colSpan: 2, title: "Resolution time by sub-type",
+      render: () => {
+        const { rows, upper } = resolutionTimeBySubtype;
+        if (!rows.length) {
+          return <div className="text-[12px] text-muted-foreground">No resolved complaints in range.</div>;
+        }
+        const maxHrs = rows[0]?.avgHrs ?? 0;
+        return (
+          <div className="flex flex-col gap-3">
+            <div className="text-[11px] text-muted-foreground -mt-1">Average hours to resolve · ordered slowest to fastest</div>
+            <div className="flex items-end gap-3 h-[180px] pt-4">
+              {rows.map((r) => {
+                const heightPct = (r.avgHrs / upper) * 100;
+                const isWorst = r.avgHrs === maxHrs;
+                return (
+                  <div key={r.name} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                    <div className="relative w-full flex-1 flex items-end">
+                      <div
+                        className="w-full rounded-t-sm relative"
+                        style={{
+                          height: `${heightPct}%`,
+                          background: isWorst ? "var(--color-chart-4)" : "var(--color-chart-1)",
+                          opacity: isWorst ? 1 : 0.7,
+                        }}
+                        title={`${r.name}: ${r.avgHrs}h avg · ${r.count} resolved`}
+                      >
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold tabular-nums text-foreground whitespace-nowrap">
+                          {r.avgHrs}h
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-foreground text-center leading-tight w-full truncate" title={r.name}>
+                      {r.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
       },
+    },
     },
     {
       id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
