@@ -331,6 +331,29 @@ export function DashboardPage() {
     return { rows, max, mean, upper, ticks };
   }, [filteredComplaints]);
 
+  const resolutionTimeBySubtype = useMemo(() => {
+    const m = new Map<string, { hrs: number; n: number }>();
+    for (const c of filteredComplaints) {
+      if (c.status !== "RESOLVED" && c.status !== "CLOSED") continue;
+      const ct = complaintTypeOf(c.typeCode);
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      const e = m.get(sub) ?? { hrs: 0, n: 0 };
+      e.hrs += c.slaHours - c.slaRemainingHrs;
+      e.n++;
+      m.set(sub, e);
+    }
+    const rows = Array.from(m, ([name, v]) => ({
+      name,
+      avgHrs: v.n ? Math.round((v.hrs / v.n) * 10) / 10 : 0,
+      n: v.n,
+    }))
+      .filter((r) => r.n > 0)
+      .sort((a, b) => b.avgHrs - a.avgHrs)
+      .slice(0, 5);
+    const max = Math.max(...rows.map((r) => r.avgHrs), 1);
+    return { rows, max };
+  }, [filteredComplaints]);
+
 
 
   const resolutionByType = useMemo(() => {
@@ -1093,6 +1116,43 @@ export function DashboardPage() {
       },
     },
     {
+      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint sub-types with the highest average resolution time.",
+      icon: Clock, colSpan: 2, title: "Resolution time by sub-type",
+      render: () => {
+        const { rows, max } = resolutionTimeBySubtype;
+        if (!rows.length) {
+          return <div className="text-[12px] text-muted-foreground">No resolved complaints in the current filter.</div>;
+        }
+        return (
+          <div className="flex flex-col gap-3">
+            <div className="text-[11px] text-muted-foreground -mt-1">Top 5 sub-types — average hours to resolve</div>
+            <div className="flex items-end gap-3 h-[200px] pt-6">
+              {rows.map((r) => {
+                const h = `${(r.avgHrs / max) * 100}%`;
+                return (
+                  <div key={r.name} className="flex-1 flex flex-col items-center h-full min-w-0" title={`${r.name}: ${r.avgHrs}h avg · ${r.n} resolved`}>
+                    <div className="flex-1 w-full flex items-end justify-center relative">
+                      <div
+                        className="w-full max-w-[56px] rounded-t-sm relative"
+                        style={{ height: h, background: "var(--color-chart-1)" }}
+                      >
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold tabular-nums text-foreground whitespace-nowrap">
+                          {r.avgHrs}h
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 w-full text-center text-[11px] text-foreground truncate" title={r.name}>
+                      {r.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
@@ -1221,7 +1281,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionTimeBySubtype, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -1236,7 +1296,7 @@ export function DashboardPage() {
         "resolution-rate", "breached-sla", "resolved",
         "reopen", "csat",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
-        "open-by-employee", "team-load-sla", "trending-locations",
+        "open-by-employee", "team-load-sla", "resolution-time-subtype", "trending-locations",
         "by-age", "by-channel", "by-sla",
         "time-of-day", "day-of-week", "over-time", "sla",
       ]
