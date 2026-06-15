@@ -44,18 +44,14 @@ function LoginPage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open DIGIT Complaint Management landing page in a new tab"
-              className="inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40"
-              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)", maxWidth: 140 }}
+              className="inline-block transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40 rounded-md px-2.5 py-1.5"
+              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
             >
-              <div
-                className="flex h-6 w-6 items-center justify-center rounded-sm font-bold"
-                style={{ background: "#FFFFFF", color: "#0C184A", fontSize: 12 }}
-              >
-                e
-              </div>
-              <span style={{ color: "#FFFFFF", fontSize: 13, fontWeight: 600, letterSpacing: "0.02em" }}>
-                eGov
-              </span>
+              <img
+                src={eGovLogoAsset.url}
+                alt="eGov Foundation"
+                style={{ height: 36, width: "auto", display: "block" }}
+              />
             </a>
 
             <div style={{ marginTop: 18 }}>
