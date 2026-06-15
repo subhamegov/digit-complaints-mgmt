@@ -154,7 +154,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
 
-      <div className="border-t border-white/5 px-3 py-2.5 text-[11px]">
+      <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
         <div className="truncate font-medium text-chrome-foreground">{userName}</div>
         <div className="truncate text-chrome-muted">{ROLE_LABEL[role]}</div>
         <div className="mt-1 text-chrome-muted/70">Build 2.4.1 · Sandbox</div>
