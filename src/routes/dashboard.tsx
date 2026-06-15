@@ -331,6 +331,31 @@ export function DashboardPage() {
     return { rows, max, mean, upper, ticks };
   }, [filteredComplaints]);
 
+  const resolutionTimeBySubtype = useMemo(() => {
+    const m = new Map<string, { name: string; hrs: number; count: number }>();
+    for (const c of filteredComplaints) {
+      if (c.status !== "RESOLVED" && c.status !== "CLOSED") continue;
+      const ct = complaintTypeOf(c.typeCode);
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      const e = m.get(sub) ?? { name: sub, hrs: 0, count: 0 };
+      e.hrs += c.slaHours - c.slaRemainingHrs;
+      e.count++;
+      m.set(sub, e);
+    }
+    const rows = Array.from(m.values())
+      .filter((r) => r.count > 0)
+      .map((r) => ({ name: r.name, avgHrs: Math.round((r.hrs / r.count) * 10) / 10, count: r.count }))
+      .sort((a, b) => b.avgHrs - a.avgHrs)
+      .slice(0, 5);
+    const max = Math.max(...rows.map((r) => r.avgHrs), 1);
+    const raw = max / 4;
+    const pow = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))));
+    const norm = raw / pow;
+    const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * pow;
+    const upper = Math.max(step, Math.ceil(max / step) * step);
+    return { rows, upper };
+  }, [filteredComplaints]);
+
 
 
   const resolutionByType = useMemo(() => {
