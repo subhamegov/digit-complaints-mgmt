@@ -998,6 +998,158 @@ export function DashboardPage() {
       ),
     },
     {
+      id: "team-load-by-sla", kind: "panel", label: "Team load by SLA", description: "All complaints by SLA state",
+      icon: Users, colSpan: 3, title: "Team load by SLA",
+      render: () => {
+        const { rows, max, mean } = teamLoadBySla;
+        if (!rows.length) {
+          return <div className="text-[12px] text-muted-foreground py-6 text-center">No assignments to display.</div>;
+        }
+        // Nice tick interval (~6 ticks).
+        const step = max <= 10 ? 2 : max <= 25 ? 5 : max <= 60 ? 10 : 20;
+        const axisMax = Math.ceil(max / step) * step;
+        const ticks: number[] = [];
+        for (let i = 0; i <= axisMax; i += step) ticks.push(i);
+
+        const COL_NAME = 160;       // px, fixed-width label column
+        const COL_TOTAL = 36;       // px, end-of-bar count
+        const ROW_H = 28;           // bar height
+        const ROW_GAP = 18;         // spacing between rows
+        const TOP_PAD = 4;
+        const AXIS_H = 28;
+        const plotHeight = rows.length * (ROW_H + ROW_GAP);
+
+        const COLORS = {
+          resolved: "#CBD5E1",      // recede — slate-300
+          onTrack:  "#93C5FD",      // recede — blue-300
+          nearing:  "#F59E0B",      // pop — amber-500
+          breached: "#DC2626",      // pop — red-600
+        };
+
+        const LegendDot = ({ color, label }: { color: string; label: string }) => (
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: color }} />
+            {label}
+          </span>
+        );
+
+        return (
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <LegendDot color={COLORS.resolved} label="Resolved" />
+              <LegendDot color={COLORS.onTrack}  label="On track" />
+              <LegendDot color={COLORS.nearing}  label="Nearing breach" />
+              <LegendDot color={COLORS.breached} label="Breached" />
+            </div>
+            <div
+              className="grid items-stretch"
+              style={{ gridTemplateColumns: `${COL_NAME}px 1fr ${COL_TOTAL}px` }}
+            >
+              {/* Spacer over label column */}
+              <div />
+              {/* Plot area: bars + gridlines + axis as a single relative container */}
+              <div className="relative" style={{ height: plotHeight + AXIS_H + TOP_PAD }}>
+                {/* Vertical gridlines */}
+                {ticks.map((t) => {
+                  const left = (t / axisMax) * 100;
+                  return (
+                    <div
+                      key={`g-${t}`}
+                      className="absolute top-0"
+                      style={{
+                        left: `${left}%`,
+                        height: plotHeight + TOP_PAD,
+                        borderLeft: "1px dashed var(--border)",
+                        opacity: t === 0 ? 0.9 : 0.45,
+                      }}
+                    />
+                  );
+                })}
+                {/* Mean reference line */}
+                {mean > 0 && (
+                  <div
+                    className="absolute top-0 pointer-events-none"
+                    style={{
+                      left: `${(mean / axisMax) * 100}%`,
+                      height: plotHeight + TOP_PAD,
+                      borderLeft: "1px dashed #0F172A",
+                      opacity: 0.55,
+                    }}
+                  >
+                    <span
+                      className="absolute -top-0.5 translate-x-1 text-[10px] font-medium text-foreground bg-surface px-1"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      team avg {mean.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+                {/* Bars */}
+                {rows.map((r, i) => {
+                  const top = TOP_PAD + i * (ROW_H + ROW_GAP) + ROW_GAP / 2;
+                  const seg = (n: number) => `${(n / axisMax) * 100}%`;
+                  return (
+                    <div key={r.id} className="absolute left-0 right-0 flex h-[28px]" style={{ top }}>
+                      <div className="flex h-full" style={{ width: `${(r.total / axisMax) * 100}%` }}
+                        title={`${r.name}\nResolved: ${r.resolved} · On track: ${r.onTrack} · Nearing breach: ${r.nearing} · Breached: ${r.breached} · Total: ${r.total}`}
+                      >
+                        <div style={{ width: seg(r.resolved), background: COLORS.resolved }} />
+                        <div style={{ width: seg(r.onTrack),  background: COLORS.onTrack  }} />
+                        <div style={{ width: seg(r.nearing),  background: COLORS.nearing  }} />
+                        <div style={{ width: seg(r.breached), background: COLORS.breached }} />
+                      </div>
+                    </div>
+                  );
+                })}
+                {/* X-axis */}
+                <div className="absolute left-0 right-0" style={{ top: plotHeight + TOP_PAD }}>
+                  <div className="relative h-px bg-border" />
+                  {ticks.map((t) => {
+                    const left = (t / axisMax) * 100;
+                    return (
+                      <div key={`t-${t}`} className="absolute" style={{ left: `${left}%`, transform: "translateX(-50%)" }}>
+                        <div className="h-1.5 w-px bg-border mx-auto" />
+                        <div className="text-[10px] text-muted-foreground tabular-nums mt-0.5">{t}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Spacer over total column */}
+              <div />
+
+              {/* Name labels (left col), one per row, aligned to bar rows */}
+              <div className="col-start-1 row-start-1 row-end-2" />
+              {rows.map((r, i) => {
+                const top = TOP_PAD + i * (ROW_H + ROW_GAP) + ROW_GAP / 2;
+                return (
+                  <Fragment key={`labels-${r.id}`}>
+                    <div
+                      className="absolute text-[12px] font-medium text-foreground truncate pr-3"
+                      style={{ top, height: ROW_H, lineHeight: `${ROW_H}px`, left: 0, width: COL_NAME }}
+                    >
+                      {r.name}
+                    </div>
+                    <div
+                      className="absolute text-[12px] tabular-nums text-foreground font-semibold"
+                      style={{
+                        top,
+                        height: ROW_H,
+                        lineHeight: `${ROW_H}px`,
+                        left: `calc(${COL_NAME}px + ${(r.total / axisMax) * 100}% * (100% - ${COL_NAME + COL_TOTAL}px) / 100% + 6px)`,
+                      }}
+                    >
+                      {r.total}
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
