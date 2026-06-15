@@ -165,7 +165,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-chrome text-chrome-foreground">
+    <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-[#0B1F3A] text-chrome-foreground">
       <SidebarContent />
     </aside>
   );
