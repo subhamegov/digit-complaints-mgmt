@@ -1296,7 +1296,7 @@ export function DashboardPage() {
         "resolution-rate", "breached-sla", "resolved",
         "reopen", "csat",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
-        "open-by-employee", "team-load-sla", "trending-locations",
+        "open-by-employee", "team-load-sla", "resolution-time-subtype", "trending-locations",
         "by-age", "by-channel", "by-sla",
         "time-of-day", "day-of-week", "over-time", "sla",
       ]
