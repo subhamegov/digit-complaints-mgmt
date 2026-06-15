@@ -55,8 +55,8 @@ const ADMIN_NAV: NavItem[] = [];
 function SidebarContextSwitchers() {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
-    <div className="space-y-2 border-b border-white/5 px-3 py-3">
-      <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-chrome-muted">
+    <div className="space-y-2 border-b border-white/10 px-3 py-3">
+      <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
         Working context
       </div>
       <SidebarField icon={Building2} label={t("COMMON_TENANT")}>
