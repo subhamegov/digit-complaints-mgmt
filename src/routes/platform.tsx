@@ -72,7 +72,7 @@ function PlatformLanding() {
               P
             </div>
             <div className="leading-tight">
-              <div className="text-[13px] font-semibold">DIGIT Platform</div>
+              <div className="text-[13px] font-semibold">DIGIT Complaint Management</div>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Complaints Management
               </div>
