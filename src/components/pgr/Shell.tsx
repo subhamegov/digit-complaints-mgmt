@@ -55,8 +55,8 @@ const ADMIN_NAV: NavItem[] = [];
 function SidebarContextSwitchers() {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
-    <div className="space-y-2 border-b border-white/5 px-3 py-3">
-      <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-chrome-muted">
+    <div className="space-y-2 border-b border-white/10 px-3 py-3">
+      <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
         Working context
       </div>
       <SidebarField icon={Building2} label={t("COMMON_TENANT")}>
@@ -122,8 +122,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             className={cn(
               "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
               active
-                ? "border-primary bg-white/[0.06] font-medium text-white"
-                : "border-transparent text-chrome-foreground/75 hover:bg-white/[0.04] hover:text-chrome-foreground",
+                ? "border-transparent bg-[#2563EB] font-medium text-white [&_svg]:text-white"
+                : "border-transparent text-[#CBD5E1] [&_svg]:text-[#94A3B8] hover:bg-[#2563EB]/[0.12] hover:text-white",
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -137,13 +137,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/5">
+      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
         <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold">
           P
         </div>
         <div className="leading-tight">
           <div className="text-[13px] font-semibold tracking-wide">DIGIT PGR</div>
-          <div className="text-[10px] uppercase tracking-wider text-chrome-muted">Grievance Redressal</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#93A4BC]">Grievance Redressal</div>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
 
-      <div className="border-t border-white/5 px-3 py-2.5 text-[11px]">
+      <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
         <div className="truncate font-medium text-chrome-foreground">{userName}</div>
         <div className="truncate text-chrome-muted">{ROLE_LABEL[role]}</div>
         <div className="mt-1 text-chrome-muted/70">Build 2.4.1 · Sandbox</div>
@@ -165,7 +165,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-chrome text-chrome-foreground">
+    <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-[#0B1F3A] text-chrome-foreground">
       <SidebarContent />
     </aside>
   );
@@ -182,7 +182,7 @@ export function MobileSidebar({ open, onClose }: { open: boolean; onClose: () =>
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <aside className="absolute left-0 top-0 bottom-0 flex w-[260px] flex-col bg-chrome text-chrome-foreground shadow-xl">
+      <aside className="absolute left-0 top-0 bottom-0 flex w-[260px] flex-col bg-[#0B1F3A] text-chrome-foreground shadow-xl">
         <SidebarContent onNavigate={onClose} />
       </aside>
     </div>
