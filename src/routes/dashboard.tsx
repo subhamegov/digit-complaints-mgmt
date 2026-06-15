@@ -299,6 +299,40 @@ export function DashboardPage() {
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
+  const teamLoadBySla = useMemo(() => {
+    type Row = { id: string; name: string; resolved: number; onTrack: number; nearing: number; breached: number; total: number };
+    const m = new Map<string, Row>();
+    for (const c of filteredComplaints) {
+      const id = c.assignedOfficerId;
+      if (!id) continue;
+      const e: Row = m.get(id) ?? { id, name: officerOf(id)?.name ?? id, resolved: 0, onTrack: 0, nearing: 0, breached: 0, total: 0 };
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      const isOpen = ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status);
+      if (isResolved) e.resolved++;
+      else if (isOpen) {
+        if (c.slaState === "BREACHED") e.breached++;
+        else if (c.slaState === "NEARING") e.nearing++;
+        else e.onTrack++;
+      }
+      e.total++;
+      m.set(id, e);
+    }
+    const rows = Array.from(m.values()).sort((a, b) => b.breached - a.breached || b.total - a.total);
+    const max = Math.max(...rows.map((r) => r.total), 1);
+    const mean = rows.length ? rows.reduce((a, r) => a + r.total, 0) / rows.length : 0;
+    // Nice axis upper bound and step
+    const raw = max / 6;
+    const pow = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))));
+    const norm = raw / pow;
+    const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * pow;
+    const upper = Math.max(step, Math.ceil(max / step) * step);
+    const ticks: number[] = [];
+    for (let v = 0; v <= upper + 0.0001; v += step) ticks.push(Math.round(v));
+    return { rows, max, mean, upper, ticks };
+  }, [filteredComplaints]);
+
+
+
   const resolutionByType = useMemo(() => {
     const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
