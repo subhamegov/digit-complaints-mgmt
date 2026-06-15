@@ -4,8 +4,8 @@ import { ShieldCheck, BarChart3, Users, Zap, ArrowRight, Globe } from "lucide-re
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "DIGIT PGR — Public Grievance Redressal" },
-      { name: "description", content: "Operations console for public-service staff to receive, route, resolve, and monitor citizen complaints across departments and localities." },
+      { title: "DIGIT Complaint Management" },
+      { name: "description", content: "A shared platform for responsive government." },
     ],
   }),
   component: LandingPage,
@@ -20,8 +20,8 @@ function LandingPage() {
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary font-bold text-primary-foreground text-sm">P</div>
             <div className="leading-tight">
-              <div className="text-[13px] font-semibold">DIGIT Platform</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">PGR Console</div>
+              <div className="text-[13px] font-semibold">DIGIT Complaint Management</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">A shared platform for responsive government</div>
             </div>
           </div>
           <Link
@@ -42,10 +42,10 @@ function LandingPage() {
               Trusted by 8+ governments
             </div>
             <h1 className="mt-5 text-[32px] font-semibold leading-tight tracking-tight md:text-[42px]">
-              Public Grievance Redressal
+              DIGIT Complaint Management
             </h1>
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-chrome-muted">
-              Operations console for public-service staff to receive, route, resolve, and monitor citizen complaints across departments and localities — on any account on the platform.
+              A shared platform for responsive government.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -138,9 +138,9 @@ function LandingPage() {
             &copy; 2026 eGovernments Foundation &middot; DIGIT 2.9
           </div>
           <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-            <span>Public Grievance Redressal</span>
+            <span>DIGIT Complaint Management</span>
             <span className="text-border">|</span>
-            <span>DIGIT Platform</span>
+            <span>A shared platform for responsive government</span>
           </div>
         </div>
       </footer>
