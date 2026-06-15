@@ -1115,6 +1115,7 @@ export function DashboardPage() {
             </div>
           </div>
         );
+      },
     },
     {
       id: "resolution-time-by-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint sub-types with the highest average resolution time.",
