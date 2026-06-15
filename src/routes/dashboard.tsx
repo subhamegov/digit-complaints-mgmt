@@ -299,37 +299,6 @@ export function DashboardPage() {
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
-  // Per-officer breakdown across all four SLA-state buckets (absolute counts).
-  // Drives the "Team load by SLA" stacked horizontal bar chart.
-  const teamLoadBySla = useMemo(() => {
-    const m = new Map<string, { resolved: number; onTrack: number; nearing: number; breached: number }>();
-    for (const c of filteredComplaints) {
-      const id = c.assignedOfficerId;
-      if (!id) continue;
-      const e = m.get(id) ?? { resolved: 0, onTrack: 0, nearing: 0, breached: 0 };
-      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
-      if (isResolved) {
-        e.resolved++;
-      } else if (c.slaState === "BREACHED") {
-        e.breached++;
-      } else if (c.slaState === "NEARING") {
-        e.nearing++;
-      } else {
-        e.onTrack++;
-      }
-      m.set(id, e);
-    }
-    const rows = Array.from(m, ([id, v]) => ({
-      id,
-      name: officerOf(id)?.name ?? id,
-      ...v,
-      total: v.resolved + v.onTrack + v.nearing + v.breached,
-    })).sort((a, b) => b.breached - a.breached || b.total - a.total);
-    const max = Math.max(1, ...rows.map((r) => r.total));
-    const mean = rows.length ? rows.reduce((a, b) => a + b.total, 0) / rows.length : 0;
-    return { rows, max, mean };
-  }, [filteredComplaints]);
-
   const resolutionByType = useMemo(() => {
     const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
@@ -998,112 +967,6 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "team-load-by-sla", kind: "panel", label: "Team load by SLA", description: "All complaints by SLA state",
-      icon: Users, colSpan: 3, title: "Team load by SLA",
-      render: () => {
-        const { rows, max, mean } = teamLoadBySla;
-        if (!rows.length) {
-          return <div className="text-[12px] text-muted-foreground py-6 text-center">No assignments to display.</div>;
-        }
-        const step = max <= 10 ? 2 : max <= 25 ? 5 : max <= 60 ? 10 : 20;
-        const axisMax = Math.ceil(max / step) * step;
-        const ticks: number[] = [];
-        for (let i = 0; i <= axisMax; i += step) ticks.push(i);
-
-        const COLORS = {
-          resolved: "#CBD5E1",
-          onTrack:  "#93C5FD",
-          nearing:  "#F59E0B",
-          breached: "#DC2626",
-        };
-
-        const meanPct = (mean / axisMax) * 100;
-
-        return (
-          <div>
-            <div className="text-[11px] text-muted-foreground mb-2">All complaints by SLA state</div>
-            <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-              {[
-                ["Resolved", COLORS.resolved],
-                ["On track", COLORS.onTrack],
-                ["Nearing breach", COLORS.nearing],
-                ["Breached", COLORS.breached],
-              ].map(([label, color]) => (
-                <span key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: color }} />
-                  {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="space-y-3">
-              {rows.map((r) => {
-                const pct = (n: number) => `${(n / axisMax) * 100}%`;
-                return (
-                  <div key={r.id} className="grid items-center gap-3" style={{ gridTemplateColumns: "160px 1fr 40px" }}>
-                    <div className="text-[12px] font-medium text-foreground truncate">{r.name}</div>
-                    <div className="relative h-7">
-                      {/* Gridlines */}
-                      {ticks.map((t) => (
-                        <div
-                          key={`g-${r.id}-${t}`}
-                          className="absolute top-0 bottom-0 pointer-events-none"
-                          style={{
-                            left: `${(t / axisMax) * 100}%`,
-                            borderLeft: "1px dashed var(--border)",
-                            opacity: t === 0 ? 0.9 : 0.35,
-                          }}
-                        />
-                      ))}
-                      {/* Mean reference */}
-                      {mean > 0 && (
-                        <div
-                          className="absolute top-0 bottom-0 pointer-events-none"
-                          style={{ left: `${meanPct}%`, borderLeft: "1px dashed #0F172A", opacity: 0.7 }}
-                        />
-                      )}
-                      {/* Stacked bar */}
-                      <div
-                        className="absolute inset-y-0 left-0 flex rounded-sm overflow-hidden"
-                        style={{ width: pct(r.total) }}
-                        title={`Resolved: ${r.resolved} · On track: ${r.onTrack} · Nearing breach: ${r.nearing} · Breached: ${r.breached} · Total: ${r.total}`}
-                      >
-                        {r.resolved > 0 && <div style={{ width: `${(r.resolved / r.total) * 100}%`, background: COLORS.resolved }} />}
-                        {r.onTrack  > 0 && <div style={{ width: `${(r.onTrack  / r.total) * 100}%`, background: COLORS.onTrack  }} />}
-                        {r.nearing  > 0 && <div style={{ width: `${(r.nearing  / r.total) * 100}%`, background: COLORS.nearing  }} />}
-                        {r.breached > 0 && <div style={{ width: `${(r.breached / r.total) * 100}%`, background: COLORS.breached }} />}
-                      </div>
-                    </div>
-                    <div className="text-[12px] tabular-nums font-semibold text-foreground text-right">{r.total}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* X-axis */}
-            <div className="grid gap-3 mt-2" style={{ gridTemplateColumns: "160px 1fr 40px" }}>
-              <div />
-              <div className="relative h-6">
-                <div className="absolute left-0 right-0 top-0 h-px bg-border" />
-                {ticks.map((t) => (
-                  <div key={`t-${t}`} className="absolute top-0" style={{ left: `${(t / axisMax) * 100}%`, transform: "translateX(-50%)" }}>
-                    <div className="h-1.5 w-px bg-border mx-auto" />
-                    <div className="text-[10px] text-muted-foreground tabular-nums mt-0.5">{t}</div>
-                  </div>
-                ))}
-                {mean > 0 && (
-                  <div className="absolute top-2.5" style={{ left: `${meanPct}%`, transform: "translateX(-50%)" }}>
-                    <div className="text-[10px] font-medium text-foreground whitespace-nowrap">team avg {mean.toFixed(1)}</div>
-                  </div>
-                )}
-              </div>
-              <div />
-            </div>
-          </div>
-        );
-      },
-    },
-    {
       id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
       render: () => (
@@ -1232,7 +1095,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -1247,7 +1110,7 @@ export function DashboardPage() {
         "resolution-rate", "breached-sla", "resolved",
         "reopen", "csat",
         "trending-complaints", "resolution-by-type", "wards", "stage-timings",
-        "open-by-employee", "team-load-by-sla", "trending-locations",
+        "open-by-employee", "trending-locations",
         "by-age", "by-channel", "by-sla",
         "time-of-day", "day-of-week", "over-time", "sla",
       ]
