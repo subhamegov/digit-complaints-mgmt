@@ -210,19 +210,19 @@ function SidebarShell({
   const { userName } = useRbac();
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/5">
+      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
         <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold">
           P
         </div>
         <div className="leading-tight">
           <div className="text-[13px] font-semibold tracking-wide">DIGIT Complaint Management</div>
-          <div className="text-[10px] uppercase tracking-wider text-chrome-muted">
+          <div className="text-[10px] uppercase tracking-wider text-[#93A4BC]">
             {t("ADMIN_CONSOLE", "Admin Console")}
           </div>
         </div>
       </div>
       <SidebarNavigation pathname={pathname} onNavigate={onNavigate} />
-      <div className="border-t border-white/5 px-3 py-2.5 text-[11px]">
+      <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
         <div className="truncate font-medium text-chrome-foreground">{userName}</div>
         <div className="truncate text-chrome-muted">
           {t("ROLE_PLATFORM_ADMIN", "Platform Administrator")}
