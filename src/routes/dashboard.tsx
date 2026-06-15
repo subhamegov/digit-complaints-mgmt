@@ -299,6 +299,37 @@ export function DashboardPage() {
     })).sort((a, b) => b.open - a.open);
   }, [filteredComplaints]);
 
+  // Per-officer breakdown across all four SLA-state buckets (absolute counts).
+  // Drives the "Team load by SLA" stacked horizontal bar chart.
+  const teamLoadBySla = useMemo(() => {
+    const m = new Map<string, { resolved: number; onTrack: number; nearing: number; breached: number }>();
+    for (const c of filteredComplaints) {
+      const id = c.assignedOfficerId;
+      if (!id) continue;
+      const e = m.get(id) ?? { resolved: 0, onTrack: 0, nearing: 0, breached: 0 };
+      const isResolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      if (isResolved) {
+        e.resolved++;
+      } else if (c.slaState === "BREACHED") {
+        e.breached++;
+      } else if (c.slaState === "NEARING") {
+        e.nearing++;
+      } else {
+        e.onTrack++;
+      }
+      m.set(id, e);
+    }
+    const rows = Array.from(m, ([id, v]) => ({
+      id,
+      name: officerOf(id)?.name ?? id,
+      ...v,
+      total: v.resolved + v.onTrack + v.nearing + v.breached,
+    })).sort((a, b) => b.breached - a.breached || b.total - a.total);
+    const max = Math.max(1, ...rows.map((r) => r.total));
+    const mean = rows.length ? rows.reduce((a, b) => a + b.total, 0) / rows.length : 0;
+    return { rows, max, mean };
+  }, [filteredComplaints]);
+
   const resolutionByType = useMemo(() => {
     const m = new Map<string, { total: number; resolved: number; resolvedOnTime: number; hrs: number }>();
     for (const c of filteredComplaints) {
