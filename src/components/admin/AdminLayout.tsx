@@ -241,14 +241,14 @@ export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-chrome text-chrome-foreground">
+      <aside className="hidden lg:flex w-[232px] shrink-0 flex-col bg-[#0B1F3A] text-chrome-foreground">
         <SidebarShell pathname={pathname} />
       </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 flex w-[260px] flex-col bg-chrome text-chrome-foreground shadow-xl">
+          <aside className="absolute left-0 top-0 bottom-0 flex w-[260px] flex-col bg-[#0B1F3A] text-chrome-foreground shadow-xl">
             <SidebarShell pathname={pathname} onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
