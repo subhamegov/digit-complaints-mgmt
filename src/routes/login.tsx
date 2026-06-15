@@ -41,12 +41,12 @@ function LoginPage() {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 self-start rounded-sm transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-primary/40"
-            aria-label="Open DIGIT Platform landing page in a new tab"
+            aria-label="Open DIGIT Complaint Management landing page in a new tab"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary font-bold text-primary-foreground">P</div>
             <div className="leading-tight">
-              <div className="text-[14px] font-semibold">DIGIT Platform</div>
-              <div className="text-[11px] uppercase tracking-wider text-chrome-muted">SaaS for Public Services</div>
+              <div className="text-[14px] font-semibold">DIGIT Complaint Management</div>
+              <div className="text-[11px] uppercase tracking-wider text-chrome-muted">Turn citizen signals to trust</div>
             </div>
           </a>
 

@@ -225,7 +225,7 @@ export function TopBar({
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary text-[12px] font-bold text-primary-foreground">P</div>
           <div className="leading-tight">
-            <div className="text-[12px] font-semibold">DIGIT Platform</div>
+            <div className="text-[12px] font-semibold">DIGIT Complaint Management</div>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Admin Console</div>
           </div>
         </div>
