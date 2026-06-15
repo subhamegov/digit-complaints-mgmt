@@ -137,13 +137,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/5">
+      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
         <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold">
           P
         </div>
         <div className="leading-tight">
           <div className="text-[13px] font-semibold tracking-wide">DIGIT PGR</div>
-          <div className="text-[10px] uppercase tracking-wider text-chrome-muted">Grievance Redressal</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#93A4BC]">Grievance Redressal</div>
         </div>
       </div>
 
