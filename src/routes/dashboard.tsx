@@ -1161,7 +1161,6 @@ export function DashboardPage() {
         );
       },
     },
-    },
     {
       id: "resolution-by-type", kind: "panel", label: "Resolution rate by complaint type", description: "Closure, on-time % and avg. resolution per type.",
       icon: ThumbsUp, colSpan: 2, title: "Resolution rate by complaint type",
