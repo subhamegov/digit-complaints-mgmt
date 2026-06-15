@@ -162,7 +162,7 @@ export function SidebarSection({
   if (items.length === 0) return null;
   return (
     <div className="mb-3">
-      <div className="px-2.5 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-chrome-muted">
+      <div className="px-2.5 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
         {t(section.titleCode, section.title)}
       </div>
       <div className="space-y-0.5">
