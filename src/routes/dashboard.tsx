@@ -331,6 +331,29 @@ export function DashboardPage() {
     return { rows, max, mean, upper, ticks };
   }, [filteredComplaints]);
 
+  const resolutionTimeBySubtype = useMemo(() => {
+    const m = new Map<string, { hrs: number; n: number }>();
+    for (const c of filteredComplaints) {
+      if (c.status !== "RESOLVED" && c.status !== "CLOSED") continue;
+      const ct = complaintTypeOf(c.typeCode);
+      const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
+      const e = m.get(sub) ?? { hrs: 0, n: 0 };
+      e.hrs += c.slaHours - c.slaRemainingHrs;
+      e.n++;
+      m.set(sub, e);
+    }
+    const rows = Array.from(m, ([name, v]) => ({
+      name,
+      avgHrs: v.n ? Math.round((v.hrs / v.n) * 10) / 10 : 0,
+      n: v.n,
+    }))
+      .filter((r) => r.n > 0)
+      .sort((a, b) => b.avgHrs - a.avgHrs)
+      .slice(0, 5);
+    const max = Math.max(...rows.map((r) => r.avgHrs), 1);
+    return { rows, max };
+  }, [filteredComplaints]);
+
 
 
   const resolutionByType = useMemo(() => {
