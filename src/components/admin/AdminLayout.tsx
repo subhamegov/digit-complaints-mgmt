@@ -136,8 +136,8 @@ export function SidebarItem({
       className={cn(
         "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
         active
-          ? "border-primary bg-white/[0.06] font-medium text-white"
-          : "border-transparent text-chrome-foreground/75 hover:bg-white/[0.04] hover:text-chrome-foreground",
+          ? "border-transparent bg-[#2563EB] font-medium text-white [&_svg]:text-white"
+          : "border-transparent text-[#CBD5E1] [&_svg]:text-[#94A3B8] hover:bg-[#2563EB]/[0.12] hover:text-white",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
