@@ -129,6 +129,37 @@ function MapController({ target }: { target: { center: [number, number]; zoom: n
   return null;
 }
 
+/**
+ * Keeps Leaflet's internal canvas in sync with the parent container size.
+ * Required because the dashboard widget is user-resizable; without this the
+ * map clips and tiles don't reflow until the next window resize.
+ */
+function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivElement> }) {
+  const map = useMap();
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      // debounce to a single frame after the resize settles
+      raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+    });
+    ro.observe(el);
+    // initial sync once mounted
+    raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+    return () => { ro.disconnect(); cancelAnimationFrame(raf); };
+  }, [map, targetRef]);
+  return null;
+}
+
+/** Exposes the Leaflet map instance to the parent for toolbar actions. */
+function MapRefBridge({ onReady }: { onReady: (m: LeafletMap) => void }) {
+  const map = useMap();
+  useEffect(() => { onReady(map); }, [map, onReady]);
+  return null;
+}
+
 /* --------------------------- main component --------------------------- */
 
 export default function ComplaintMapInner({ complaints }: { complaints: Complaint[] }) {
