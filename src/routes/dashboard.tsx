@@ -779,8 +779,8 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "complaint-map", kind: "panel", label: "Complaint map", description: "Bangalore boundary hierarchy with zoom-driven LOD; WoW or SLA breach coloring.",
-      icon: MapPin, colSpan: 2, title: "Complaint map · Bangalore",
+      id: "complaint-map", kind: "panel", label: "Complaint map", description: "Bengaluru boundary hierarchy with zoom-driven LOD; WoW or SLA breach coloring.",
+      icon: MapPin, colSpan: 2, defaultRowSpan: 2, title: "Complaint map · Bengaluru", padded: false,
       render: () => <ComplaintMap complaints={filteredComplaints} />,
     },
     {
