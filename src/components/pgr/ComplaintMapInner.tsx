@@ -7,12 +7,12 @@
  */
 import "leaflet/dist/leaflet.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer, TileLayer, Polygon, CircleMarker, Popup, Tooltip,
   useMap, useMapEvents,
 } from "react-leaflet";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
 import type { Complaint } from "@/lib/mock-data";
 import { complaintTypeOf } from "@/lib/mock-data";
 import {
@@ -21,7 +21,7 @@ import {
   LOCALITY_BY_WARD_FIELD, WARD_BY_LOCALITY_FIELD,
   pinForComplaint, type BoundaryPolygon,
 } from "./bangaloreGeo";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, Crosshair, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type MetricMode = "wow" | "sla";
