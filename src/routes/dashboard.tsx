@@ -586,12 +586,12 @@ export function DashboardPage() {
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
 
     // Stat KPIs
-    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
+    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", improveDirection: "down", getValue: () => String(s.total), getDelta: () => "+12 vs last week", getDeltaValue: () => "5%", getHistory: () => trend.map((d) => d.filed) },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
-    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA" },
+    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", improveDirection: "up", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA", getDeltaValue: () => "9%", getHistory: () => trend.map((d) => d.resolved) },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
     { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs), getDelta: () => "Target: 36h" },
-    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5` },
+    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", improveDirection: "down", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5`, getDeltaValue: () => "0.6", getHistory: () => [3.1, 2.9, 3.4, 3.2, 3.6, 3.8, 4.1] },
     { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
     {
       id: "resolution-rate", kind: "stat",
@@ -600,13 +600,16 @@ export function DashboardPage() {
         ? "Resolved-within-SLA ÷ (resolved-within-SLA + open-past-SLA). Counts open-past-SLA complaints as failures-in-progress."
         : "Resolved ÷ logged complaints, as a percentage.",
       icon: ThumbsUp, intent: "positive",
+      improveDirection: "up",
       getValue: () => canCustomize ? `${tu.onTimeRate}%` : `${resolutionRate}%`,
       getDelta: () => canCustomize
         ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
+      getDeltaValue: () => "4%",
+      getHistory: () => trend.map((d) => d.filed ? Math.round((d.resolved / d.filed) * 100) : 0),
     },
     { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
-    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints" },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", improveDirection: "down", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints", getDeltaValue: () => "12%", getHistory: () => [8, 10, 9, 12, 11, 14, 16] },
     { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
