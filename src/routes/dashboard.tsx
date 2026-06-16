@@ -43,6 +43,7 @@ type KpiDef = {
   };
   // panel-specific
   colSpan?: 1 | 2 | 3;
+  defaultRowSpan?: 1 | 2 | 3;
   padded?: boolean;
   title?: string;
   action?: React.ReactNode;
