@@ -1741,6 +1741,10 @@ export function DashboardPage() {
                     value={k.getValue?.() ?? ""}
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
+                    history={k.getHistory?.()}
+                    deltaLabel={k.getDeltaIndicator?.().label}
+                    deltaDirection={k.getDeltaIndicator?.().dir}
+                    improveDirection={k.improveDirection}
                     onRemove={() => removeKpi(id)}
                   />
                 ) : (
