@@ -134,7 +134,7 @@ function MapController({ target }: { target: { center: [number, number]; zoom: n
  * Required because the dashboard widget is user-resizable; without this the
  * map clips and tiles don't reflow until the next window resize.
  */
-function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivElement> }) {
+function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivElement | null> }) {
   const map = useMap();
   useEffect(() => {
     const el = targetRef.current;
