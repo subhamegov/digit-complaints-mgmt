@@ -102,12 +102,21 @@ export function StatCard({
   delta,
   intent = "neutral",
   onRemove,
+  history,
+  deltaValue,
+  improveDirection,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
   onRemove?: () => void;
+  /** Series for the bottom sparkline. */
+  history?: number[];
+  /** Change amount label rendered next to the value (e.g. "18%" or "0.6"). */
+  deltaValue?: string;
+  /** Which direction is "good" for this metric. Drives the delta colour. */
+  improveDirection?: "up" | "down";
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -115,8 +124,44 @@ export function StatCard({
     warning:  "text-status-progress",
     negative: "text-status-breach",
   };
+
+  // Derive the arrow direction from the sparkline (first vs last point).
+  let trendDir: "up" | "down" | "flat" = "flat";
+  if (history && history.length >= 2) {
+    const diff = history[history.length - 1] - history[0];
+    trendDir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+  }
+  const isGood =
+    improveDirection && trendDir !== "flat"
+      ? trendDir === improveDirection
+      : null;
+  const deltaColor =
+    isGood === null
+      ? "text-muted-foreground"
+      : isGood
+        ? "text-status-resolved"
+        : "text-status-breach";
+
+  // Sparkline geometry.
+  const sparkPath = (() => {
+    if (!history || history.length < 2) return null;
+    const w = 100;
+    const h = 24;
+    const min = Math.min(...history);
+    const max = Math.max(...history);
+    const range = max - min || 1;
+    const step = w / (history.length - 1);
+    return history
+      .map((v, i) => {
+        const x = i * step;
+        const y = h - ((v - min) / range) * h;
+        return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+      })
+      .join(" ");
+  })();
+
   return (
-    <div className="relative rounded border border-border bg-surface p-4 group">
+    <div className="relative rounded border border-border bg-surface p-4 pb-6 group overflow-hidden">
       {onRemove && (
         <button
           type="button"
@@ -128,8 +173,33 @@ export function StatCard({
         </button>
       )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
+      <div className="mt-2 flex items-baseline gap-2">
+        <div className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
+        {deltaValue && trendDir !== "flat" && (
+          <div className={cn("text-[12px] font-medium tabular-nums leading-none", deltaColor)}>
+            <span aria-hidden>{trendDir === "up" ? "▲" : "▼"}</span>
+            {deltaValue}
+          </div>
+        )}
+      </div>
       {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
+      {sparkPath && (
+        <svg
+          className="absolute bottom-0 left-0 h-6 w-full"
+          viewBox="0 0 100 24"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path
+            d={sparkPath}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+            className={deltaColor}
+          />
+        </svg>
+      )}
     </div>
   );
 }
