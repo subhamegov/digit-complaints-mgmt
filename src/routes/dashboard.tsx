@@ -1196,6 +1196,88 @@ export function DashboardPage() {
       ),
     },
     {
+      id: "flow-ratio-dept", kind: "panel", label: "Flow ratio by department", description: "Resolved ÷ created per department — worst-first.",
+      icon: BarChart3, colSpan: 2, title: "Flow ratio by department",
+      render: () => {
+        const { rows } = flowRatioByDept;
+        const upper = 1.4;
+        const pct = (v: number) => `${Math.min(v, upper) / upper * 100}%`;
+        const ticks = [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4];
+        if (!rows.length) {
+          return <div className="text-[12px] text-muted-foreground">No complaints in the current filter.</div>;
+        }
+        return (
+          <div className="flex flex-col gap-3">
+            <div className="text-[11px] text-muted-foreground -mt-1">resolved ÷ created</div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: "var(--color-chart-4)" }} />
+                Below break-even
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: "var(--color-chart-3)" }} />
+                At or above break-even
+              </span>
+            </div>
+            <div className="flex">
+              <div className="w-[140px] shrink-0">
+                <div className="flex flex-col gap-3 py-1">
+                  {rows.map((r) => (
+                    <div key={r.department} className="h-6 flex items-center text-[12px] text-foreground truncate pr-2" title={r.department}>
+                      {r.department}
+                    </div>
+                  ))}
+                </div>
+                <div className="h-5" />
+              </div>
+              <div className="flex-1 relative min-w-0">
+                <div className="absolute inset-0 bottom-5 pointer-events-none">
+                  {ticks.map((t2) => (
+                    <div key={t2} className="absolute top-0 bottom-0 border-l border-border/60" style={{ left: pct(t2) }} />
+                  ))}
+                  <div className="absolute top-0 bottom-0" style={{ left: pct(1) }}>
+                    <div className="h-full border-l border-dashed border-foreground/50" />
+                    <div className="absolute -top-0.5 left-1 text-[10px] text-muted-foreground bg-surface px-1 rounded-sm whitespace-nowrap">
+                      break-even
+                    </div>
+                  </div>
+                </div>
+                <div className="relative flex flex-col gap-3 py-1">
+                  {rows.map((r) => {
+                    const below = r.ratio < 1;
+                    const color = below ? "var(--color-chart-4)" : "var(--color-chart-3)";
+                    const tip = `${r.department}: ${r.ratio.toFixed(2)} — ${r.resolved} resolved of ${r.created} created`;
+                    return (
+                      <div key={r.department} className="h-6 relative" title={tip}>
+                        <div
+                          className="absolute inset-y-0 left-0 rounded-sm"
+                          style={{ width: pct(r.ratio), background: color }}
+                        />
+                        <div
+                          className="absolute top-1/2 -translate-y-1/2 text-[11px] font-semibold tabular-nums text-foreground"
+                          style={{ left: `calc(${pct(r.ratio)} + 6px)` }}
+                        >
+                          {r.ratio.toFixed(2)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="relative h-5 mt-1">
+                  {ticks.map((t2) => (
+                    <div key={t2} className="absolute -translate-x-1/2 text-[10px] text-muted-foreground tabular-nums" style={{ left: pct(t2) }}>
+                      {t2.toFixed(1)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+
+    {
       id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state — exposes bottleneck stage.",
       icon: Clock, colSpan: 2, title: "Average time per workflow stage",
       render: () => (
