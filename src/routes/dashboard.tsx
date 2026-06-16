@@ -35,6 +35,10 @@ type KpiDef = {
   intent?: "positive" | "negative" | "warning" | "neutral";
   getValue?: () => string;
   getDelta?: () => string;
+  getHistory?: () => number[];
+  getDeltaLabel?: () => string;
+  getDeltaDir?: () => "up" | "down" | "flat";
+  improveDirection?: "up" | "down";
   // panel-specific
   colSpan?: 1 | 2 | 3;
   padded?: boolean;
