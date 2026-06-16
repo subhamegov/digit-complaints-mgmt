@@ -1672,7 +1672,7 @@ export function DashboardPage() {
             const userSize = sizes[id];
             const defaultSpan: 1 | 2 | 3 = k.kind === "panel" ? (k.colSpan ?? 1) : 1;
             const effectiveSpan: 1 | 2 | 3 = userSize?.colSpan ?? defaultSpan;
-            const effectiveRowSpan: 1 | 2 | 3 = userSize?.rowSpan ?? 1;
+            const effectiveRowSpan: 1 | 2 | 3 = userSize?.rowSpan ?? (k.kind === "panel" ? (k.defaultRowSpan ?? 1) : 1);
             const spanClass =
               gridCols === 6
                 ? effectiveSpan === 3
