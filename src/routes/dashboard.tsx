@@ -1397,8 +1397,9 @@ export function DashboardPage() {
         "resolution-rate", "breached-sla", "resolved",
         "reopen", "csat",
         "team-load-sla", "resolution-time-subtype", "complaint-map",
-        "stage-timings", "over-time", "sla",
+        "stage-timings", "flow-ratio-dept", "over-time", "sla",
       ]
+
       : [
         "total", "open", "resolved", "resolution-rate", "avg-resolution", "first-response",
         "trend", "wards", "dept", "geo-map", "complaint-map", "by-status", "by-type", "by-sla",
