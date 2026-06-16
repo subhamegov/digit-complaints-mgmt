@@ -102,20 +102,12 @@ export function StatCard({
   delta,
   intent = "neutral",
   onRemove,
-  history,
-  deltaLabel,
-  deltaDirection,
-  improveDirection,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
   onRemove?: () => void;
-  history?: number[];
-  deltaLabel?: string;
-  deltaDirection?: "up" | "down" | "flat";
-  improveDirection?: "up" | "down";
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -123,66 +115,21 @@ export function StatCard({
     warning:  "text-status-progress",
     negative: "text-status-breach",
   };
-  const hasSpark = Array.isArray(history) && history.length > 1;
-  // Compute arrow color: based on whether the actual direction matches "improve" direction.
-  let trendColor = "text-muted-foreground";
-  if (deltaDirection && deltaDirection !== "flat" && improveDirection) {
-    const isGood = deltaDirection === improveDirection;
-    trendColor = isGood ? "text-status-resolved" : "text-status-breach";
-  }
-  const arrow = deltaDirection === "up" ? "▲" : deltaDirection === "down" ? "▼" : "";
-
-  // Sparkline path
-  let sparkPath = "";
-  if (hasSpark) {
-    const w = 100;
-    const h = 24;
-    const min = Math.min(...history!);
-    const max = Math.max(...history!);
-    const range = max - min || 1;
-    const step = w / (history!.length - 1);
-    sparkPath = history!
-      .map((v, i) => {
-        const x = i * step;
-        const y = h - ((v - min) / range) * h;
-        return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-      })
-      .join(" ");
-  }
-
-  const sparkColor = trendColor === "text-muted-foreground" ? "text-foreground/40" : trendColor;
-
   return (
-    <div className="relative rounded border border-border bg-surface p-4 group overflow-hidden">
+    <div className="relative rounded border border-border bg-surface p-4 group">
       {onRemove && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30 z-10"
+          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30"
           aria-label={`Remove ${label}`}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="mt-2 flex items-baseline gap-2">
-        <div className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
-        {deltaLabel && (
-          <span className={cn("text-[12px] font-medium tabular-nums leading-none", trendColor)}>
-            {arrow && <span className="mr-0.5">{arrow}</span>}
-            {deltaLabel}
-          </span>
-        )}
-      </div>
-      {hasSpark ? (
-        <div className="mt-3 px-1 pb-1">
-          <svg viewBox="0 0 100 24" preserveAspectRatio="none" className={cn("block w-full h-6", sparkColor)}>
-            <path d={sparkPath} fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-          </svg>
-        </div>
-      ) : (
-        delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>
-      )}
+      <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
+      {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
     </div>
   );
 }

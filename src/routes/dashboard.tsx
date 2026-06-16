@@ -35,10 +35,6 @@ type KpiDef = {
   intent?: "positive" | "negative" | "warning" | "neutral";
   getValue?: () => string;
   getDelta?: () => string;
-  // stat sparkline / trend indicator
-  improveDirection?: "up" | "down";
-  getHistory?: () => number[];
-  getDeltaIndicator?: () => { dir: "up" | "down" | "flat"; label: string };
   // panel-specific
   colSpan?: 1 | 2 | 3;
   padded?: boolean;
@@ -583,49 +579,16 @@ export function DashboardPage() {
   const overTimeData =
     overTimeGran === "daily" ? overTimeDaily : overTimeGran === "weekly" ? overTimeWeekly : overTimeMonthly;
 
-  // Sparkline series for stat-card trend indicators. Derived from the same
-  // 7-day trend the over-time KPI uses so all cards stay consistent.
-  const sparkSeries = useMemo(() => {
-    const filed = trend.map((d) => d.filed);
-    const resolved = trend.map((d) => d.resolved);
-    const total = filed.slice();
-    const breachedDaily = filed.map((f, i) => Math.max(0, Math.round((f - resolved[i]) * 0.6 + ((i * 2) % 3))));
-    const onTimeDaily = filed.map((f, i) => {
-      const r = resolved[i];
-      const denom = r + Math.max(0, f - r);
-      return denom ? Math.round((r / denom) * 1000) / 10 : 0;
-    });
-    const csatBase = canCustomize ? tu.csat : s.satisfaction;
-    const csatDaily = trend.map((_, i) => Math.round((csatBase + Math.sin(i * 0.9) * 0.25) * 10) / 10);
-    const reopenBase = canCustomize ? tu.reopenRate : s.reopenRate;
-    const reopenDaily = trend.map((_, i) => Math.round((reopenBase + Math.cos(i * 0.7) * 1.2 + i * 0.15) * 10) / 10);
-    return { total, resolved, breachedDaily, onTimeDaily, csatDaily, reopenDaily };
-  }, [trend, canCustomize, tu, s]);
-
-  const makeDelta = (arr: number[], style: "pct" | "abs"): { dir: "up" | "down" | "flat"; label: string } => {
-    if (!arr || arr.length < 2) return { dir: "flat", label: "" };
-    const first = arr[0];
-    const last = arr[arr.length - 1];
-    const diff = last - first;
-    const dir: "up" | "down" | "flat" = diff > 0.0001 ? "up" : diff < -0.0001 ? "down" : "flat";
-    if (style === "pct") {
-      const pct = first ? Math.round((diff / first) * 100) : 0;
-      return { dir, label: `${Math.abs(pct)}%` };
-    }
-    return { dir, label: `${Math.abs(Math.round(diff * 10) / 10)}` };
-  };
-
-
   // Unified KPI registry: every box (stat card or chart panel) is a KPI.
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
 
     // Stat KPIs
-    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week", improveDirection: "down", getHistory: () => sparkSeries.total, getDeltaIndicator: () => makeDelta(sparkSeries.total, "pct") },
+    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
-    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA", improveDirection: "up", getHistory: () => sparkSeries.resolved, getDeltaIndicator: () => makeDelta(sparkSeries.resolved, "pct") },
+    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
     { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs), getDelta: () => "Target: 36h" },
-    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5`, improveDirection: "down", getHistory: () => sparkSeries.reopenDaily, getDeltaIndicator: () => makeDelta(sparkSeries.reopenDaily, "abs") },
+    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5` },
     { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
     {
       id: "resolution-rate", kind: "stat",
@@ -638,17 +601,14 @@ export function DashboardPage() {
       getDelta: () => canCustomize
         ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
-      improveDirection: "up",
-      getHistory: () => sparkSeries.onTimeDaily,
-      getDeltaIndicator: () => makeDelta(sparkSeries.onTimeDaily, "abs"),
     },
     { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
-    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints", improveDirection: "down", getHistory: () => sparkSeries.breachedDaily, getDeltaIndicator: () => makeDelta(sparkSeries.breachedDaily, "abs") },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints" },
     { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
     { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
-    { id: "csat", kind: "stat", label: "Citizen satisfaction", description: "Mean citizen satisfaction (1–5) across resolved complaints.", icon: ThumbsUp, intent: "positive", getValue: () => canCustomize ? `${tu.csat}/5` : `${s.satisfaction}/5`, getDelta: () => "Across resolved", improveDirection: "up", getHistory: () => sparkSeries.csatDaily, getDeltaIndicator: () => makeDelta(sparkSeries.csatDaily, "abs") },
+    { id: "csat", kind: "stat", label: "Citizen satisfaction", description: "Mean citizen satisfaction (1–5) across resolved complaints.", icon: ThumbsUp, intent: "positive", getValue: () => canCustomize ? `${tu.csat}/5` : `${s.satisfaction}/5`, getDelta: () => "Across resolved" },
     { id: "resolved-per-day", kind: "stat", label: "Resolved per day", description: "Resolved complaints ÷ days in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => canCustomize ? String(tu.resolvedPerDay) : "11", getDelta: () => "Rolling rate" },
     { id: "oldest-open", kind: "stat", label: "Oldest open age", description: "Age of the oldest currently-open complaint.", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? tu.oldestOpenLabel : "9d 4h", getDelta: () => "Action required" },
     { id: "active-officers", kind: "stat", label: "Active field officers", description: "Officers with at least one assignment in the last 24 hours.", icon: Users, intent: "neutral", getValue: () => "142", getDelta: () => "12 on leave" },
@@ -1422,7 +1382,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionTimeBySubtype, flowRatioByDept, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu, sparkSeries]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionTimeBySubtype, flowRatioByDept, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
@@ -1613,7 +1573,7 @@ export function DashboardPage() {
                           <HoverCardContent side="left" align="start" className="w-72 p-3">
                             {k.kind === "stat" ? (
                               <div className="mb-2 w-fit">
-                                <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} history={k.getHistory?.()} deltaLabel={k.getDeltaIndicator?.().label} deltaDirection={k.getDeltaIndicator?.().dir} improveDirection={k.improveDirection} />
+                                <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
                               </div>
                             ) : (
                               <div className="mb-2 rounded border border-border bg-muted/30 px-3 py-2 text-[12px] text-foreground inline-flex items-center gap-2">
@@ -1741,10 +1701,6 @@ export function DashboardPage() {
                     value={k.getValue?.() ?? ""}
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
-                    history={k.getHistory?.()}
-                    deltaLabel={k.getDeltaIndicator?.().label}
-                    deltaDirection={k.getDeltaIndicator?.().dir}
-                    improveDirection={k.improveDirection}
                     onRemove={() => removeKpi(id)}
                   />
                 ) : (
@@ -1843,7 +1799,7 @@ export function DashboardPage() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
               {KPI_REGISTRY.filter((k) => k.kind === "stat").slice(0, 6).map((k) => (
-                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} history={k.getHistory?.()} deltaLabel={k.getDeltaIndicator?.().label} deltaDirection={k.getDeltaIndicator?.().dir} improveDirection={k.improveDirection} />
+                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
               ))}
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
