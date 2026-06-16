@@ -354,6 +354,25 @@ export function DashboardPage() {
     return { rows, max };
   }, [filteredComplaints]);
 
+  const flowRatioByDept = useMemo(() => {
+    const m = new Map<string, { created: number; resolved: number }>();
+    for (const c of filteredComplaints) {
+      const e = m.get(c.department) ?? { created: 0, resolved: 0 };
+      e.created++;
+      if (c.status === "RESOLVED" || c.status === "CLOSED") e.resolved++;
+      m.set(c.department, e);
+    }
+    const rows = Array.from(m, ([department, v]) => ({
+      department,
+      created: v.created,
+      resolved: v.resolved,
+      ratio: v.created ? v.resolved / v.created : 0,
+    })).sort((a, b) => a.ratio - b.ratio);
+    return { rows };
+  }, [filteredComplaints]);
+
+
+
 
 
   const resolutionByType = useMemo(() => {
