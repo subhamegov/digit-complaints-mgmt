@@ -102,20 +102,12 @@ export function StatCard({
   delta,
   intent = "neutral",
   onRemove,
-  history,
-  deltaLabel,
-  deltaDir,
-  improveDirection,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
   onRemove?: () => void;
-  history?: number[];
-  deltaLabel?: string;
-  deltaDir?: "up" | "down" | "flat";
-  improveDirection?: "up" | "down";
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -123,69 +115,21 @@ export function StatCard({
     warning:  "text-status-progress",
     negative: "text-status-breach",
   };
-
-  const hasTrend = Array.isArray(history) && history.length > 1;
-  const showDelta = !!deltaLabel && !!deltaDir && deltaDir !== "flat" && !!improveDirection;
-  const isGood = showDelta && deltaDir === improveDirection;
-  const deltaColor = showDelta
-    ? (isGood ? "text-status-resolved" : "text-status-breach")
-    : "text-muted-foreground";
-  const arrow = deltaDir === "up" ? "▲" : deltaDir === "down" ? "▼" : "";
-
-  // Sparkline geometry
-  let sparkPath = "";
-  if (hasTrend) {
-    const w = 100;
-    const h = 24;
-    const min = Math.min(...history!);
-    const max = Math.max(...history!);
-    const span = max - min || 1;
-    const stepX = w / (history!.length - 1);
-    sparkPath = history!
-      .map((v, i) => {
-        const x = i * stepX;
-        const y = h - ((v - min) / span) * h;
-        return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-      })
-      .join(" ");
-  }
-
   return (
-    <div className="relative rounded border border-border bg-surface group overflow-hidden">
+    <div className="relative rounded border border-border bg-surface p-4 group">
       {onRemove && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30 z-10"
+          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30"
           aria-label={`Remove ${label}`}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-      <div className={cn("p-4", hasTrend ? "pb-2" : "")}>
-        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</span>
-          {showDelta && (
-            <span className={cn("text-[12px] font-medium tabular-nums leading-none", deltaColor)}>
-              {arrow}{deltaLabel}
-            </span>
-          )}
-        </div>
-        {!hasTrend && delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
-      </div>
-      {hasTrend && (
-        <div className="px-4 pb-3">
-          <svg
-            viewBox="0 0 100 24"
-            preserveAspectRatio="none"
-            className={cn("w-full h-6", deltaColor)}
-            aria-hidden
-          >
-            <path d={sparkPath} fill="none" stroke="currentColor" strokeWidth={1.25} vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      )}
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
+      {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
     </div>
   );
 }
