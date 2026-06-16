@@ -35,6 +35,10 @@ type KpiDef = {
   intent?: "positive" | "negative" | "warning" | "neutral";
   getValue?: () => string;
   getDelta?: () => string;
+  // stat sparkline / trend indicator
+  improveDirection?: "up" | "down";
+  getHistory?: () => number[];
+  getDeltaIndicator?: () => { dir: "up" | "down" | "flat"; label: string };
   // panel-specific
   colSpan?: 1 | 2 | 3;
   padded?: boolean;
