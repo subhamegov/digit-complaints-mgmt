@@ -35,6 +35,10 @@ type KpiDef = {
   intent?: "positive" | "negative" | "warning" | "neutral";
   getValue?: () => string;
   getDelta?: () => string;
+  getHistory?: () => number[];
+  getDeltaLabel?: () => string;
+  getDeltaDir?: () => "up" | "down" | "flat";
+  improveDirection?: "up" | "down";
   // panel-specific
   colSpan?: 1 | 2 | 3;
   padded?: boolean;
@@ -542,6 +546,69 @@ export function DashboardPage() {
     };
   }, [filteredComplaints]);
 
+  // 7-day per-KPI histories for sparklines (test-user cards). Bins
+  // filteredComplaints by day across the same trend window the other
+  // time-series cards use, so all sparkline cards stay consistent.
+  const kpiHistories = useMemo(() => {
+    const days = 7;
+    const now = Date.now();
+    const buckets = Array.from({ length: days }, () => ({
+      filed: 0, resolved: 0, resolvedOnTime: 0, openBreached: 0,
+      reopened: 0, csat: [] as number[],
+    }));
+    for (const c of filteredComplaints as TestComplaint[]) {
+      const ageD = Math.floor((now - new Date(c.filedOn).getTime()) / 86400_000);
+      const idx = days - 1 - ageD;
+      if (idx < 0 || idx >= days) continue;
+      const b = buckets[idx];
+      b.filed++;
+      const resolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      const isOpen = ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
+      if (resolved) {
+        b.resolved++;
+        if (c.slaState !== "BREACHED") b.resolvedOnTime++;
+      }
+      if (isOpen && c.slaState === "BREACHED") b.openBreached++;
+      if (c.reopenCount > 0 || c.status === "REOPENED") b.reopened++;
+      if (resolved && typeof c.csat === "number") b.csat.push(c.csat);
+    }
+    const total = buckets.map((b) => b.filed);
+    const resolved = buckets.map((b) => b.resolved);
+    const breachedOpen = buckets.map((b) => b.openBreached);
+    const onTimeRate = buckets.map((b) => {
+      const denom = b.resolved + b.openBreached;
+      return denom ? Math.round((b.resolvedOnTime / denom) * 1000) / 10 : 0;
+    });
+    const reopenRate = buckets.map((b) =>
+      b.resolved ? Math.round((b.reopened / b.resolved) * 1000) / 10 : 0,
+    );
+    const csat = buckets.map((b) =>
+      b.csat.length ? Math.round((b.csat.reduce((a, x) => a + x, 0) / b.csat.length) * 10) / 10 : 0,
+    );
+    return { total, resolved, breachedOpen, onTimeRate, reopenRate, csat };
+  }, [filteredComplaints]);
+
+  // Per-KPI delta helpers (last point vs first point in the window).
+  const makeDelta = (hist: number[], kind: "count" | "pct" | "decimal"): { label: string; dir: "up" | "down" | "flat" } => {
+    if (!hist.length) return { label: "0", dir: "flat" };
+    const last = hist[hist.length - 1];
+    const first = hist[0];
+    const diff = last - first;
+    const dir: "up" | "down" | "flat" = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+    const abs = Math.abs(diff);
+    let label = "0";
+    if (kind === "count") label = String(Math.round(abs));
+    else if (kind === "pct") label = `${(Math.round(abs * 10) / 10).toFixed(1)}%`;
+    else label = (Math.round(abs * 10) / 10).toFixed(1);
+    return { label, dir };
+  };
+  const dTotal = makeDelta(kpiHistories.total, "count");
+  const dResolved = makeDelta(kpiHistories.resolved, "count");
+  const dBreachedOpen = makeDelta(kpiHistories.breachedOpen, "count");
+  const dOnTime = makeDelta(kpiHistories.onTimeRate, "pct");
+  const dReopen = makeDelta(kpiHistories.reopenRate, "pct");
+  const dCsat = makeDelta(kpiHistories.csat, "decimal");
+
   const overTimeMonthly = useMemo(() => {
     const sumF = trend.reduce((a, b) => a + b.filed, 0) * 4;
     const sumR = trend.reduce((a, b) => a + b.resolved, 0) * 4;
@@ -583,12 +650,18 @@ export function DashboardPage() {
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
 
     // Stat KPIs
-    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
+    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week",
+      ...(canCustomize ? { improveDirection: "down" as const, getHistory: () => kpiHistories.total, getDeltaLabel: () => dTotal.label, getDeltaDir: () => dTotal.dir } : {}),
+    },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
-    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA" },
+    { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA",
+      ...(canCustomize ? { improveDirection: "up" as const, getHistory: () => kpiHistories.resolved, getDeltaLabel: () => dResolved.label, getDeltaDir: () => dResolved.dir } : {}),
+    },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
     { id: "avg-resolution", kind: "stat", label: t("CS_AVG_RESOLUTION"), description: "Average time taken to resolve a complaint (hours).", icon: Clock, intent: "neutral", getValue: () => fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs), getDelta: () => "Target: 36h" },
-    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5` },
+    { id: "reopen", kind: "stat", label: t("CS_REOPEN_RATE"), description: "Reopened ÷ resolved, as a percentage.", icon: Repeat, intent: "neutral", getValue: () => `${canCustomize ? tu.reopenRate : s.reopenRate}%`, getDelta: () => canCustomize ? `CSAT ${tu.csat}/5` : `CSAT ${s.satisfaction}/5`,
+      ...(canCustomize ? { improveDirection: "down" as const, getHistory: () => kpiHistories.reopenRate, getDeltaLabel: () => dReopen.label, getDeltaDir: () => dReopen.dir } : {}),
+    },
     { id: "first-response", kind: "stat", label: "Avg. first response", description: "Mean time from registration to first officer acknowledgement (hours).", icon: Clock, intent: "positive", getValue: () => fmtHHMM(firstResponseHrs), getDelta: () => "−18% WoW" },
     {
       id: "resolution-rate", kind: "stat",
@@ -601,9 +674,12 @@ export function DashboardPage() {
       getDelta: () => canCustomize
         ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
+      ...(canCustomize ? { improveDirection: "up" as const, getHistory: () => kpiHistories.onTimeRate, getDeltaLabel: () => dOnTime.label, getDeltaDir: () => dOnTime.dir } : {}),
     },
     { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
-    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints" },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints",
+      ...(canCustomize ? { improveDirection: "down" as const, getHistory: () => kpiHistories.breachedOpen, getDeltaLabel: () => dBreachedOpen.label, getDeltaDir: () => dBreachedOpen.dir } : {}),
+    },
     { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
@@ -1702,6 +1778,10 @@ export function DashboardPage() {
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
                     onRemove={() => removeKpi(id)}
+                    history={k.getHistory?.()}
+                    deltaLabel={k.getDeltaLabel?.()}
+                    deltaDir={k.getDeltaDir?.()}
+                    improveDirection={k.improveDirection}
                   />
                 ) : (
                   <Panel
