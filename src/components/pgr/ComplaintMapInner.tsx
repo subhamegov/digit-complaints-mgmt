@@ -7,12 +7,12 @@
  */
 import "leaflet/dist/leaflet.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer, TileLayer, Polygon, CircleMarker, Popup, Tooltip,
   useMap, useMapEvents,
 } from "react-leaflet";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
 import type { Complaint } from "@/lib/mock-data";
 import { complaintTypeOf } from "@/lib/mock-data";
 import {
@@ -21,7 +21,7 @@ import {
   LOCALITY_BY_WARD_FIELD, WARD_BY_LOCALITY_FIELD,
   pinForComplaint, type BoundaryPolygon,
 } from "./bangaloreGeo";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, Crosshair, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type MetricMode = "wow" | "sla";
@@ -129,6 +129,37 @@ function MapController({ target }: { target: { center: [number, number]; zoom: n
   return null;
 }
 
+/**
+ * Keeps Leaflet's internal canvas in sync with the parent container size.
+ * Required because the dashboard widget is user-resizable; without this the
+ * map clips and tiles don't reflow until the next window resize.
+ */
+function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivElement | null> }) {
+  const map = useMap();
+  useEffect(() => {
+    const el = targetRef.current;
+    if (!el) return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      // debounce to a single frame after the resize settles
+      raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+    });
+    ro.observe(el);
+    // initial sync once mounted
+    raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+    return () => { ro.disconnect(); cancelAnimationFrame(raf); };
+  }, [map, targetRef]);
+  return null;
+}
+
+/** Exposes the Leaflet map instance to the parent for toolbar actions. */
+function MapRefBridge({ onReady }: { onReady: (m: LeafletMap) => void }) {
+  const map = useMap();
+  useEffect(() => { onReady(map); }, [map, onReady]);
+  return null;
+}
+
 /* --------------------------- main component --------------------------- */
 
 export default function ComplaintMapInner({ complaints }: { complaints: Complaint[] }) {
@@ -188,11 +219,29 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
 
   const cityBounds: LatLngBoundsExpression = BANGALORE_BOUNDS;
 
+  const mapRef = useRef<LeafletMap | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [legendOpen, setLegendOpen] = useState(true);
+
+  const resetView = () => {
+    setSelectedLocality(null);
+    setSelectedWard(null);
+    setFlyTarget({ center: BANGALORE_CENTER, zoom: 11 });
+  };
+  const fitToSelection = () => {
+    const target = selectedWard ?? selectedLocality;
+    if (target) setFlyTarget({ center: target.center, zoom: selectedWard ? 15 : 13 });
+    else setFlyTarget({ center: BANGALORE_CENTER, zoom: 11 });
+  };
+  const toggleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else el.requestFullscreen?.();
+  };
+
   const breadcrumb: { label: string; onClick?: () => void }[] = [
-    { label: "Bangalore", onClick: () => {
-      setSelectedLocality(null); setSelectedWard(null);
-      setFlyTarget({ center: BANGALORE_CENTER, zoom: 11 });
-    } },
+    { label: "Bengaluru", onClick: resetView },
   ];
   if (selectedLocality) {
     breadcrumb.push({
@@ -207,18 +256,27 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
     breadcrumb.push({ label: selectedWard.name });
   }
 
+  const activeName = selectedWard?.name ?? selectedLocality?.name ?? "Bengaluru";
+  const levelLabel = showLocalities ? "Locality" : showWards ? "Ward" : "Complaints";
+
   return (
-    <div className="flex h-full min-h-[480px] flex-col gap-2">
+    <div
+      ref={containerRef}
+      role="region"
+      aria-label={`Complaint distribution map for ${activeName} by ${levelLabel.toLowerCase()}`}
+      className="flex h-full min-h-[260px] w-full flex-col gap-2 p-3"
+    >
       {/* Toolbar: metric switch + breadcrumb */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex overflow-hidden rounded-sm border border-border text-[11px]">
+      <div className="flex flex-wrap items-center gap-2">
+        <div role="group" aria-label="Map metric" className="inline-flex overflow-hidden rounded-sm border border-border text-[11px]">
           {(["wow", "sla"] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMetric(m)}
+              aria-pressed={metric === m}
               className={cn(
-                "px-2.5 py-1 font-medium transition-colors",
+                "px-2.5 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                 metric === m
                   ? "bg-primary text-primary-foreground"
                   : "bg-surface text-muted-foreground hover:text-foreground",
@@ -229,30 +287,60 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
           ))}
         </div>
 
-        <nav className="flex flex-wrap items-center gap-1 text-[11.5px] text-muted-foreground">
+        <nav aria-label="Selected geography" className="flex flex-wrap items-center gap-1 text-[11.5px] text-muted-foreground">
           {breadcrumb.map((b, i) => (
             <span key={i} className="inline-flex items-center gap-1">
-              {i === 0 && <Home className="h-3 w-3" />}
+              {i === 0 && <Home className="h-3 w-3" aria-hidden />}
               {b.onClick && i < breadcrumb.length - 1 ? (
                 <button
                   type="button"
                   onClick={b.onClick}
-                  className="hover:text-foreground hover:underline"
+                  className="hover:text-foreground hover:underline focus:outline-none focus-visible:underline"
                 >{b.label}</button>
               ) : (
                 <span className={cn(i === breadcrumb.length - 1 && "font-medium text-foreground")}>{b.label}</span>
               )}
-              {i < breadcrumb.length - 1 && <ChevronRight className="h-3 w-3 opacity-60" />}
+              {i < breadcrumb.length - 1 && <ChevronRight className="h-3 w-3 opacity-60" aria-hidden />}
             </span>
           ))}
           <span className="ml-2 rounded-sm bg-muted px-1.5 py-0.5 text-[10.5px] tabular-nums">
-            zoom {zoom} · {showLocalities ? "Locality" : showWards ? "Ward" : "Complaints"}
+            zoom {zoom} · {levelLabel}
           </span>
         </nav>
+
+        <div className="ml-auto inline-flex items-center gap-1">
+          <button
+            type="button"
+            onClick={fitToSelection}
+            title="Fit to selected geography"
+            aria-label="Fit to selected geography"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <Crosshair className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={resetView}
+            title="Reset view"
+            aria-label="Reset map view"
+            className="inline-flex h-7 items-center gap-1 rounded-sm border border-border bg-surface px-2 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <Home className="h-3 w-3" aria-hidden /> Reset
+          </button>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            title="Toggle fullscreen"
+            aria-label="Toggle fullscreen"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Map */}
-      <div className="relative flex-1 overflow-hidden rounded-sm border border-border">
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-sm border border-border">
         <MapContainer
           center={BANGALORE_CENTER}
           zoom={11}
@@ -269,24 +357,34 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
           />
           <ZoomWatcher onZoom={setZoom} />
           <MapController target={flyTarget} />
+          <MapRefBridge onReady={(m) => { mapRef.current = m; }} />
+          <ResizeInvalidator targetRef={containerRef} />
 
           {/* Locality layer */}
           {showLocalities && LOCALITY_POLYGONS.map((p) => {
             const agg = localityAgg.get(p.code)!;
             const col = colorFor(agg);
+            const isSelected = selectedLocality?.code === p.code;
             return (
               <Polygon
                 key={p.code}
                 positions={p.polygon}
                 pathOptions={{
-                  fillColor: col.fill, fillOpacity: 0.55,
-                  color: col.stroke, weight: 1.2,
+                  fillColor: col.fill,
+                  fillOpacity: isSelected ? 0.5 : 0.32,
+                  color: col.stroke,
+                  weight: isSelected ? 2.2 : 1.1,
+                  opacity: 0.85,
                 }}
                 eventHandlers={{
                   click: () => {
-                    setSelectedLocality(p);
-                    setSelectedWard(null);
-                    setFlyTarget({ center: p.center, zoom: 13 });
+                    if (selectedLocality?.code === p.code) {
+                      resetView();
+                    } else {
+                      setSelectedLocality(p);
+                      setSelectedWard(null);
+                      setFlyTarget({ center: p.center, zoom: 13 });
+                    }
                   },
                 }}
               >
@@ -299,20 +397,29 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
           {showWards && WARD_POLYGONS.map((p) => {
             const agg = wardAgg.get(p.code)!;
             const col = colorFor(agg);
+            const isSelected = selectedWard?.code === p.code;
             return (
               <Polygon
                 key={p.code}
                 positions={p.polygon}
                 pathOptions={{
-                  fillColor: col.fill, fillOpacity: 0.6,
-                  color: col.stroke, weight: 1.2,
+                  fillColor: col.fill,
+                  fillOpacity: isSelected ? 0.55 : 0.35,
+                  color: col.stroke,
+                  weight: isSelected ? 2.2 : 1.1,
+                  opacity: 0.85,
                 }}
                 eventHandlers={{
                   click: () => {
-                    setSelectedWard(p);
-                    const loc = LOCALITY_POLYGONS.find((l) => l.code === p.parentCode) ?? null;
-                    setSelectedLocality(loc);
-                    setFlyTarget({ center: p.center, zoom: 15 });
+                    if (selectedWard?.code === p.code) {
+                      setSelectedWard(null);
+                      if (selectedLocality) setFlyTarget({ center: selectedLocality.center, zoom: 13 });
+                    } else {
+                      setSelectedWard(p);
+                      const loc = LOCALITY_POLYGONS.find((l) => l.code === p.parentCode) ?? null;
+                      setSelectedLocality(loc);
+                      setFlyTarget({ center: p.center, zoom: 15 });
+                    }
                   },
                 }}
               >
@@ -357,39 +464,62 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
         </MapContainer>
 
         {/* Legend */}
-        <div className="pointer-events-none absolute bottom-2 left-2 z-[400] rounded-sm border border-border bg-background/95 px-2.5 py-2 text-[10.5px] shadow-sm">
-          <div className="mb-1 font-semibold text-foreground">
-            {metric === "wow" ? "Week-over-week change" : "SLA breach share"}
-          </div>
-          <div className="grid grid-cols-1 gap-1">
-            {metric === "wow"
-              ? WOW_STOPS.map((s) => (
+        <div className="absolute bottom-2 left-2 z-[400] max-w-[180px] rounded-sm border border-border bg-background/95 text-[10.5px] shadow-sm">
+          <button
+            type="button"
+            onClick={() => setLegendOpen((v) => !v)}
+            aria-expanded={legendOpen}
+            aria-controls="map-legend-body"
+            className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            <span>{metric === "wow" ? "Week-over-week change" : "SLA breach share"}</span>
+            <span aria-hidden className="text-muted-foreground">{legendOpen ? "–" : "+"}</span>
+          </button>
+          {legendOpen && (
+            <div id="map-legend-body" className="px-2.5 pb-2">
+              <div className="grid grid-cols-1 gap-1">
+                {(metric === "wow" ? WOW_STOPS : SLA_STOPS).map((s) => (
                   <div key={s.label} className="flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-3.5 rounded-sm" style={{ background: s.fill, border: `1px solid ${s.stroke}` }} />
+                    <span aria-hidden className="inline-block h-2.5 w-3.5 rounded-sm" style={{ background: s.fill, border: `1px solid ${s.stroke}` }} />
                     <span className="text-foreground">{s.label}</span>
-                  </div>
-                ))
-              : SLA_STOPS.map((s) => (
-                  <div key={s.label} className="flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-3.5 rounded-sm" style={{ background: s.fill, border: `1px solid ${s.stroke}` }} />
-                    <span className="text-foreground">{s.label}</span>
-                  </div>
-                ))}
-          </div>
-          {showPins && (
-            <>
-              <div className="mt-2 mb-1 font-semibold text-foreground">Pin · SLA state</div>
-              <div className="flex flex-col gap-1">
-                {(["WITHIN", "NEARING", "BREACHED"] as const).map((s) => (
-                  <div key={s} className="flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PIN_COLOR[s].fill, border: `1px solid ${PIN_COLOR[s].stroke}` }} />
-                    <span className="text-foreground">{PIN_COLOR[s].label}</span>
                   </div>
                 ))}
               </div>
-            </>
+              {showPins && (
+                <>
+                  <div className="mt-2 mb-1 font-semibold text-foreground">Pin · SLA state</div>
+                  <div className="flex flex-col gap-1">
+                    {(["WITHIN", "NEARING", "BREACHED"] as const).map((s) => (
+                      <div key={s} className="flex items-center gap-1.5">
+                        <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PIN_COLOR[s].fill, border: `1px solid ${PIN_COLOR[s].stroke}` }} />
+                        <span className="text-foreground">{PIN_COLOR[s].label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              <div className="mt-2 border-t border-border pt-1.5 text-[10px] text-muted-foreground">
+                Click a {levelLabel.toLowerCase()} to focus · click again to clear
+              </div>
+            </div>
           )}
         </div>
+
+        {(selectedLocality || selectedWard) && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="absolute top-2 right-2 z-[400] inline-flex items-center gap-2 rounded-sm border border-border bg-background/95 px-2 py-1 text-[11px] shadow-sm"
+          >
+            <span className="text-muted-foreground">Filter:</span>
+            <span className="font-medium text-foreground">{activeName}</span>
+            <button
+              type="button"
+              onClick={resetView}
+              className="text-primary hover:underline focus:outline-none focus-visible:underline"
+            >Clear</button>
+          </div>
+        )}
       </div>
     </div>
   );
