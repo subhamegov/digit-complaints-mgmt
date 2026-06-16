@@ -96,18 +96,60 @@ export function PageHeader({
   );
 }
 
+function Sparkline({ data, className }: { data: number[]; className?: string }) {
+  if (!data || data.length < 2) return null;
+  const w = 100;
+  const h = 24;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - ((v - min) / range) * h;
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(" ");
+  return (
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      preserveAspectRatio="none"
+      className={cn("block w-full h-6", className)}
+      aria-hidden
+    >
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
 export function StatCard({
   label,
   value,
   delta,
   intent = "neutral",
   onRemove,
+  history,
+  deltaValue,
+  deltaSuffix = "",
+  improveDirection,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
   onRemove?: () => void;
+  history?: number[];
+  deltaValue?: number;
+  deltaSuffix?: string;
+  improveDirection?: "up" | "down";
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -115,21 +157,44 @@ export function StatCard({
     warning:  "text-status-progress",
     negative: "text-status-breach",
   };
+  const hasTrend = typeof deltaValue === "number" && !!improveDirection;
+  const isGood = hasTrend
+    ? (improveDirection === "up" ? (deltaValue as number) >= 0 : (deltaValue as number) <= 0)
+    : false;
+  const trendColor = hasTrend ? (isGood ? "text-status-resolved" : "text-status-breach") : "";
+  const arrow = hasTrend ? ((deltaValue as number) >= 0 ? "▲" : "▼") : "";
+  const deltaTxt = hasTrend
+    ? `${arrow}${Math.abs(deltaValue as number)}${deltaSuffix}`
+    : "";
   return (
-    <div className="relative rounded border border-border bg-surface p-4 group">
+    <div className="relative rounded border border-border bg-surface group flex flex-col h-full">
       {onRemove && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="absolute top-1 right-1 inline-flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-status-breach focus:outline-none focus:ring-2 focus:ring-primary/30 z-10"
           aria-label={`Remove ${label}`}
         >
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
-      {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
+      <div className="px-4 pt-4 pb-2 flex-1">
+        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground pr-6">{label}</div>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <span className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</span>
+          {hasTrend && (
+            <span className={cn("text-[12px] font-semibold tabular-nums leading-none", trendColor)}>
+              {deltaTxt}
+            </span>
+          )}
+        </div>
+        {!hasTrend && delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
+      </div>
+      {history && history.length > 1 && (
+        <div className="px-4 pb-3 pt-1">
+          <Sparkline data={history} className={hasTrend ? trendColor : "text-muted-foreground"} />
+        </div>
+      )}
     </div>
   );
 }

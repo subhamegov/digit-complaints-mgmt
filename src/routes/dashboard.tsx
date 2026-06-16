@@ -579,6 +579,68 @@ export function DashboardPage() {
   const overTimeData =
     overTimeGran === "daily" ? overTimeDaily : overTimeGran === "weekly" ? overTimeWeekly : overTimeMonthly;
 
+  // Per-day buckets of filteredComplaints over the last 7 days — drives
+  // per-card sparklines so every card's trend reflects its own underlying metric.
+  const last7Buckets = useMemo(() => {
+    const now = Date.now();
+    const buckets: TestComplaint[][] = Array.from({ length: 7 }, () => []);
+    for (const c of filteredComplaints as TestComplaint[]) {
+      const ageDays = Math.floor((now - new Date(c.filedOn).getTime()) / 86400_000);
+      if (ageDays >= 0 && ageDays < 7) buckets[6 - ageDays].push(c);
+    }
+    return buckets;
+  }, [filteredComplaints]);
+
+  const kpiSpark = useMemo(() => {
+    const isResolved = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
+    const isOpen = (c: Complaint) => ["OPEN","ASSIGNED","IN_PROGRESS","REOPENED"].includes(c.status);
+
+    const totalH = last7Buckets.map((b) => b.length);
+    const resolvedH = last7Buckets.map((b) => b.filter(isResolved).length);
+    const onTimeH = last7Buckets.map((b) => {
+      const r = b.filter(isResolved);
+      const onTime = r.filter((c) => c.slaState !== "BREACHED").length;
+      const openPast = b.filter((c) => isOpen(c) && c.slaState === "BREACHED").length;
+      const denom = r.length + openPast;
+      return denom ? Math.round((onTime / denom) * 1000) / 10 : 0;
+    });
+    const breachedH = last7Buckets.map((b) => b.filter((c) => isOpen(c) && c.slaState === "BREACHED").length);
+    const reopenH = last7Buckets.map((b) => {
+      const r = b.filter(isResolved);
+      const reop = b.filter((c) => c.reopenCount > 0 || c.status === "REOPENED").length;
+      return r.length ? Math.round((reop / r.length) * 1000) / 10 : 0;
+    });
+    const csatH = last7Buckets.map((b) => {
+      const scores = b.filter(isResolved)
+        .map((c) => (c as TestComplaint).csat)
+        .filter((v): v is number => typeof v === "number");
+      return scores.length ? Math.round((scores.reduce((a, n) => a + n, 0) / scores.length) * 10) / 10 : 0;
+    });
+
+    const diff = (h: number[], dp = 0) => {
+      const last = h[h.length - 1] ?? 0;
+      const first = h[0] ?? 0;
+      const f = Math.pow(10, dp);
+      return Math.round((last - first) * f) / f;
+    };
+    const pct = (h: number[]) => {
+      const last = h[h.length - 1] ?? 0;
+      const first = h.find((v) => v > 0) ?? 0;
+      if (!first) return last > 0 ? 100 : 0;
+      return Math.round(((last - first) / first) * 100);
+    };
+
+    return {
+      "total":           { history: totalH,    delta: pct(totalH),     suffix: "%", dir: "down" as const },
+      "resolved":        { history: resolvedH, delta: pct(resolvedH),  suffix: "%", dir: "up"   as const },
+      "resolution-rate": { history: onTimeH,   delta: diff(onTimeH, 1), suffix: "pts", dir: "up"   as const },
+      "breached-sla":    { history: breachedH, delta: diff(breachedH),  suffix: "",  dir: "down" as const },
+      "reopen":          { history: reopenH,   delta: diff(reopenH, 1), suffix: "pts", dir: "down" as const },
+      "csat":            { history: csatH,     delta: diff(csatH, 1),   suffix: "",  dir: "up"   as const },
+    } as Record<string, { history: number[]; delta: number; suffix: string; dir: "up" | "down" }>;
+  }, [last7Buckets]);
+
+
   // Unified KPI registry: every box (stat card or chart panel) is a KPI.
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
 
@@ -1695,15 +1757,22 @@ export function DashboardPage() {
                   isResizing && "ring-2 ring-primary outline-none rounded",
                 )}
               >
-                {k.kind === "stat" ? (
-                  <StatCard
-                    label={k.label}
-                    value={k.getValue?.() ?? ""}
-                    intent={k.intent}
-                    delta={k.getDelta?.() ?? ""}
-                    onRemove={() => removeKpi(id)}
-                  />
-                ) : (
+                {k.kind === "stat" ? (() => {
+                  const sp = kpiSpark[id];
+                  return (
+                    <StatCard
+                      label={k.label}
+                      value={k.getValue?.() ?? ""}
+                      intent={k.intent}
+                      delta={sp ? undefined : (k.getDelta?.() ?? "")}
+                      onRemove={() => removeKpi(id)}
+                      history={sp?.history}
+                      deltaValue={sp?.delta}
+                      deltaSuffix={sp?.suffix}
+                      improveDirection={sp?.dir}
+                    />
+                  );
+                })() : (
                   <Panel
                     title={k.title}
                     action={k.action}
