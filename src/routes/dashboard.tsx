@@ -620,7 +620,7 @@ export function DashboardPage() {
   const KPI_REGISTRY: KpiDef[] = useMemo(() => [
 
     // Stat KPIs
-    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week" },
+    { id: "total", kind: "stat", label: t("CS_TOTAL_COMPLAINTS"), description: "Total complaints registered in the selected period.", icon: TrendingUp, intent: "neutral", getValue: () => String(s.total), getDelta: () => "+12 vs last week", improveDirection: "down", getHistory: () => sparkSeries.total, getDeltaIndicator: () => makeDelta(sparkSeries.total, "pct") },
     { id: "open", kind: "stat", label: t("CS_OPEN_COMPLAINTS"), description: "Complaints currently open and awaiting resolution.", icon: AlertTriangle, intent: "warning", getValue: () => String(s.open), getDelta: () => canCustomize ? `${tu.atRisk} at risk · ${tu.openPastSla} breached` : "4 nearing breach" },
     { id: "resolved", kind: "stat", label: t("CS_RESOLVED_COMPLAINTS"), description: "Complaints resolved in the selected period.", icon: ThumbsUp, intent: "positive", getValue: () => String(s.resolved), getDelta: () => canCustomize ? `Out of ${s.total} complaints` : "87% within SLA" },
     { id: "breached", kind: "stat", label: t("CS_SLA_BREACHED"), description: "Complaints where SLA has been breached.", icon: AlertTriangle, intent: "negative", getValue: () => String(s.breached), getDelta: () => "Escalation L2 active" },
