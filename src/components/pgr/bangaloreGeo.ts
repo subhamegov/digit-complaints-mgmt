@@ -51,25 +51,45 @@ const WARDS_PER_LOCALITY: Record<string, string[]> = {
   "East Village":       ["Riverside", "Green Park", "New Colony"],
 };
 
-/** Slightly jitter rectangle corners so polygons feel like real boundaries, not graph paper. */
-function rectPolygon(
+/**
+ * Build an organic-looking polygon inside a bounding box.
+ * Samples an ellipse fitted to the box at N angular steps, then perturbs
+ * each radius with seeded multi-octave noise so the outline reads as a
+ * real administrative boundary rather than graph paper.
+ */
+function organicPolygon(
   seed: string,
   minLat: number, maxLat: number, minLng: number, maxLng: number,
-  jitter = 0.004,
+  steps = 28,
+  noiseAmp = 0.22,
 ): Polygon {
   const rand = mulberry32(hashString(seed));
-  const j = () => (rand() - 0.5) * 2 * jitter;
-  // 8 perimeter points so the outline isn't a perfect rectangle.
-  return [
-    [minLat + j(), minLng + j()],
-    [minLat + j(), (minLng + maxLng) / 2 + j()],
-    [minLat + j(), maxLng + j()],
-    [(minLat + maxLat) / 2 + j(), maxLng + j()],
-    [maxLat + j(), maxLng + j()],
-    [maxLat + j(), (minLng + maxLng) / 2 + j()],
-    [maxLat + j(), minLng + j()],
-    [(minLat + maxLat) / 2 + j(), minLng + j()],
-  ];
+  const cLat = (minLat + maxLat) / 2;
+  const cLng = (minLng + maxLng) / 2;
+  // Half-extents — ellipse inscribed in the box, slightly enlarged so
+  // adjacent polygons touch / overlap and the seams disappear.
+  const rLat = (maxLat - minLat) / 2 * 1.05;
+  const rLng = (maxLng - minLng) / 2 * 1.05;
+
+  // Pre-roll a small noise table; smoothed across neighbours so the
+  // boundary varies gently instead of zig-zagging.
+  const raw = Array.from({ length: steps }, () => rand());
+  const smooth = raw.map((_, i) => {
+    const a = raw[(i - 1 + steps) % steps];
+    const b = raw[i];
+    const c = raw[(i + 1) % steps];
+    return (a + b * 2 + c) / 4;
+  });
+
+  const points: Polygon = [];
+  for (let i = 0; i < steps; i++) {
+    const theta = (i / steps) * Math.PI * 2;
+    const n = 1 + (smooth[i] - 0.5) * noiseAmp * 2;
+    const lat = cLat + Math.sin(theta) * rLat * n;
+    const lng = cLng + Math.cos(theta) * rLng * n;
+    points.push([lat, lng]);
+  }
+  return points;
 }
 
 function centerOf(minLat: number, maxLat: number, minLng: number, maxLng: number): LatLng {
@@ -79,7 +99,7 @@ function centerOf(minLat: number, maxLat: number, minLng: number, maxLng: number
 export const LOCALITY_POLYGONS: BoundaryPolygon[] = LOCALITY_BOXES.map((b) => ({
   code: b.code,
   name: b.name,
-  polygon: rectPolygon(b.code, b.minLat, b.maxLat, b.minLng, b.maxLng, 0.006),
+  polygon: organicPolygon(b.code, b.minLat, b.maxLat, b.minLng, b.maxLng, 32, 0.18),
   center: centerOf(b.minLat, b.maxLat, b.minLng, b.maxLng),
 }));
 
@@ -93,7 +113,7 @@ export const WARD_POLYGONS: BoundaryPolygon[] = LOCALITY_BOXES.flatMap((loc) => 
       code: `${loc.code}__${wardName.replace(/\s+/g, "_").toUpperCase()}`,
       name: wardName,
       parentCode: loc.code,
-      polygon: rectPolygon(loc.code + wardName, loc.minLat, loc.maxLat, minLng, maxLng, 0.003),
+      polygon: organicPolygon(loc.code + wardName, loc.minLat, loc.maxLat, minLng, maxLng, 24, 0.16),
       center: centerOf(loc.minLat, loc.maxLat, minLng, maxLng),
     };
   });
