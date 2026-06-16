@@ -546,6 +546,69 @@ export function DashboardPage() {
     };
   }, [filteredComplaints]);
 
+  // 7-day per-KPI histories for sparklines (test-user cards). Bins
+  // filteredComplaints by day across the same trend window the other
+  // time-series cards use, so all sparkline cards stay consistent.
+  const kpiHistories = useMemo(() => {
+    const days = 7;
+    const now = Date.now();
+    const buckets = Array.from({ length: days }, () => ({
+      filed: 0, resolved: 0, resolvedOnTime: 0, openBreached: 0,
+      reopened: 0, csat: [] as number[],
+    }));
+    for (const c of filteredComplaints as TestComplaint[]) {
+      const ageD = Math.floor((now - new Date(c.filedOn).getTime()) / 86400_000);
+      const idx = days - 1 - ageD;
+      if (idx < 0 || idx >= days) continue;
+      const b = buckets[idx];
+      b.filed++;
+      const resolved = c.status === "RESOLVED" || c.status === "CLOSED";
+      const isOpen = ["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"].includes(c.status);
+      if (resolved) {
+        b.resolved++;
+        if (c.slaState !== "BREACHED") b.resolvedOnTime++;
+      }
+      if (isOpen && c.slaState === "BREACHED") b.openBreached++;
+      if (c.reopenCount > 0 || c.status === "REOPENED") b.reopened++;
+      if (resolved && typeof c.csat === "number") b.csat.push(c.csat);
+    }
+    const total = buckets.map((b) => b.filed);
+    const resolved = buckets.map((b) => b.resolved);
+    const breachedOpen = buckets.map((b) => b.openBreached);
+    const onTimeRate = buckets.map((b) => {
+      const denom = b.resolved + b.openBreached;
+      return denom ? Math.round((b.resolvedOnTime / denom) * 1000) / 10 : 0;
+    });
+    const reopenRate = buckets.map((b) =>
+      b.resolved ? Math.round((b.reopened / b.resolved) * 1000) / 10 : 0,
+    );
+    const csat = buckets.map((b) =>
+      b.csat.length ? Math.round((b.csat.reduce((a, x) => a + x, 0) / b.csat.length) * 10) / 10 : 0,
+    );
+    return { total, resolved, breachedOpen, onTimeRate, reopenRate, csat };
+  }, [filteredComplaints]);
+
+  // Per-KPI delta helpers (last point vs first point in the window).
+  const makeDelta = (hist: number[], kind: "count" | "pct" | "decimal") => {
+    if (!hist.length) return { label: "0", dir: "flat" as const };
+    const last = hist[hist.length - 1];
+    const first = hist[0];
+    const diff = last - first;
+    const dir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+    const abs = Math.abs(diff);
+    let label = "0";
+    if (kind === "count") label = String(Math.round(abs));
+    else if (kind === "pct") label = `${(Math.round(abs * 10) / 10).toFixed(1)}%`;
+    else label = (Math.round(abs * 10) / 10).toFixed(1);
+    return { label, dir };
+  };
+  const dTotal = makeDelta(kpiHistories.total, "count");
+  const dResolved = makeDelta(kpiHistories.resolved, "count");
+  const dBreachedOpen = makeDelta(kpiHistories.breachedOpen, "count");
+  const dOnTime = makeDelta(kpiHistories.onTimeRate, "pct");
+  const dReopen = makeDelta(kpiHistories.reopenRate, "pct");
+  const dCsat = makeDelta(kpiHistories.csat, "decimal");
+
   const overTimeMonthly = useMemo(() => {
     const sumF = trend.reduce((a, b) => a + b.filed, 0) * 4;
     const sumR = trend.reduce((a, b) => a + b.resolved, 0) * 4;
