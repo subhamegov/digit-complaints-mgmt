@@ -1757,15 +1757,22 @@ export function DashboardPage() {
                   isResizing && "ring-2 ring-primary outline-none rounded",
                 )}
               >
-                {k.kind === "stat" ? (
-                  <StatCard
-                    label={k.label}
-                    value={k.getValue?.() ?? ""}
-                    intent={k.intent}
-                    delta={k.getDelta?.() ?? ""}
-                    onRemove={() => removeKpi(id)}
-                  />
-                ) : (
+                {k.kind === "stat" ? (() => {
+                  const sp = kpiSpark[id];
+                  return (
+                    <StatCard
+                      label={k.label}
+                      value={k.getValue?.() ?? ""}
+                      intent={k.intent}
+                      delta={sp ? undefined : (k.getDelta?.() ?? "")}
+                      onRemove={() => removeKpi(id)}
+                      history={sp?.history}
+                      deltaValue={sp?.delta}
+                      deltaSuffix={sp?.suffix}
+                      improveDirection={sp?.dir}
+                    />
+                  );
+                })() : (
                   <Panel
                     title={k.title}
                     action={k.action}
