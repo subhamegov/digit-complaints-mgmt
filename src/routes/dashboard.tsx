@@ -1708,8 +1708,10 @@ export function DashboardPage() {
                     value={k.getValue?.() ?? ""}
                     intent={k.intent}
                     delta={k.getDelta?.() ?? ""}
+                    trend={k.getTrend?.()}
                     onRemove={() => removeKpi(id)}
                   />
+
                 ) : (
                   <Panel
                     title={k.title}
