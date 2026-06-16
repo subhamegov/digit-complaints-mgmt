@@ -25,8 +25,12 @@ export function ComplaintMap({ complaints }: { complaints: Complaint[] }) {
 
 function MapSkeleton() {
   return (
-    <div className="flex h-full min-h-[480px] items-center justify-center rounded-sm border border-border bg-muted/30 text-[12px] text-muted-foreground">
-      Loading map…
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex h-full w-full items-center justify-center bg-muted/30 text-[12px] text-muted-foreground"
+    >
+      Loading complaint geography…
     </div>
   );
 }
