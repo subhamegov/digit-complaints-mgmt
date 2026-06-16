@@ -1808,7 +1808,7 @@ export function DashboardPage() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
               {KPI_REGISTRY.filter((k) => k.kind === "stat").slice(0, 6).map((k) => (
-                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
+                <StatCard key={k.id} label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} history={k.getHistory?.()} deltaValue={k.getDeltaValue?.()} improveDirection={k.improveDirection} />
               ))}
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
