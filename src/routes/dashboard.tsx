@@ -1382,7 +1382,7 @@ export function DashboardPage() {
         </div>
       ),
     },
-  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionTimeBySubtype, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
+  ], [s, dept, wards, trend, recent, wardsMax, geoView, geoData, filteredComplaints, statusView, statusBuckets, typeView, typeBuckets, typeExpanded, slaView, slaBuckets, channelBuckets, openBreakdown, hourBuckets, dowBuckets, trendingTypes, trendingLocations, openByEmployee, teamLoadBySla, resolutionTimeBySubtype, flowRatioByDept, resolutionByType, overTimeGran, overTimeData, avgResolutionHrs, firstResponseHrs, resolutionRate, canCustomize, tu]);
 
   const kpiById = useMemo(() => {
     const m = new Map<string, KpiDef>();
