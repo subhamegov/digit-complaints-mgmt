@@ -96,18 +96,27 @@ export function PageHeader({
   );
 }
 
+export type StatTrend = {
+  change: number;
+  display: string;
+  improveDirection: "up" | "down";
+  sparkline: number[];
+};
+
 export function StatCard({
   label,
   value,
   delta,
   intent = "neutral",
   onRemove,
+  trend,
 }: {
   label: string;
   value: string | number;
   delta?: string;
   intent?: "neutral" | "positive" | "warning" | "negative";
   onRemove?: () => void;
+  trend?: StatTrend;
 }) {
   const intentMap = {
     neutral:  "text-foreground",
@@ -115,6 +124,56 @@ export function StatCard({
     warning:  "text-status-progress",
     negative: "text-status-breach",
   };
+
+  let arrowEl: ReactNode = null;
+  let sparkEl: ReactNode = null;
+  if (trend) {
+    const dir: "up" | "down" = trend.change >= 0 ? "up" : "down";
+    const isGood = dir === trend.improveDirection;
+    const arrowColor = isGood ? "text-status-resolved" : "text-status-breach";
+    arrowEl = (
+      <span className={cn("ml-2 inline-flex items-baseline text-[12px] font-semibold tabular-nums", arrowColor)}>
+        <span aria-hidden>{dir === "up" ? "▲" : "▼"}</span>
+        <span className="ml-0.5">{trend.display}</span>
+      </span>
+    );
+
+    const data = trend.sparkline;
+    if (data.length > 1) {
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const range = max - min || 1;
+      const w = 100;
+      const h = 24;
+      const pts = data
+        .map((v, i) => {
+          const x = (i / (data.length - 1)) * w;
+          const y = h - ((v - min) / range) * h;
+          return `${x.toFixed(2)},${y.toFixed(2)}`;
+        })
+        .join(" ");
+      const strokeColor = isGood ? "var(--color-status-resolved)" : "var(--color-status-breach)";
+      sparkEl = (
+        <svg
+          viewBox={`0 0 ${w} ${h}`}
+          preserveAspectRatio="none"
+          className="mt-3 h-6 w-full"
+          aria-hidden
+        >
+          <polyline
+            points={pts}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      );
+    }
+  }
+
   return (
     <div className="relative rounded border border-border bg-surface p-4 group">
       {onRemove && (
@@ -128,8 +187,12 @@ export function StatCard({
         </button>
       )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={cn("mt-2 text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</div>
-      {delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
+      <div className="mt-2 flex items-baseline">
+        <span className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</span>
+        {arrowEl}
+      </div>
+      {!trend && delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
+      {sparkEl}
     </div>
   );
 }
