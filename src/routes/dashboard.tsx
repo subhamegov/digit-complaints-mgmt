@@ -1613,7 +1613,7 @@ export function DashboardPage() {
                           <HoverCardContent side="left" align="start" className="w-72 p-3">
                             {k.kind === "stat" ? (
                               <div className="mb-2 w-fit">
-                                <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} />
+                                <StatCard label={k.label} value={k.getValue?.() ?? ""} intent={k.intent} delta={k.getDelta?.() ?? ""} history={k.getHistory?.()} deltaLabel={k.getDeltaIndicator?.().label} deltaDirection={k.getDeltaIndicator?.().dir} improveDirection={k.improveDirection} />
                               </div>
                             ) : (
                               <div className="mb-2 rounded border border-border bg-muted/30 px-3 py-2 text-[12px] text-foreground inline-flex items-center gap-2">
