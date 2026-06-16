@@ -638,6 +638,9 @@ export function DashboardPage() {
       getDelta: () => canCustomize
         ? `Breached open: ${tu.openPastSla}`
         : `${s.resolved}/${s.total} resolved`,
+      improveDirection: "up",
+      getHistory: () => sparkSeries.onTimeDaily,
+      getDeltaIndicator: () => makeDelta(sparkSeries.onTimeDaily, "abs"),
     },
     { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
     { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints" },
