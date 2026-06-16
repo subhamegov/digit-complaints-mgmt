@@ -589,12 +589,12 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   // Per-KPI delta helpers (last point vs first point in the window).
-  const makeDelta = (hist: number[], kind: "count" | "pct" | "decimal") => {
-    if (!hist.length) return { label: "0", dir: "flat" as const };
+  const makeDelta = (hist: number[], kind: "count" | "pct" | "decimal"): { label: string; dir: "up" | "down" | "flat" } => {
+    if (!hist.length) return { label: "0", dir: "flat" };
     const last = hist[hist.length - 1];
     const first = hist[0];
     const diff = last - first;
-    const dir = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
+    const dir: "up" | "down" | "flat" = diff > 0 ? "up" : diff < 0 ? "down" : "flat";
     const abs = Math.abs(diff);
     let label = "0";
     if (kind === "count") label = String(Math.round(abs));
