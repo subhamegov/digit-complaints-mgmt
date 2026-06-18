@@ -1184,10 +1184,10 @@ export function DashboardPage() {
           return <div className="text-[12px] text-muted-foreground">No resolved complaints in the current filter.</div>;
         }
         const stageDefs = [
-          { key: "pendingAssignment" as const, label: "Pending assignment", color: "var(--color-chart-1)" },
-          { key: "assigned" as const,            label: "Assigned",             color: "var(--color-chart-2)" },
-          { key: "pendingReassignment" as const, label: "Pending reassignment", color: "var(--color-chart-3)" },
-          { key: "resolved" as const,            label: "Resolved",             color: "var(--color-chart-4)" },
+          { key: "pendingAssignment" as const, label: "Pending assignment", color: "var(--color-chart-4)" },
+          { key: "assigned" as const,            label: "Assigned",             color: "var(--color-chart-3)" },
+          { key: "pendingReassignment" as const, label: "Pending reassignment", color: "var(--color-chart-2)" },
+          { key: "resolved" as const,            label: "Resolved",             color: "var(--color-chart-1)" },
         ];
         return (
           <div className="flex flex-col gap-3">
