@@ -914,9 +914,7 @@ export function DashboardPage() {
             c.status !== "REJECTED" &&
             (c.slaState === "NEARING" || c.slaState === "BREACHED"),
         );
-        const rows = canCustomize
-          ? [...base].sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
-          : base.slice(0, 6);
+        const rows = [...base].sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs);
         return <ComplaintsAtRiskTable rows={rows} />;
       },
     },
