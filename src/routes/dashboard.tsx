@@ -904,29 +904,23 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "sla", kind: "panel", label: "SLA at risk", description: "Complaints approaching or past SLA in next 24h.",
-      icon: ListChecks, colSpan: 3, title: "SLA at risk — next 24 hours", padded: false,
+      id: "sla", kind: "panel", label: "Complaints at risk", description: "Open complaints nearing SLA breach or already breached.",
+      icon: ListChecks, colSpan: 3, title: "Complaints at risk", padded: false,
       render: () => {
-        const rows = canCustomize
-          ? [...filteredComplaints].filter(c => c.status !== "RESOLVED" && c.status !== "CLOSED" && c.status !== "REJECTED").sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
-          : filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6);
-        return (
-        <DataTable<Complaint>
-          emptyMessage={t("EMPTY_INBOX")}
-          rows={rows}
-          columns={[
-            { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
-            { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
-            { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
-            { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
-            { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
-            { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
-            { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
-          ]}
-        />
+        const base = filteredComplaints.filter(
+          (c) =>
+            c.status !== "RESOLVED" &&
+            c.status !== "CLOSED" &&
+            c.status !== "REJECTED" &&
+            (c.slaState === "NEARING" || c.slaState === "BREACHED"),
         );
+        const rows = canCustomize
+          ? [...base].sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
+          : base.slice(0, 6);
+        return <ComplaintsAtRiskTable rows={rows} />;
       },
     },
+
 
     // --- New panels (KPIs 7-19) ---
     {
