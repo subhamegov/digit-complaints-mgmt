@@ -1315,7 +1315,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint sub-types with the highest average resolution time.",
+      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint subtypes by average hours to resolve.",
       icon: Clock, colSpan: 2, title: "Resolution time by sub-type",
       render: () => {
         const { rows, max } = resolutionTimeBySubtype;
@@ -1330,8 +1330,8 @@ export function DashboardPage() {
         ];
         return (
           <div className="flex flex-col gap-3">
-            <div className="text-[11px] text-muted-foreground -mt-1">Top 5 sub-types — average hours to resolve</div>
-            <div className="flex items-end gap-3 h-[200px] pt-6">
+            <div className="text-[11px] text-muted-foreground -mt-1">Top 5 complaint subtypes by average hours to resolve</div>
+            <div className="flex items-end gap-3 h-[180px] pt-2">
               {rows.map((r) => {
                 const h = `${(r.avgHrs / max) * 100}%`;
                 const tooltip = [
@@ -1348,12 +1348,23 @@ export function DashboardPage() {
                         </div>
                         {stageDefs.map((s, i) => {
                           const segH = r.avgHrs ? `${(r.segs[s.key] / r.avgHrs) * 100}%` : "0%";
+                          const segValue = r.segs[s.key];
+                          const showLabel = max > 0 && segValue > max * 0.06;
                           return (
                             <div
                               key={s.key}
                               style={{ height: segH, background: s.color }}
-                              className={i === stageDefs.length - 1 ? "rounded-t-sm" : ""}
-                            />
+                              className={cn(
+                                "relative flex items-center justify-center overflow-hidden",
+                                i === stageDefs.length - 1 ? "rounded-t-sm" : ""
+                              )}
+                            >
+                              {showLabel && (
+                                <span className="text-[10px] font-medium text-white" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
+                                  {segValue}h
+                                </span>
+                              )}
+                            </div>
                           );
                         })}
                       </div>
