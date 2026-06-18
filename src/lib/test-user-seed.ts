@@ -185,7 +185,13 @@ function chooseOfficer(typeCode: string, i: number, status: ComplaintStatus): st
   return pool[i % pool.length];
 }
 
-function buildStageHours(status: ComplaintStatus, age: number, slaHours: number) {
+function buildStageHours(
+  status: ComplaintStatus,
+  age: number,
+  slaHours: number,
+  typeCode: string = "",
+  i: number = 0,
+) {
   // Heuristic but consistent:
   //  - pendingAssignment is short (≤ 6h) once anything is assigned.
   //  - assigned dwell is small (≤ 10h) once work has started.
@@ -205,13 +211,37 @@ function buildStageHours(status: ComplaintStatus, age: number, slaHours: number)
     }
     case "RESOLVED":
     case "CLOSED": {
-      // Resolution time ≈ slaHours-ish; aim for ~70% on-time among resolved.
-      const pa = 3;
-      const asg = 6;
-      // Decide on-time deterministically by index — handled by caller using a
-      // mask, so just clamp pendingResolution to the remainder.
-      const pr = Math.max(2, age - pa - asg);
       void slaHours;
+      // Per-subtype stage profile so different sub-types have different
+      // bottlenecks. Weights for [pendingAssignment, assigned, pendingResolution];
+      // the remainder of `age` becomes the implicit "resolved" segment.
+      let h = 0;
+      for (let k = 0; k < typeCode.length; k++) h = (h * 31 + typeCode.charCodeAt(k)) >>> 0;
+      const profiles: Array<[number, number, number]> = [
+        [0.30, 0.15, 0.20], // pending-assignment heavy
+        [0.10, 0.45, 0.15], // assigned heavy (field work)
+        [0.08, 0.18, 0.45], // pending-reassignment heavy
+        [0.18, 0.28, 0.28], // balanced
+        [0.22, 0.10, 0.38], // queue + reassign heavy
+      ];
+      const [wPa, wAsg, wPr] = profiles[h % profiles.length];
+      // Per-complaint jitter in ±20% so bars aren't identical within a sub-type.
+      const j = ((i * 9301 + 49297) % 233280) / 233280; // 0..1
+      const jitter = 0.8 + j * 0.4;
+      const pa = Math.max(1, Math.round(age * wPa * jitter));
+      const asg = Math.max(1, Math.round(age * wAsg * jitter));
+      const pr = Math.max(1, Math.round(age * wPr * jitter));
+      // Keep within age so the implicit "resolved" segment stays ≥ 0.
+      const cap = Math.max(3, age - 1);
+      const sum = pa + asg + pr;
+      if (sum > cap) {
+        const s = cap / sum;
+        return {
+          pendingAssignment: Math.max(1, Math.round(pa * s)),
+          assigned: Math.max(1, Math.round(asg * s)),
+          pendingResolution: Math.max(1, Math.round(pr * s)),
+        };
+      }
       return { pendingAssignment: pa, assigned: asg, pendingResolution: pr };
     }
     case "REJECTED":
