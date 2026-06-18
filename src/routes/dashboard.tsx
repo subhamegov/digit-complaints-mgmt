@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useRef, useEffect, Fragment } from "react";
-import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search } from "lucide-react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search, ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
-  StatCard, Panel, StatusBadge, SlaBadge,
-  ActionButton, OwnerCell, DataTable, nextActionFor,
+  StatCard, Panel, StatusBadge,
+  ActionButton, OwnerCell,
 } from "@/components/pgr/primitives";
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -54,6 +54,135 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
   component: DashboardPage,
 });
+
+/** Format SLA remaining hours as a signed duration string.
+ *  Positive remaining → "-Xh" / "-Xd" (time until breach).
+ *  Negative remaining → "+Xh" / "+Xd" (time since breach). */
+function formatBreachDuration(remainingHrs: number): { text: string; breached: boolean } {
+  const breached = remainingHrs < 0;
+  const abs = Math.abs(remainingHrs);
+  const unit = abs >= 48 ? "d" : "h";
+  const val = abs >= 48 ? Math.round(abs / 24) : Math.round(abs);
+  const sign = breached ? "+" : "-";
+  return { text: `${sign}${val}${unit}`, breached };
+}
+
+type RiskSortKey = "id" | "type" | "subtype" | "locality" | "owner" | "status" | "sla" | "duration";
+type RiskSortDir = "asc" | "desc";
+
+function ComplaintsAtRiskTable({ rows }: { rows: Complaint[] }) {
+  const [sortKey, setSortKey] = useState<RiskSortKey>("duration");
+  const [sortDir, setSortDir] = useState<RiskSortDir>("asc");
+
+  const sorted = useMemo(() => {
+    const arr = [...rows];
+    const dir = sortDir === "asc" ? 1 : -1;
+    arr.sort((a, b) => {
+      const av = sortValue(a, sortKey);
+      const bv = sortValue(b, sortKey);
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+    return arr;
+  }, [rows, sortKey, sortDir]);
+
+  const toggle = (k: RiskSortKey) => {
+    if (sortKey === k) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(k); setSortDir("asc"); }
+  };
+
+  const cols: { key: RiskSortKey; label: string }[] = [
+    { key: "id", label: "Complaint ID" },
+    { key: "type", label: "Complaint Type" },
+    { key: "subtype", label: "Complaint Subtype" },
+    { key: "locality", label: "Locality" },
+    { key: "owner", label: "Owner" },
+    { key: "status", label: "Status" },
+    { key: "sla", label: "SLA Status" },
+    { key: "duration", label: "Duration of Breach" },
+  ];
+
+  if (rows.length === 0) {
+    return <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">{t("EMPTY_INBOX")}</div>;
+  }
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[860px] text-[13px]">
+        <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+          <tr>
+            {cols.map((c) => {
+              const active = sortKey === c.key;
+              const Icon = !active ? ChevronsUpDown : sortDir === "asc" ? ArrowUp : ArrowDown;
+              return (
+                <th key={c.key} className="px-3 py-2 font-medium whitespace-nowrap text-left">
+                  <button
+                    type="button"
+                    onClick={() => toggle(c.key)}
+                    className={cn(
+                      "inline-flex items-center gap-1 hover:text-foreground transition-colors",
+                      active && "text-foreground",
+                    )}
+                    aria-sort={active ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    {c.label}
+                    <Icon className="h-3 w-3 opacity-70" />
+                  </button>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {sorted.map((c) => {
+            const sub = (c as TestComplaint).subtype ?? complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
+            const slaLabel = c.slaState === "BREACHED" ? "Breached" : "Nearing Breach";
+            const slaTok = c.slaState === "BREACHED"
+              ? "bg-status-breach-bg text-status-breach"
+              : "bg-status-progress-bg text-status-progress";
+            const dur = formatBreachDuration(c.slaRemainingHrs);
+            const durTone = dur.breached ? "text-status-breach" : "text-status-progress";
+            return (
+              <tr key={c.id} className="hover:bg-muted/40">
+                <td className="px-3 py-2 align-top">
+                  <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link>
+                </td>
+                <td className="px-3 py-2 align-top text-[12px]">{complaintTypeOf(c.typeCode)?.name ?? c.typeCode}</td>
+                <td className="px-3 py-2 align-top text-[12px]">{sub}</td>
+                <td className="px-3 py-2 align-top text-[12px]">{c.locality}</td>
+                <td className="px-3 py-2 align-top"><OwnerCell id={c.assignedOfficerId} /></td>
+                <td className="px-3 py-2 align-top"><StatusBadge status={c.status} /></td>
+                <td className="px-3 py-2 align-top">
+                  <span className={cn("inline-flex items-center rounded-sm px-2 py-0.5 text-[11px] font-medium", slaTok)}>
+                    {slaLabel}
+                  </span>
+                </td>
+                <td className={cn("px-3 py-2 align-top text-[12px] font-semibold tabular-nums", durTone)}>
+                  {dur.text}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function sortValue(c: Complaint, key: RiskSortKey): string | number {
+  switch (key) {
+    case "id": return c.id;
+    case "type": return complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
+    case "subtype": return (c as TestComplaint).subtype ?? complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
+    case "locality": return c.locality ?? "";
+    case "owner": return officerOf(c.assignedOfficerId)?.name ?? "";
+    case "status": return c.status;
+    case "sla": return c.slaState === "BREACHED" ? 1 : 0; // Breached after Nearing when desc
+    case "duration": return c.slaRemainingHrs; // ascending = most breached first
+  }
+}
+
 
 export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
@@ -775,29 +904,23 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "sla", kind: "panel", label: "SLA at risk", description: "Complaints approaching or past SLA in next 24h.",
-      icon: ListChecks, colSpan: 3, title: "SLA at risk — next 24 hours", padded: false,
+      id: "sla", kind: "panel", label: "Complaints at risk", description: "Open complaints nearing SLA breach or already breached.",
+      icon: ListChecks, colSpan: 3, title: "Complaints at risk", padded: false,
       render: () => {
-        const rows = canCustomize
-          ? [...filteredComplaints].filter(c => c.status !== "RESOLVED" && c.status !== "CLOSED" && c.status !== "REJECTED").sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
-          : filteredComplaints.filter(c => c.slaState !== "WITHIN" && c.status !== "RESOLVED" && c.status !== "REJECTED").slice(0, 6);
-        return (
-        <DataTable<Complaint>
-          emptyMessage={t("EMPTY_INBOX")}
-          rows={rows}
-          columns={[
-            { key: "id", header: t("CS_COMPLAINT_NO"), cell: (c) => <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary hover:underline">{c.id}</Link> },
-            { key: "type", header: t("CS_COMPLAINT_TYPE"), cell: (c) => <span>{complaintTypeOf(c.typeCode)?.name}</span> },
-            { key: "loc", header: t("COMMON_LOCALITY"), cell: (c) => <span className="text-[12px]">{c.locality}</span> },
-            { key: "owner", header: t("COMMON_OWNER"), cell: (c) => <OwnerCell id={c.assignedOfficerId} /> },
-            { key: "sla", header: t("CS_SLA_STATUS"), cell: (c) => <SlaBadge state={c.slaState} remainingHrs={c.slaRemainingHrs} /> },
-            { key: "status", header: t("CS_COMPLAINT_STATUS"), cell: (c) => <StatusBadge status={c.status} /> },
-            { key: "next", header: t("CS_NEXT_ACTION"), cell: (c) => <span className="text-[12px] font-medium">{nextActionFor(c)}</span> },
-          ]}
-        />
+        const base = filteredComplaints.filter(
+          (c) =>
+            c.status !== "RESOLVED" &&
+            c.status !== "CLOSED" &&
+            c.status !== "REJECTED" &&
+            (c.slaState === "NEARING" || c.slaState === "BREACHED"),
         );
+        const rows = canCustomize
+          ? [...base].sort((a, b) => a.slaRemainingHrs - b.slaRemainingHrs).slice(0, 8)
+          : base.slice(0, 6);
+        return <ComplaintsAtRiskTable rows={rows} />;
       },
     },
+
 
     // --- New panels (KPIs 7-19) ---
     {
