@@ -339,21 +339,54 @@ export function DashboardPage() {
   }, [filteredComplaints]);
 
   const resolutionTimeBySubtype = useMemo(() => {
-    const m = new Map<string, { hrs: number; n: number }>();
+    type StageKey = "pendingAssignment" | "assigned" | "pendingResolution";
+    const stageKeys: StageKey[] = ["pendingAssignment", "assigned", "pendingResolution"];
+    const m = new Map<string, {
+      hrs: number;
+      n: number;
+      stageSums: Record<StageKey, number>;
+      stageCounts: Record<StageKey, number>;
+    }>();
     for (const c of filteredComplaints) {
       if (c.status !== "RESOLVED" && c.status !== "CLOSED") continue;
       const ct = complaintTypeOf(c.typeCode);
       const sub = (c as TestComplaint).subtype ?? ct?.name ?? c.typeCode;
-      const e = m.get(sub) ?? { hrs: 0, n: 0 };
+      const e = m.get(sub) ?? {
+        hrs: 0, n: 0,
+        stageSums: { pendingAssignment: 0, assigned: 0, pendingResolution: 0 },
+        stageCounts: { pendingAssignment: 0, assigned: 0, pendingResolution: 0 },
+      };
       e.hrs += c.slaHours - c.slaRemainingHrs;
       e.n++;
+      const sh = (c as TestComplaint).stageHours;
+      for (const k of stageKeys) {
+        const v = sh?.[k];
+        if (typeof v === "number" && v > 0) {
+          e.stageSums[k] += v;
+          e.stageCounts[k] += 1;
+        }
+      }
       m.set(sub, e);
     }
-    const rows = Array.from(m, ([name, v]) => ({
-      name,
-      avgHrs: v.n ? Math.round((v.hrs / v.n) * 10) / 10 : 0,
-      n: v.n,
-    }))
+    const rows = Array.from(m, ([name, v]) => {
+      const avgHrs = v.n ? v.hrs / v.n : 0;
+      const avgStage = (k: StageKey) =>
+        v.stageCounts[k] ? v.stageSums[k] / v.stageCounts[k] : 0;
+      const pendingAssignment = avgStage("pendingAssignment");
+      const assigned = avgStage("assigned");
+      const pendingReassignment = avgStage("pendingResolution");
+      const stagesSum = pendingAssignment + assigned + pendingReassignment;
+      const resolved = Math.max(0, avgHrs - stagesSum);
+      const r1 = (x: number) => Math.round(x * 10) / 10;
+      const segs = {
+        pendingAssignment: r1(pendingAssignment),
+        assigned: r1(assigned),
+        pendingReassignment: r1(pendingReassignment),
+        resolved: r1(resolved),
+      };
+      const total = r1(segs.pendingAssignment + segs.assigned + segs.pendingReassignment + segs.resolved);
+      return { name, avgHrs: total, n: v.n, segs };
+    })
       .filter((r) => r.n > 0)
       .sort((a, b) => b.avgHrs - a.avgHrs)
       .slice(0, 5);
