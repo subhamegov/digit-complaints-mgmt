@@ -1183,22 +1183,40 @@ export function DashboardPage() {
         if (!rows.length) {
           return <div className="text-[12px] text-muted-foreground">No resolved complaints in the current filter.</div>;
         }
+        const stageDefs = [
+          { key: "pendingAssignment" as const, label: "Pending assignment", color: "var(--color-chart-1)" },
+          { key: "assigned" as const,            label: "Assigned",             color: "var(--color-chart-2)" },
+          { key: "pendingReassignment" as const, label: "Pending reassignment", color: "var(--color-chart-3)" },
+          { key: "resolved" as const,            label: "Resolved",             color: "var(--color-chart-4)" },
+        ];
         return (
           <div className="flex flex-col gap-3">
             <div className="text-[11px] text-muted-foreground -mt-1">Top 5 sub-types — average hours to resolve</div>
             <div className="flex items-end gap-3 h-[200px] pt-6">
               {rows.map((r) => {
                 const h = `${(r.avgHrs / max) * 100}%`;
+                const tooltip = [
+                  r.name,
+                  ...stageDefs.map((s) => `${s.label}: ${r.segs[s.key]}h`),
+                  `Total: ${r.avgHrs}h`,
+                ].join("\n");
                 return (
-                  <div key={r.name} className="flex-1 flex flex-col items-center h-full min-w-0" title={`${r.name}: ${r.avgHrs}h avg · ${r.n} resolved`}>
+                  <div key={r.name} className="flex-1 flex flex-col items-center h-full min-w-0" title={tooltip}>
                     <div className="flex-1 w-full flex items-end justify-center relative">
-                      <div
-                        className="w-full max-w-[56px] rounded-t-sm relative"
-                        style={{ height: h, background: "var(--color-chart-1)" }}
-                      >
-                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold tabular-nums text-foreground whitespace-nowrap">
+                      <div className="w-full max-w-[56px] rounded-t-sm overflow-hidden relative flex flex-col-reverse" style={{ height: h }}>
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold tabular-nums text-foreground whitespace-nowrap z-10">
                           {r.avgHrs}h
                         </div>
+                        {stageDefs.map((s, i) => {
+                          const segH = r.avgHrs ? `${(r.segs[s.key] / r.avgHrs) * 100}%` : "0%";
+                          return (
+                            <div
+                              key={s.key}
+                              style={{ height: segH, background: s.color }}
+                              className={i === stageDefs.length - 1 ? "rounded-t-sm" : ""}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="mt-2 w-full text-center text-[11px] text-foreground truncate" title={r.name}>
@@ -1207,6 +1225,14 @@ export function DashboardPage() {
                   </div>
                 );
               })}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+              {stageDefs.map((s) => (
+                <div key={s.key} className="inline-flex items-center gap-1.5">
+                  <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} />
+                  <span>{s.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         );
