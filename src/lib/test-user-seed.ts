@@ -325,7 +325,7 @@ function build(i: number): TestComplaint {
   const effectiveAge = isResolvedLike && resolvedOnTime
     ? Math.min(age, type.slaHours - 1)
     : age;
-  const stageHours = buildStageHours(status, effectiveAge, type.slaHours);
+  const stageHours = buildStageHours(status, effectiveAge, type.slaHours, typeCode, i);
   const remaining = type.slaHours - effectiveAge;
   const slaState =
     remaining < 0 ? "BREACHED" : remaining < type.slaHours * 0.25 ? "NEARING" : "WITHIN";
