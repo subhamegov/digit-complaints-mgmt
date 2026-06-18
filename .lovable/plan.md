@@ -1,58 +1,69 @@
 ## Goal
 
-Replace the current 3-tile landing on `/admin/workflow-config` with a **Workflows list** that surfaces all configured complaint workflows for the account, clearly marks the system-locked reference workflow, and keeps the three existing tools (Visualization, SLA Maps, Role Hierarchy) reachable as actions on each workflow row.
+Replace the placeholder at `/admin/complaints-config` with a functional configuration workspace covering the five areas implied by the page subtitle. All data stays in-memory (mock) for v1, and every user-facing label is editable per locale inline.
 
-## What the user will see
+## Layout
 
-A single page at `/admin/workflow-config` with:
+```text
+Complaints
+─────────────────────────────────────────────────────
+[Locale: EN ▾]  [Search…]              [+ New]  [Export]
+─────────────────────────────────────────────────────
+Tabs: Categories │ Priorities │ Statuses │ Resolution codes │ Custom attributes
+─────────────────────────────────────────────────────
+<active tab content>
+```
 
-1. **Header**: "Workflows" + subtitle "Workflow definitions installed for this account. The DIGIT reference workflow is locked and cannot be edited or deleted."
-2. **Primary action (top-right)**: `+ New workflow` (clones from a base).
-3. **Workflows table** with columns:
-   - **Name** (with a small "System" / lock badge on the reference workflow)
-   - **Code** (e.g. `PGR.STANDARD.V2`)
-   - **Type** (Reference / Custom)
-   - **States** (count, e.g. "7 states")
-   - **Transitions** (count)
-   - **Used by** (count of complaint categories bound to it)
-   - **Status** (Active / Draft / Archived)
-   - **Updated** (date + author)
-   - **Actions**: Visualize · SLA Maps · Role Hierarchy · Edit · Duplicate · Delete
-     - For the locked reference row: Edit and Delete are disabled with a tooltip "System workflow — clone to customize". Duplicate, Visualize, SLA Maps, Role Hierarchy remain enabled.
+- Header: locale switcher (EN / HI / KN — matches existing localization options), global search, primary action button (contextual to active tab), and Export (JSON download of the current config).
+- Tabs preserve query-string state (`?tab=categories`).
+- Right-side drawer for create/edit forms (consistent with other admin screens in the project).
+- Empty states with a "Seed sample data" affordance.
 
-## The locked reference workflow
+## Tab content
 
-Per the DIGIT PGR reference implementation, the standard banked workflow is **`PGR` business service** (a.k.a. **"DIGIT PGR Standard Workflow v2"**, code `PGR.STANDARD.V2`). This is the canonical state machine used by the DIGIT Public Grievance Redressal module and is bundled with the platform — every account inherits it and it cannot be deleted or structurally edited; account admins clone it to create custom variants.
+### 1. Categories & Subcategories
+- Two-pane layout: left = category tree (drag-to-reorder, expand/collapse, enable/disable toggle); right = detail panel for the selected node.
+- Detail panel fields: code (slug, immutable after create), label (per-locale), description (per-locale), default priority, default SLA hours, owning department, active flag.
+- Subcategories inherit defaults from parent unless overridden.
+- Inline link: "Edit workflow for this category →" deep-links to `admin.workflow-config`.
 
-States: `OPEN → ASSIGNED → IN_PROGRESS → RESOLVED → (CLOSED | REOPENED) | REJECTED` — already defined in `src/routes/config.workflow.tsx` and reused for the visualizer.
+### 2. Priorities
+- Sortable table: order, code, label (per-locale), color swatch, weight (numeric), default flag.
+- One row can be marked default; toggling another clears the prior default.
 
-## Seed rows for the list (mock data, account-scoped)
+### 3. Statuses
+- Sortable table: code, label (per-locale), category (Open / In progress / Resolved / Closed / Rejected), color, terminal flag.
+- Read-only banner: "Lifecycle transitions are defined in Workflow Config" with a link.
 
-| Name | Code | Type | States | Transitions | Used by | Status | Updated |
-|---|---|---|---|---|---|---|---|
-| DIGIT PGR Standard Workflow v2 *(locked)* | `PGR.STANDARD.V2` | Reference | 7 | 7 | 42 categories | Active | 2024-01-15 · DIGIT Platform |
-| Sanitation Fast-Track | `PGR.SANITATION.FT` | Custom | 6 | 6 | 8 categories | Active | 2026-04-22 · Vikram Mehta |
-| Water Supply – 2-Tier Escalation | `PGR.WATER.2TIER` | Custom | 8 | 9 | 5 categories | Active | 2026-05-30 · Vikram Mehta |
-| Street Lighting (pilot) | `PGR.LIGHTING.PILOT` | Custom | 7 | 7 | 0 categories | Draft | 2026-06-08 · Harpreet Kaur |
+### 4. Resolution codes
+- Table: code, label (per-locale), description (per-locale), applicable statuses (multi-select), applicable categories (multi-select, optional — empty = all), active flag.
 
-## Behavioural details
+### 5. Custom attributes
+- Table: code, label (per-locale), type (text / number / select / multiselect / date / boolean / file), required, visibility (channels: web/mobile/CSR; roles: citizen/agent/supervisor), validation (min/max/length/regex depending on type), options editor for select types (each option label per-locale), applies-to-categories (multi-select, empty = all).
 
-- Clicking a row name opens the existing `/admin/workflow-config/visualization` page (passing the workflow code via search param so the visualizer can show that workflow; current visualizer already shows the standard one, so for now all rows route there).
-- "Duplicate" on the locked row toasts "Cloned 'DIGIT PGR Standard Workflow v2' → draft" (no real persistence; mock UX).
-- "Delete" on the locked row is disabled; tooltip explains why. On other rows it opens an alert-dialog confirm.
-- Row badge for the locked workflow: small `Lock` icon + "System" pill, plus a "Reference" type tag.
+## Multilingual editing
 
-## Technical changes
+- Locale switcher in the header sets the "active editing locale" — all label inputs in the page show that locale's value.
+- Every label field has a small `EN · HI · KN` indicator chip showing which locales have a value; missing locales render as a warning dot.
+- A "Translate all" link on each row opens a small modal with one input per configured locale.
 
-- **Edit** `src/routes/admin.workflow-config.index.tsx`:
-  - Remove the 3-tile grid; replace with a `Panel` containing the workflows table (use existing `Panel` / table patterns from `src/components/pgr/primitives.tsx` and `src/routes/config.workflow.tsx` for visual consistency).
-  - Add an in-file `WORKFLOWS` constant with the four rows above.
-  - Per-row action menu via existing `DropdownMenu` (shadcn). Use `Lock`, `Eye`, `Gauge`, `ShieldCheck`, `Copy`, `Pencil`, `Trash2` icons from `lucide-react`.
-  - Disabled state on Edit/Delete for `type === "Reference"` with `title` tooltip.
-- **No route additions** — Visualization, SLA Maps, Role Hierarchy stay at their current child routes and are reached from row actions.
-- No other files changed.
+## Data layer (in-memory)
 
-## Out of scope
+- New module `src/lib/complaints-config-store.ts`:
+  - Types: `Category`, `Priority`, `Status`, `ResolutionCode`, `CustomAttribute`, `LocalizedString = Record<LocaleCode, string>`.
+  - Seed data covering ~6 categories, ~15 subcategories, 4 priorities, 6 statuses, 8 resolution codes, 4 custom attributes — aligned with the seed data already used elsewhere (e.g. `test-user-seed.ts`, dashboard).
+  - Zustand store (project already uses it) exposing CRUD actions and selectors; persisted to `sessionStorage` so edits survive route changes within a session but reset on reload — matches the "demo" intent.
+- Validation via `zod` schemas per entity (code regex, label non-empty for the default locale, numeric ranges).
 
-- Real persistence / CRUD backend (mock only).
-- Per-workflow visualizer variants (the visualizer keeps showing the standard machine for now; wiring per-workflow data can be a follow-up).
+## Files
+
+- Edit: `src/routes/admin.complaints-config.tsx` — replace `BlankAdminPage` with the new screen, wired through the existing `AdminLayout`.
+- New: `src/components/admin/complaints-config/` — `index.tsx` (shell + tabs), `CategoriesTab.tsx`, `PrioritiesTab.tsx`, `StatusesTab.tsx`, `ResolutionCodesTab.tsx`, `CustomAttributesTab.tsx`, `LocalizedInput.tsx`, `EntityDrawer.tsx`.
+- New: `src/lib/complaints-config-store.ts` — types, seed, zustand store, zod schemas.
+
+## Out of scope (v1)
+
+- Server persistence / Lovable Cloud wiring.
+- Wiring custom attributes into the actual complaint intake form.
+- Bulk import (CSV) — Export only.
+- Audit log of config changes.
