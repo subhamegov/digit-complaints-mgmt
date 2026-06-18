@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useRef, useEffect, Fragment } from "react";
-import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search } from "lucide-react";
+import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search, ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
   StatCard, Panel, StatusBadge, SlaBadge,
