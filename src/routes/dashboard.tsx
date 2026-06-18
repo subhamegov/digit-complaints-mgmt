@@ -3,8 +3,8 @@ import { useState, useMemo, useRef, useEffect, Fragment } from "react";
 import { Plus, Download, ArrowRight, TrendingUp, Clock, Users, AlertTriangle, ThumbsUp, Repeat, Building2, Filter, BarChart3, LineChart as LineChartIcon, MapPin, ListChecks, Activity, X, Search, ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import { COMPLAINT_TYPES } from "@/lib/mock-data";
 import {
-  StatCard, Panel, StatusBadge, SlaBadge,
-  ActionButton, OwnerCell, DataTable, nextActionFor,
+  StatCard, Panel, StatusBadge,
+  ActionButton, OwnerCell,
 } from "@/components/pgr/primitives";
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
