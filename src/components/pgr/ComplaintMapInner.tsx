@@ -632,7 +632,7 @@ function PolyTooltip({
         <div className="font-semibold">{name} <span className="font-normal text-muted-foreground">· {level}</span></div>
         <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
           <span className="text-muted-foreground">{metricLabel}</span><span className="tabular-nums font-medium">{value}</span>
-          <span className="text-muted-foreground">Total filed</span><span className="tabular-nums">{agg.total}</span>
+          <span className="text-muted-foreground">Total created</span><span className="tabular-nums">{agg.total}</span>
           <span className="text-muted-foreground">Open</span><span className="tabular-nums">{agg.open}</span>
           <span className="text-muted-foreground">Resolved</span><span className="tabular-nums">{agg.resolved}</span>
         </div>
