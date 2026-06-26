@@ -119,6 +119,39 @@ export const WARD_POLYGONS: BoundaryPolygon[] = LOCALITY_BOXES.flatMap((loc) => 
   });
 });
 
+/**
+ * Sub-ward polygons (3 per ward) — the lowest colored hierarchy level.
+ * Each ward bounding box is split into 3 horizontal strips so the
+ * sub-wards stack within the parent ward's vertical column.
+ */
+export const SUBWARD_POLYGONS: BoundaryPolygon[] = WARD_POLYGONS.flatMap((ward) => {
+  let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+  for (const [lat, lng] of ward.polygon) {
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+  }
+  const stripH = (maxLat - minLat) / 3;
+  return [0, 1, 2].map((i) => {
+    const sMinLat = minLat + stripH * i;
+    const sMaxLat = minLat + stripH * (i + 1);
+    return {
+      code: `${ward.code}__SW${i}`,
+      name: `${ward.name} – Sector ${i + 1}`,
+      parentCode: ward.code,
+      polygon: organicPolygon(ward.code + "_sw" + i, sMinLat, sMaxLat, minLng, maxLng, 20, 0.14),
+      center: centerOf(sMinLat, sMaxLat, minLng, maxLng),
+    };
+  });
+});
+
+/** Deterministic sub-ward assignment for a complaint within its ward. */
+export function subwardCodeForComplaint(complaintId: string, wardCode: string): string {
+  const idx = hashString(complaintId + wardCode) % 3;
+  return `${wardCode}__SW${idx}`;
+}
+
 /** Lookup helpers used to bucket dataset complaints into map polygons. */
 export const LOCALITY_BY_WARD_FIELD: Record<string, BoundaryPolygon> = Object.fromEntries(
   LOCALITY_POLYGONS.map((p) => [p.name, p]),
