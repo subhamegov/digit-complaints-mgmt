@@ -1,9 +1,9 @@
 /**
  * ComplaintMapInner — Leaflet implementation of the Civic Operations Hub map.
  *
- * This module is loaded ONLY on the client (via React.lazy from the
- * SSR-safe ComplaintMap wrapper) because Leaflet touches `window` at
- * module evaluation time.
+ * Three tabs (Complaints Filed / Open / Resolved) drive a choropleth across
+ * a District → Subdistrict → Sub-subdistrict hierarchy. At the deepest zoom
+ * we drop one pin per complaint (green=resolved, red=open) regardless of tab.
  */
 import "leaflet/dist/leaflet.css";
 
@@ -17,101 +17,112 @@ import type { Complaint } from "@/lib/mock-data";
 import { complaintTypeOf } from "@/lib/mock-data";
 import {
   BANGALORE_CENTER, BANGALORE_BOUNDS,
-  LOCALITY_POLYGONS, WARD_POLYGONS,
+  LOCALITY_POLYGONS, WARD_POLYGONS, SUBWARD_POLYGONS,
   LOCALITY_BY_WARD_FIELD, WARD_BY_LOCALITY_FIELD,
+  subwardCodeForComplaint,
   pinForComplaint, type BoundaryPolygon,
 } from "./bangaloreGeo";
 import { ChevronRight, Home, Crosshair, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type MetricMode = "wow" | "sla";
+type MetricMode = "filed" | "open" | "resolved";
 
-/* ----------------------------- palette ----------------------------- */
+/* ----------------------------- status helpers ----------------------------- */
 
-// Diverging WoW palette — teal (improving) → neutral → amber → red (spike).
-const WOW_STOPS: { test: (delta: number, isNew: boolean) => boolean; fill: string; stroke: string; label: string }[] = [
-  { test: (d) => d <= -25,             fill: "#0d9488", stroke: "#0f766e", label: "↓ > 25%" },
-  { test: (d) => d > -25 && d <= -5,   fill: "#99f6e4", stroke: "#5eead4", label: "↓ 5–25%" },
-  { test: (d) => d > -5 && d < 5,      fill: "#e5e7eb", stroke: "#9ca3af", label: "flat ±5%" },
-  { test: (d) => d >= 5 && d <= 25,    fill: "#fde68a", stroke: "#f59e0b", label: "↑ 5–25%" },
-  { test: (d) => d > 25 && d <= 100,   fill: "#fb923c", stroke: "#ea580c", label: "↑ 25–100%" },
-  { test: (d, isNew) => d > 100 || isNew, fill: "#dc2626", stroke: "#991b1b", label: "↑ >100% / new" },
-];
+const RESOLVED_STATUSES = new Set(["RESOLVED", "CLOSED"]);
+const OPEN_STATUSES = new Set(["OPEN", "ASSIGNED", "IN_PROGRESS", "REOPENED"]);
 
-// Sequential SLA breach palette (share of complaints in poly with state BREACHED).
-const SLA_STOPS: { max: number; fill: string; stroke: string; label: string }[] = [
-  { max: 0.001, fill: "#f1f5f9", stroke: "#cbd5e1", label: "0%" },
-  { max: 0.10,  fill: "#fee2e2", stroke: "#fecaca", label: "≤ 10%" },
-  { max: 0.25,  fill: "#fca5a5", stroke: "#f87171", label: "10–25%" },
-  { max: 0.50,  fill: "#f87171", stroke: "#dc2626", label: "25–50%" },
-  { max: 0.75,  fill: "#dc2626", stroke: "#991b1b", label: "50–75%" },
-  { max: 1.01,  fill: "#7f1d1d", stroke: "#450a0a", label: "> 75%" },
-];
+function isResolved(c: Complaint) { return RESOLVED_STATUSES.has(c.status); }
+function isOpen(c: Complaint) { return OPEN_STATUSES.has(c.status); }
 
-const PIN_COLOR: Record<string, { fill: string; stroke: string; label: string }> = {
-  WITHIN:   { fill: "#14b8a6", stroke: "#0f766e", label: "Within SLA" },
-  NEARING:  { fill: "#f59e0b", stroke: "#b45309", label: "Breaching" },
-  BREACHED: { fill: "#dc2626", stroke: "#7f1d1d", label: "Breached" },
+/* ------------------------------- palettes ------------------------------- */
+
+interface Ramp {
+  /** ramp stops, increasing threshold. Pick the first stop whose `max` >= value. */
+  stops: { max: number; fill: string; stroke: string; label: string }[];
+  emptyFill: string;
+  emptyStroke: string;
+}
+
+// Blue ramp — raw counts. Buckets are picked dynamically from data max.
+const BLUE_FILLS = ["#eff6ff", "#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#1d4ed8"];
+const BLUE_STROKES = ["#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#1d4ed8", "#1e3a8a"];
+
+// Red ramp — % open.
+const RED_RAMP: Ramp = {
+  emptyFill: "#f8fafc", emptyStroke: "#cbd5e1",
+  stops: [
+    { max: 0.0001, fill: "#fef2f2", stroke: "#fecaca", label: "0%" },
+    { max: 0.20,   fill: "#fecaca", stroke: "#fca5a5", label: "≤ 20%" },
+    { max: 0.40,   fill: "#fca5a5", stroke: "#f87171", label: "20–40%" },
+    { max: 0.60,   fill: "#f87171", stroke: "#ef4444", label: "40–60%" },
+    { max: 0.80,   fill: "#dc2626", stroke: "#b91c1c", label: "60–80%" },
+    { max: 1.01,   fill: "#7f1d1d", stroke: "#450a0a", label: "> 80%" },
+  ],
+};
+
+// Green ramp — % resolved.
+const GREEN_RAMP: Ramp = {
+  emptyFill: "#f8fafc", emptyStroke: "#cbd5e1",
+  stops: [
+    { max: 0.0001, fill: "#f0fdf4", stroke: "#bbf7d0", label: "0%" },
+    { max: 0.20,   fill: "#bbf7d0", stroke: "#86efac", label: "≤ 20%" },
+    { max: 0.40,   fill: "#86efac", stroke: "#4ade80", label: "20–40%" },
+    { max: 0.60,   fill: "#4ade80", stroke: "#22c55e", label: "40–60%" },
+    { max: 0.80,   fill: "#16a34a", stroke: "#15803d", label: "60–80%" },
+    { max: 1.01,   fill: "#14532d", stroke: "#052e16", label: "> 80%" },
+  ],
+};
+
+function buildBlueRamp(maxCount: number): Ramp {
+  const m = Math.max(1, maxCount);
+  // 6 evenly spaced buckets up to max.
+  const stops = BLUE_FILLS.map((fill, i) => {
+    const upper = Math.round((m * (i + 1)) / BLUE_FILLS.length);
+    const lower = i === 0 ? 1 : Math.round((m * i) / BLUE_FILLS.length) + 1;
+    const label = i === 0 ? `1–${upper}` : lower >= upper ? `${upper}` : `${lower}–${upper}`;
+    return { max: upper + 0.5, fill, stroke: BLUE_STROKES[i], label };
+  });
+  return { emptyFill: "#f8fafc", emptyStroke: "#cbd5e1", stops };
+}
+
+function rampColor(ramp: Ramp, value: number | null): { fill: string; stroke: string } {
+  if (value === null) return { fill: ramp.emptyFill, stroke: ramp.emptyStroke };
+  for (const s of ramp.stops) if (value <= s.max) return { fill: s.fill, stroke: s.stroke };
+  const last = ramp.stops[ramp.stops.length - 1];
+  return { fill: last.fill, stroke: last.stroke };
+}
+
+const PIN_COLOR = {
+  resolved: { fill: "#16a34a", stroke: "#14532d", label: "Resolved" },
+  open:     { fill: "#dc2626", stroke: "#7f1d1d", label: "Open" },
 };
 
 /* ------------------------ per-polygon aggregate ------------------------ */
 
 interface PolyAgg {
   total: number;
-  thisWeek: number;
-  lastWeek: number;
-  /** WoW delta as a percentage. null = both weeks zero. */
-  wowPct: number | null;
-  /** true when last week was 0 but this week > 0 ("new spike"). */
-  isNewSpike: boolean;
-  within: number;
-  nearing: number;
-  breached: number;
-  /** share breached, 0..1. */
-  slaShare: number;
+  open: number;
+  resolved: number;
+  openPct: number | null;     // null when total = 0
+  resolvedPct: number | null; // null when total = 0
 }
 
-function aggregate(complaints: Complaint[], referenceNow: number): PolyAgg {
-  const sevenDays = 7 * 24 * 3600 * 1000;
-  let thisWeek = 0, lastWeek = 0;
-  let within = 0, nearing = 0, breached = 0;
+function aggregate(complaints: Complaint[]): PolyAgg {
+  let open = 0, resolved = 0;
   for (const c of complaints) {
-    const ts = new Date(c.filedOn).getTime();
-    const ageMs = referenceNow - ts;
-    if (ageMs >= 0 && ageMs < sevenDays) thisWeek++;
-    else if (ageMs >= sevenDays && ageMs < 2 * sevenDays) lastWeek++;
-    if (c.slaState === "WITHIN") within++;
-    else if (c.slaState === "NEARING") nearing++;
-    else if (c.slaState === "BREACHED") breached++;
+    if (isResolved(c)) resolved++;
+    else if (isOpen(c)) open++;
   }
-  let wowPct: number | null = null;
-  let isNewSpike = false;
-  if (lastWeek === 0 && thisWeek === 0) wowPct = null;
-  else if (lastWeek === 0) { isNewSpike = true; wowPct = 999; }
-  else wowPct = Math.round(((thisWeek - lastWeek) / lastWeek) * 100);
   const total = complaints.length;
-  const slaShare = total === 0 ? 0 : breached / total;
-  return { total, thisWeek, lastWeek, wowPct, isNewSpike, within, nearing, breached, slaShare };
+  return {
+    total, open, resolved,
+    openPct: total === 0 ? null : open / total,
+    resolvedPct: total === 0 ? null : resolved / total,
+  };
 }
 
-function colorForWow(agg: PolyAgg): { fill: string; stroke: string } {
-  if (agg.total === 0) return { fill: "#f8fafc", stroke: "#cbd5e1" };
-  if (agg.wowPct === null) return { fill: "#e5e7eb", stroke: "#9ca3af" };
-  for (const stop of WOW_STOPS) {
-    if (stop.test(agg.wowPct, agg.isNewSpike)) return stop;
-  }
-  return { fill: "#e5e7eb", stroke: "#9ca3af" };
-}
-
-function colorForSla(agg: PolyAgg): { fill: string; stroke: string } {
-  if (agg.total === 0) return { fill: "#f8fafc", stroke: "#cbd5e1" };
-  for (const stop of SLA_STOPS) {
-    if (agg.slaShare <= stop.max) return stop;
-  }
-  return SLA_STOPS[SLA_STOPS.length - 1];
-}
-
-/* --------------------------- zoom watcher --------------------------- */
+/* --------------------------- map helpers --------------------------- */
 
 function ZoomWatcher({ onZoom }: { onZoom: (z: number) => void }) {
   const map = useMap();
@@ -120,7 +131,6 @@ function ZoomWatcher({ onZoom }: { onZoom: (z: number) => void }) {
   return null;
 }
 
-/** Imperative helper for breadcrumb "fly to" actions. */
 function MapController({ target }: { target: { center: [number, number]; zoom: number } | null }) {
   const map = useMap();
   useEffect(() => {
@@ -129,11 +139,6 @@ function MapController({ target }: { target: { center: [number, number]; zoom: n
   return null;
 }
 
-/**
- * Keeps Leaflet's internal canvas in sync with the parent container size.
- * Required because the dashboard widget is user-resizable; without this the
- * map clips and tiles don't reflow until the next window resize.
- */
 function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivElement | null> }) {
   const map = useMap();
   useEffect(() => {
@@ -142,18 +147,15 @@ function ResizeInvalidator({ targetRef }: { targetRef: React.RefObject<HTMLDivEl
     let raf = 0;
     const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
-      // debounce to a single frame after the resize settles
       raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
     });
     ro.observe(el);
-    // initial sync once mounted
     raf = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
     return () => { ro.disconnect(); cancelAnimationFrame(raf); };
   }, [map, targetRef]);
   return null;
 }
 
-/** Exposes the Leaflet map instance to the parent for toolbar actions. */
 function MapRefBridge({ onReady }: { onReady: (m: LeafletMap) => void }) {
   const map = useMap();
   useEffect(() => { onReady(map); }, [map, onReady]);
@@ -162,63 +164,100 @@ function MapRefBridge({ onReady }: { onReady: (m: LeafletMap) => void }) {
 
 /* --------------------------- main component --------------------------- */
 
+const TABS: { id: MetricMode; label: string }[] = [
+  { id: "filed",    label: "Complaints Filed" },
+  { id: "open",     label: "Open" },
+  { id: "resolved", label: "Resolved" },
+];
+
 export default function ComplaintMapInner({ complaints }: { complaints: Complaint[] }) {
-  const [metric, setMetric] = useState<MetricMode>("wow");
+  const [metric, setMetric] = useState<MetricMode>("filed");
   const [zoom, setZoom] = useState(11);
   const [selectedLocality, setSelectedLocality] = useState<BoundaryPolygon | null>(null);
   const [selectedWard, setSelectedWard] = useState<BoundaryPolygon | null>(null);
+  const [selectedSubward, setSelectedSubward] = useState<BoundaryPolygon | null>(null);
   const [flyTarget, setFlyTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
 
-  /** Reference "now" = most recent filedOn in the dataset (data is mock-dated 2026-05). */
-  const referenceNow = useMemo(() => {
-    let m = 0;
-    for (const c of complaints) {
-      const t = new Date(c.filedOn).getTime();
-      if (t > m) m = t;
-    }
-    return m || Date.now();
-  }, [complaints]);
-
-  /** Group complaints by their map polygon, using the dataset's ward/locality fields. */
-  const { byLocality, byWard } = useMemo(() => {
+  /** Group complaints by each polygon level using dataset fields + deterministic sub-ward bucketing. */
+  const { byLocality, byWard, bySubward } = useMemo(() => {
     const byLocality = new Map<string, Complaint[]>();
     const byWard = new Map<string, Complaint[]>();
+    const bySubward = new Map<string, Complaint[]>();
     for (const c of complaints) {
-      // dataset.ward → map locality
       const loc = LOCALITY_BY_WARD_FIELD[c.ward];
       if (loc) {
         if (!byLocality.has(loc.code)) byLocality.set(loc.code, []);
         byLocality.get(loc.code)!.push(c);
       }
-      // dataset.locality → map ward
       const wd = WARD_BY_LOCALITY_FIELD[c.locality];
       if (wd) {
         if (!byWard.has(wd.code)) byWard.set(wd.code, []);
         byWard.get(wd.code)!.push(c);
+        const swCode = subwardCodeForComplaint(c.id, wd.code);
+        if (!bySubward.has(swCode)) bySubward.set(swCode, []);
+        bySubward.get(swCode)!.push(c);
       }
     }
-    return { byLocality, byWard };
+    return { byLocality, byWard, bySubward };
   }, [complaints]);
 
   const localityAgg = useMemo(
-    () => new Map(LOCALITY_POLYGONS.map((p) => [p.code, aggregate(byLocality.get(p.code) ?? [], referenceNow)])),
-    [byLocality, referenceNow],
+    () => new Map(LOCALITY_POLYGONS.map((p) => [p.code, aggregate(byLocality.get(p.code) ?? [])])),
+    [byLocality],
   );
   const wardAgg = useMemo(
-    () => new Map(WARD_POLYGONS.map((p) => [p.code, aggregate(byWard.get(p.code) ?? [], referenceNow)])),
-    [byWard, referenceNow],
+    () => new Map(WARD_POLYGONS.map((p) => [p.code, aggregate(byWard.get(p.code) ?? [])])),
+    [byWard],
+  );
+  const subwardAgg = useMemo(
+    () => new Map(SUBWARD_POLYGONS.map((p) => [p.code, aggregate(bySubward.get(p.code) ?? [])])),
+    [bySubward],
   );
 
-  // Layer-of-detail decisions driven by current zoom.
+  // Zoom-driven hierarchy: District (≤11) → Subdistrict (12–13) → Sub-subdistrict (14) → Pins (≥15).
   const showLocalities = zoom <= 11;
   const showWards = zoom >= 12 && zoom <= 13;
-  const showPins = zoom >= 14;
+  const showSubwards = zoom === 14;
+  const showPins = zoom >= 15;
 
-  const activeStops = metric === "wow" ? WOW_STOPS : SLA_STOPS;
-  const colorFor = metric === "wow" ? colorForWow : colorForSla;
+  const levelLabel =
+    showPins ? "Complaints" :
+    showSubwards ? "Sub-subdistrict" :
+    showWards ? "Subdistrict" : "District";
+
+  // Build the active ramp + value extractor per tab.
+  const { ramp, valueOf, metricLabel, formatValue } = useMemo(() => {
+    if (metric === "filed") {
+      const allTotals = [
+        ...Array.from(localityAgg.values()).map((a) => a.total),
+        ...Array.from(wardAgg.values()).map((a) => a.total),
+        ...Array.from(subwardAgg.values()).map((a) => a.total),
+      ];
+      const maxCount = Math.max(0, ...allTotals);
+      return {
+        ramp: buildBlueRamp(maxCount),
+        valueOf: (a: PolyAgg) => (a.total === 0 ? null : a.total),
+        metricLabel: "Complaints filed",
+        formatValue: (v: number | null) => (v === null ? "—" : String(Math.round(v))),
+      };
+    }
+    if (metric === "open") {
+      return {
+        ramp: RED_RAMP,
+        valueOf: (a: PolyAgg) => a.openPct,
+        metricLabel: "% Open",
+        formatValue: (v: number | null) => (v === null ? "—" : `${Math.round(v * 100)}%`),
+      };
+    }
+    return {
+      ramp: GREEN_RAMP,
+      valueOf: (a: PolyAgg) => a.resolvedPct,
+      metricLabel: "% Resolved",
+      formatValue: (v: number | null) => (v === null ? "—" : `${Math.round(v * 100)}%`),
+    };
+  }, [metric, localityAgg, wardAgg, subwardAgg]);
 
   const cityBounds: LatLngBoundsExpression = BANGALORE_BOUNDS;
-
   const mapRef = useRef<LeafletMap | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [legendOpen, setLegendOpen] = useState(true);
@@ -226,11 +265,12 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
   const resetView = () => {
     setSelectedLocality(null);
     setSelectedWard(null);
+    setSelectedSubward(null);
     setFlyTarget({ center: BANGALORE_CENTER, zoom: 11 });
   };
   const fitToSelection = () => {
-    const target = selectedWard ?? selectedLocality;
-    if (target) setFlyTarget({ center: target.center, zoom: selectedWard ? 15 : 13 });
+    const target = selectedSubward ?? selectedWard ?? selectedLocality;
+    if (target) setFlyTarget({ center: target.center, zoom: selectedSubward ? 15 : selectedWard ? 14 : 13 });
     else setFlyTarget({ center: BANGALORE_CENTER, zoom: 11 });
   };
   const toggleFullscreen = () => {
@@ -248,41 +288,52 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
       label: selectedLocality.name,
       onClick: () => {
         setSelectedWard(null);
+        setSelectedSubward(null);
         setFlyTarget({ center: selectedLocality.center, zoom: 13 });
       },
     });
   }
   if (selectedWard) {
-    breadcrumb.push({ label: selectedWard.name });
+    breadcrumb.push({
+      label: selectedWard.name,
+      onClick: () => {
+        setSelectedSubward(null);
+        setFlyTarget({ center: selectedWard.center, zoom: 14 });
+      },
+    });
+  }
+  if (selectedSubward) {
+    breadcrumb.push({ label: selectedSubward.name });
   }
 
-  const activeName = selectedWard?.name ?? selectedLocality?.name ?? "Bengaluru";
-  const levelLabel = showLocalities ? "Locality" : showWards ? "Ward" : "Complaints";
+  const activeName =
+    selectedSubward?.name ?? selectedWard?.name ?? selectedLocality?.name ?? "Bengaluru";
 
   return (
     <div
       ref={containerRef}
       role="region"
-      aria-label={`Complaint distribution map for ${activeName} by ${levelLabel.toLowerCase()}`}
+      aria-label={`Complaint distribution map for ${activeName} — ${metricLabel}`}
       className="flex h-full min-h-[260px] w-full flex-col gap-2 p-3"
     >
-      {/* Toolbar: metric switch + breadcrumb */}
+      {/* Toolbar: metric tabs + breadcrumb */}
       <div className="flex flex-wrap items-center gap-2">
-        <div role="group" aria-label="Map metric" className="inline-flex overflow-hidden rounded-sm border border-border text-[11px]">
-          {(["wow", "sla"] as const).map((m) => (
+        <div role="tablist" aria-label="Map metric" className="inline-flex overflow-hidden rounded-sm border border-border text-[11px]">
+          {TABS.map((t) => (
             <button
-              key={m}
+              key={t.id}
               type="button"
-              onClick={() => setMetric(m)}
-              aria-pressed={metric === m}
+              role="tab"
+              onClick={() => setMetric(t.id)}
+              aria-selected={metric === t.id}
               className={cn(
                 "px-2.5 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                metric === m
+                metric === t.id
                   ? "bg-primary text-primary-foreground"
                   : "bg-surface text-muted-foreground hover:text-foreground",
               )}
             >
-              {m === "wow" ? "WoW change" : "SLA breach"}
+              {t.label}
             </button>
           ))}
         </div>
@@ -360,10 +411,11 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
           <MapRefBridge onReady={(m) => { mapRef.current = m; }} />
           <ResizeInvalidator targetRef={containerRef} />
 
-          {/* Locality layer */}
+          {/* District (Locality) layer */}
           {showLocalities && LOCALITY_POLYGONS.map((p) => {
             const agg = localityAgg.get(p.code)!;
-            const col = colorFor(agg);
+            const v = valueOf(agg);
+            const col = rampColor(ramp, v);
             const isSelected = selectedLocality?.code === p.code;
             return (
               <Polygon
@@ -371,7 +423,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
                 positions={p.polygon}
                 pathOptions={{
                   fillColor: col.fill,
-                  fillOpacity: isSelected ? 0.5 : 0.32,
+                  fillOpacity: isSelected ? 0.55 : 0.4,
                   color: col.stroke,
                   weight: isSelected ? 2.2 : 1.1,
                   opacity: 0.85,
@@ -383,20 +435,22 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
                     } else {
                       setSelectedLocality(p);
                       setSelectedWard(null);
+                      setSelectedSubward(null);
                       setFlyTarget({ center: p.center, zoom: 13 });
                     }
                   },
                 }}
               >
-                <PolyTooltip name={p.name} agg={agg} level="Locality" />
+                <PolyTooltip name={p.name} agg={agg} level="District" metricLabel={metricLabel} value={formatValue(v)} />
               </Polygon>
             );
           })}
 
-          {/* Ward layer */}
+          {/* Subdistrict (Ward) layer */}
           {showWards && WARD_POLYGONS.map((p) => {
             const agg = wardAgg.get(p.code)!;
-            const col = colorFor(agg);
+            const v = valueOf(agg);
+            const col = rampColor(ramp, v);
             const isSelected = selectedWard?.code === p.code;
             return (
               <Polygon
@@ -404,7 +458,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
                 positions={p.polygon}
                 pathOptions={{
                   fillColor: col.fill,
-                  fillOpacity: isSelected ? 0.55 : 0.35,
+                  fillOpacity: isSelected ? 0.6 : 0.42,
                   color: col.stroke,
                   weight: isSelected ? 2.2 : 1.1,
                   opacity: 0.85,
@@ -413,31 +467,70 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
                   click: () => {
                     if (selectedWard?.code === p.code) {
                       setSelectedWard(null);
+                      setSelectedSubward(null);
                       if (selectedLocality) setFlyTarget({ center: selectedLocality.center, zoom: 13 });
                     } else {
                       setSelectedWard(p);
+                      setSelectedSubward(null);
                       const loc = LOCALITY_POLYGONS.find((l) => l.code === p.parentCode) ?? null;
                       setSelectedLocality(loc);
+                      setFlyTarget({ center: p.center, zoom: 14 });
+                    }
+                  },
+                }}
+              >
+                <PolyTooltip name={p.name} agg={agg} level="Subdistrict" metricLabel={metricLabel} value={formatValue(v)} />
+              </Polygon>
+            );
+          })}
+
+          {/* Sub-subdistrict (Sub-ward) layer */}
+          {showSubwards && SUBWARD_POLYGONS.map((p) => {
+            const agg = subwardAgg.get(p.code)!;
+            const v = valueOf(agg);
+            const col = rampColor(ramp, v);
+            const isSelected = selectedSubward?.code === p.code;
+            return (
+              <Polygon
+                key={p.code}
+                positions={p.polygon}
+                pathOptions={{
+                  fillColor: col.fill,
+                  fillOpacity: isSelected ? 0.65 : 0.45,
+                  color: col.stroke,
+                  weight: isSelected ? 2.2 : 1.1,
+                  opacity: 0.85,
+                }}
+                eventHandlers={{
+                  click: () => {
+                    if (selectedSubward?.code === p.code) {
+                      setSelectedSubward(null);
+                      if (selectedWard) setFlyTarget({ center: selectedWard.center, zoom: 14 });
+                    } else {
+                      setSelectedSubward(p);
+                      const parentWard = WARD_POLYGONS.find((w) => w.code === p.parentCode) ?? null;
+                      if (parentWard) {
+                        setSelectedWard(parentWard);
+                        const loc = LOCALITY_POLYGONS.find((l) => l.code === parentWard.parentCode) ?? null;
+                        setSelectedLocality(loc);
+                      }
                       setFlyTarget({ center: p.center, zoom: 15 });
                     }
                   },
                 }}
               >
-                <PolyTooltip name={p.name} agg={agg} level="Ward" />
+                <PolyTooltip name={p.name} agg={agg} level="Sub-subdistrict" metricLabel={metricLabel} value={formatValue(v)} />
               </Polygon>
             );
           })}
 
-          {/* Pin layer */}
+          {/* Pin layer — identical across tabs */}
           {showPins && complaints.map((c) => {
             const ward = WARD_BY_LOCALITY_FIELD[c.locality];
             if (!ward) return null;
             const [lat, lng] = pinForComplaint(c.id, ward);
-            const tone = PIN_COLOR[c.slaState] ?? PIN_COLOR.WITHIN;
+            const tone = isResolved(c) ? PIN_COLOR.resolved : PIN_COLOR.open;
             const type = complaintTypeOf(c.typeCode);
-            const filed = new Date(c.filedOn);
-            const ageH = Math.max(0, Math.round((referenceNow - filed.getTime()) / 3600_000));
-            const ageLabel = ageH < 48 ? `${ageH}h ago` : `${Math.round(ageH / 24)}d ago`;
             return (
               <CircleMarker
                 key={c.id}
@@ -453,8 +546,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
                     <div className="font-semibold">{type?.name ?? c.typeCode}</div>
                     <div className="text-muted-foreground">{c.id}</div>
                     <div className="mt-1">Status: <span className="font-medium">{c.status.replaceAll("_", " ")}</span></div>
-                    <div>SLA: <span className="font-medium" style={{ color: tone.stroke }}>{tone.label}</span></div>
-                    <div>Filed: {ageLabel}</div>
+                    <div>State: <span className="font-medium" style={{ color: tone.stroke }}>{tone.label}</span></div>
                     <div className="text-muted-foreground">{c.locality} · {c.ward}</div>
                   </div>
                 </Popup>
@@ -464,7 +556,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
         </MapContainer>
 
         {/* Legend */}
-        <div className="absolute bottom-2 left-2 z-[400] max-w-[180px] rounded-sm border border-border bg-background/95 text-[10.5px] shadow-sm">
+        <div className="absolute bottom-2 left-2 z-[400] max-w-[200px] rounded-sm border border-border bg-background/95 text-[10.5px] shadow-sm">
           <button
             type="button"
             onClick={() => setLegendOpen((v) => !v)}
@@ -472,40 +564,46 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
             aria-controls="map-legend-body"
             className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            <span>{metric === "wow" ? "Week-over-week change" : "SLA breach share"}</span>
+            <span>{metricLabel}</span>
             <span aria-hidden className="text-muted-foreground">{legendOpen ? "–" : "+"}</span>
           </button>
           {legendOpen && (
             <div id="map-legend-body" className="px-2.5 pb-2">
               <div className="grid grid-cols-1 gap-1">
-                {(metric === "wow" ? WOW_STOPS : SLA_STOPS).map((s) => (
+                {ramp.stops.map((s) => (
                   <div key={s.label} className="flex items-center gap-1.5">
                     <span aria-hidden className="inline-block h-2.5 w-3.5 rounded-sm" style={{ background: s.fill, border: `1px solid ${s.stroke}` }} />
                     <span className="text-foreground">{s.label}</span>
                   </div>
                 ))}
+                <div className="flex items-center gap-1.5">
+                  <span aria-hidden className="inline-block h-2.5 w-3.5 rounded-sm" style={{ background: ramp.emptyFill, border: `1px solid ${ramp.emptyStroke}` }} />
+                  <span className="text-muted-foreground">No complaints</span>
+                </div>
               </div>
               {showPins && (
                 <>
-                  <div className="mt-2 mb-1 font-semibold text-foreground">Pin · SLA state</div>
+                  <div className="mt-2 mb-1 font-semibold text-foreground">Pin · status</div>
                   <div className="flex flex-col gap-1">
-                    {(["WITHIN", "NEARING", "BREACHED"] as const).map((s) => (
-                      <div key={s} className="flex items-center gap-1.5">
-                        <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PIN_COLOR[s].fill, border: `1px solid ${PIN_COLOR[s].stroke}` }} />
-                        <span className="text-foreground">{PIN_COLOR[s].label}</span>
-                      </div>
-                    ))}
+                    <div className="flex items-center gap-1.5">
+                      <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PIN_COLOR.resolved.fill, border: `1px solid ${PIN_COLOR.resolved.stroke}` }} />
+                      <span className="text-foreground">Resolved</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PIN_COLOR.open.fill, border: `1px solid ${PIN_COLOR.open.stroke}` }} />
+                      <span className="text-foreground">Open</span>
+                    </div>
                   </div>
                 </>
               )}
               <div className="mt-2 border-t border-border pt-1.5 text-[10px] text-muted-foreground">
-                Click a {levelLabel.toLowerCase()} to focus · click again to clear
+                Zoom in to drill down · click a {levelLabel.toLowerCase()} to focus
               </div>
             </div>
           )}
         </div>
 
-        {(selectedLocality || selectedWard) && (
+        {(selectedLocality || selectedWard || selectedSubward) && (
           <div
             role="status"
             aria-live="polite"
@@ -525,26 +623,18 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
   );
 }
 
-function PolyTooltip({ name, agg, level }: { name: string; agg: PolyAgg; level: string }) {
-  const wow = agg.wowPct === null
-    ? "—"
-    : agg.isNewSpike
-    ? "new spike"
-    : `${agg.wowPct > 0 ? "+" : ""}${agg.wowPct}%`;
+function PolyTooltip({
+  name, agg, level, metricLabel, value,
+}: { name: string; agg: PolyAgg; level: string; metricLabel: string; value: string }) {
   return (
     <Tooltip direction="top" sticky opacity={1}>
       <div className="text-[11.5px] leading-snug">
         <div className="font-semibold">{name} <span className="font-normal text-muted-foreground">· {level}</span></div>
         <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
-          <span className="text-muted-foreground">This week</span><span className="tabular-nums">{agg.thisWeek}</span>
-          <span className="text-muted-foreground">Last week</span><span className="tabular-nums">{agg.lastWeek}</span>
-          <span className="text-muted-foreground">WoW</span><span className="tabular-nums">{wow}</span>
-          <span className="text-muted-foreground">Total</span><span className="tabular-nums">{agg.total}</span>
-        </div>
-        <div className="mt-1 flex gap-2 text-[11px]">
-          <span style={{ color: "#0f766e" }}>● {agg.within} within</span>
-          <span style={{ color: "#b45309" }}>● {agg.nearing} breaching</span>
-          <span style={{ color: "#991b1b" }}>● {agg.breached} breached</span>
+          <span className="text-muted-foreground">{metricLabel}</span><span className="tabular-nums font-medium">{value}</span>
+          <span className="text-muted-foreground">Total filed</span><span className="tabular-nums">{agg.total}</span>
+          <span className="text-muted-foreground">Open</span><span className="tabular-nums">{agg.open}</span>
+          <span className="text-muted-foreground">Resolved</span><span className="tabular-nums">{agg.resolved}</span>
         </div>
       </div>
     </Tooltip>
