@@ -237,7 +237,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
       return {
         ramp: buildBlueRamp(maxCount),
         valueOf: (a: PolyAgg) => (a.total === 0 ? null : a.total),
-        metricLabel: "Complaints filed",
+        metricLabel: "Created",
         formatValue: (v: number | null) => (v === null ? "—" : String(Math.round(v))),
       };
     }
