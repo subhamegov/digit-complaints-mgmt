@@ -165,7 +165,7 @@ function MapRefBridge({ onReady }: { onReady: (m: LeafletMap) => void }) {
 /* --------------------------- main component --------------------------- */
 
 const TABS: { id: MetricMode; label: string }[] = [
-  { id: "filed",    label: "Complaints Filed" },
+  { id: "filed",    label: "Created" },
   { id: "open",     label: "Open" },
   { id: "resolved", label: "Resolved" },
 ];
