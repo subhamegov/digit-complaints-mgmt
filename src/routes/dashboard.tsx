@@ -186,6 +186,10 @@ function sortValue(c: Complaint, key: RiskSortKey): string | number {
 
 export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
+
+  // Department Head gets a dedicated, RBAC-scoped dashboard.
+  if (role === "DEPT_HEAD") return <DeptHeadDashboard />;
+
   const canCustomize = role === "TEST_USER";
 
   // Filter state (TEST_USER only)
