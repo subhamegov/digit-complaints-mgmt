@@ -527,14 +527,19 @@ export function DeptHeadDashboard() {
       icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
       render: () => <BreachVsCaseload officers={caseload.officers} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType]);
+    {
+      id: "dh-flow-ratio-dept", kind: "panel", label: "Flow ratio by department",
+      description: "Resolved ÷ created per department — worst-first. > 1 means backlog is shrinking.",
+      icon: BarChart3, title: "Flow ratio by department", colSpan: 2,
+      render: () => <FlowRatioByDeptChart rows={flowRatioByDept} />,
+    },
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
-    "dh-total", "dh-pct-open", "dh-pct-resolved", "dh-created-today",
-    "dh-ward-perf", "dh-subtype-perf", "dh-by-type", "dh-map",
-    "dh-over-time", "dh-inflow",
-    "dh-recurring", "dh-channel",
+    "dh-total",
+    "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-map",
+    "dh-over-time",
     "dh-breach-scatter",
   ], []);
 
