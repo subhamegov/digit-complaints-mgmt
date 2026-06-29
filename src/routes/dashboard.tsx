@@ -17,6 +17,7 @@ import {
   type Complaint,
 } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
+import { DeptHeadDashboard } from "@/components/pgr/DeptHeadDashboard";
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
@@ -186,6 +187,10 @@ function sortValue(c: Complaint, key: RiskSortKey): string | number {
 
 export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
+
+  // Department Head gets a dedicated, RBAC-scoped dashboard.
+  if (role === "DEPT_HEAD") return <DeptHeadDashboard />;
+
   const canCustomize = role === "TEST_USER";
 
   // Filter state (TEST_USER only)
