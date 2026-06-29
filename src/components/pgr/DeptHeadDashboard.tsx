@@ -323,9 +323,126 @@ export function DeptHeadDashboard() {
 
   const empty = rows.length === 0;
 
+  const registry: GridKpiDef[] = useMemo(() => [
+    // ----- Stats (Row 1) -----
+    {
+      id: "dh-ontime-rate", kind: "stat", label: "On-time resolution rate",
+      description: "Resolved within SLA ÷ all complaints that reached an SLA outcome.",
+      icon: Activity, intent: "positive",
+      getValue: () => `${metrics.onTimeRate}%`,
+      getTrend: () => makeTrend(sparks.onTime, "up"),
+    },
+    {
+      id: "dh-csat", kind: "stat", label: "Citizen satisfaction",
+      description: "Average CSAT from resolved complaints in scope.",
+      icon: ThumbsUp, intent: "positive",
+      getValue: () => metrics.csat ? `${metrics.csat} / 5` : "—",
+      getDelta: () => `${metrics.csatResp} responses · ${metrics.csatRate}% rate`,
+      getTrend: () => makeTrend(sparks.csat, "up"),
+    },
+    {
+      id: "dh-resolved", kind: "stat", label: "Resolved (this period)",
+      description: "Resolved + closed complaints in scope.",
+      icon: TrendingUp, intent: "positive",
+      getValue: () => String(metrics.resolved),
+      getTrend: () => makeTrend(sparks.resolved, "up"),
+    },
+    {
+      id: "dh-open", kind: "stat", label: "Open",
+      description: "Complaints not yet resolved or closed.",
+      icon: AlertTriangle, intent: "warning",
+      getValue: () => String(metrics.open),
+      getTrend: () => makeTrend(sparks.open, "down"),
+    },
+    {
+      id: "dh-flow-ratio", kind: "stat", label: "Flow ratio",
+      description: "Resolved ÷ created. > 1 means backlog is shrinking.",
+      icon: Repeat, intent: metrics.flowRatio >= 1 ? "positive" : "negative",
+      getValue: () => metrics.flowRatio.toFixed(2),
+      getDelta: () => "Resolved ÷ created",
+      getTrend: () => makeTrend(sparks.flow, "up"),
+    },
+    {
+      id: "dh-oldest", kind: "stat", label: "Oldest open complaint",
+      description: "Age of the longest-open complaint in scope.",
+      icon: Clock, intent: "warning",
+      getValue: () => fmtHrs(metrics.oldestHrs),
+      getDelta: () => "Awaiting closure",
+      getTrend: () => makeTrend(sparks.oldest, "down"),
+    },
+
+    // ----- Panels (Row 2+) -----
+    {
+      id: "dh-ward-perf", kind: "panel", label: "Ward performance",
+      description: "Per-ward open count, breach %, resolution rate and CSAT.",
+      icon: BarChart3, title: "Ward performance", colSpan: 1, defaultRowSpan: 2,
+      render: () => <WardPerformanceTable rows={wardRows} />,
+    },
+    {
+      id: "dh-subtype-perf", kind: "panel", label: "Sub-type performance",
+      description: "Per sub-type avg resolution vs SLA, reopen %, on-time %, CSAT.",
+      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 2,
+      render: () => <SubtypePerformanceTable rows={subtypeRows} />,
+    },
+    {
+      id: "dh-map", kind: "panel", label: "Complaints map",
+      description: "Geographic view of complaints across wards in scope.",
+      icon: MapPin, title: "Complaints map", colSpan: 3, defaultRowSpan: 2, padded: false,
+      render: () => <div className="h-full"><ComplaintMap complaints={rows} /></div>,
+    },
+    {
+      id: "dh-over-time", kind: "panel", label: "Complaints over time",
+      description: "Created vs resolved over 12 months, with on-time % overlay.",
+      icon: LineChartIcon, title: "Complaints over time — last 12 months", colSpan: 2,
+      render: () => <ComplaintsOverTimeChart data={overTime} />,
+    },
+    {
+      id: "dh-inflow", kind: "panel", label: "Inflow by sub-type",
+      description: "Stacked monthly inflow for the top 6 sub-types.",
+      icon: Layers, title: "Inflow by sub-type — last 12 months", colSpan: 2,
+      render: () => <InflowBySubtypeChart data={inflowBySubtype.data} series={inflowBySubtype.series} />,
+    },
+    {
+      id: "dh-recurring", kind: "panel", label: "Recurring complaints",
+      description: "Same problem, same locality (≥ 3 reports).",
+      icon: Repeat, title: "Recurring complaints by ward & sub-type", colSpan: 2,
+      render: () => (
+        <>
+          <p className="mb-2 text-[12px] text-muted-foreground">Same problem, same locality — recurring (≥ 3 reports).</p>
+          <RecurringTable rows={recurring} />
+        </>
+      ),
+    },
+    {
+      id: "dh-channel", kind: "panel", label: "Service quality by channel",
+      description: "Volume, resolution rate, and CSAT per intake channel.",
+      icon: BarChart3, title: "Service quality by channel", colSpan: 1,
+      render: () => <ChannelEquityTable rows={channelRows} />,
+    },
+    {
+      id: "dh-caseload", kind: "panel", label: "Caseload per officer",
+      description: "Per-officer assigned caseload with team avg / median / max.",
+      icon: Users, title: "Caseload per officer", colSpan: 2,
+      render: () => <CaseloadPanel data={caseload} />,
+    },
+    {
+      id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload",
+      description: "Scatter of officer caseload (x) vs breach % (y).",
+      icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
+      render: () => <BreachVsCaseload officers={caseload.officers} />,
+    },
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload]);
+
+  const defaultIds = useMemo(() => [
+    "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
+    "dh-ward-perf", "dh-subtype-perf", "dh-map",
+    "dh-over-time", "dh-inflow",
+    "dh-recurring", "dh-channel",
+    "dh-caseload", "dh-breach-scatter",
+  ], []);
+
   return (
     <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
-      {/* Scope selector — demo only; backend will populate this automatically */}
       <ScopeBanner presetIndex={presetIndex} setPreset={setPreset} scopeLabel={scope.label} rowCount={rows.length} />
 
       {empty ? (
@@ -335,88 +452,7 @@ export function DeptHeadDashboard() {
           </p>
         </Panel>
       ) : (
-        <>
-          {/* ROW 1 — Health snapshot */}
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-            <StatCard
-              label="On-time resolution rate" intent="positive"
-              value={`${metrics.onTimeRate}%`}
-              trend={makeTrend(sparks.onTime, "up")}
-            />
-            <StatCard
-              label="Citizen satisfaction" intent="positive"
-              value={metrics.csat ? `${metrics.csat} / 5` : "—"}
-              delta={`${metrics.csatResp} responses · ${metrics.csatRate}% rate`}
-              trend={makeTrend(sparks.csat, "up")}
-            />
-            <StatCard
-              label="Resolved (this period)" intent="positive"
-              value={String(metrics.resolved)}
-              trend={makeTrend(sparks.resolved, "up")}
-            />
-            <StatCard
-              label="Open" intent="warning"
-              value={String(metrics.open)}
-              trend={makeTrend(sparks.open, "down")}
-            />
-            <StatCard
-              label="Flow ratio" intent={metrics.flowRatio >= 1 ? "positive" : "negative"}
-              value={metrics.flowRatio.toFixed(2)}
-              delta="Resolved ÷ created"
-              trend={makeTrend(sparks.flow, "up")}
-            />
-            <StatCard
-              label="Oldest open complaint" intent="warning"
-              value={fmtHrs(metrics.oldestHrs)}
-              delta="Awaiting closure"
-              trend={makeTrend(sparks.oldest, "down")}
-            />
-          </div>
-
-          {/* ROW 2 — Where is it failing */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-            <Panel title="Ward performance" className="lg:col-span-1">
-              <WardPerformanceTable rows={wardRows} />
-            </Panel>
-            <Panel title="Complaint sub-type performance" className="lg:col-span-2">
-              <SubtypePerformanceTable rows={subtypeRows} />
-            </Panel>
-            <Panel title="Complaints map" className="lg:col-span-3" padded={false}>
-              <div className="h-[420px]"><ComplaintMap complaints={rows} /></div>
-            </Panel>
-          </div>
-
-          {/* ROW 3 — Trajectory & demand */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <Panel title="Complaints over time — last 12 months">
-              <ComplaintsOverTimeChart data={overTime} />
-            </Panel>
-            <Panel title="Inflow by sub-type — last 12 months">
-              <InflowBySubtypeChart data={inflowBySubtype.data} series={inflowBySubtype.series} />
-            </Panel>
-          </div>
-
-          {/* ROW 4 — Why (systemic) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-            <Panel title="Recurring complaints by ward & sub-type" className="lg:col-span-2">
-              <p className="mb-2 text-[12px] text-muted-foreground">Same problem, same locality — recurring (≥ 3 reports).</p>
-              <RecurringTable rows={recurring} />
-            </Panel>
-            <Panel title="Service quality by channel">
-              <ChannelEquityTable rows={channelRows} />
-            </Panel>
-          </div>
-
-          {/* ROW 5 — Capacity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <Panel title="Caseload per officer">
-              <CaseloadPanel data={caseload} />
-            </Panel>
-            <Panel title="Breach rate vs caseload">
-              <BreachVsCaseload officers={caseload.officers} />
-            </Panel>
-          </div>
-        </>
+        <CustomizableGrid registry={registry} defaultIds={defaultIds} />
       )}
     </div>
   );
