@@ -86,9 +86,21 @@ export function DeptHeadDashboard() {
     const now = Date.now();
     const oldestHrs = openRows.reduce((m, c) => Math.max(m, (now - new Date(c.filedOn).getTime()) / 3600_000), 0);
 
+    // "Today" anchored to the most recent filedOn in the dataset so demo
+    // numbers don't go stale relative to wall-clock time.
+    const latest = rows.reduce((m, c) => Math.max(m, new Date(c.filedOn).getTime()), 0);
+    const dayMs = 24 * 3600_000;
+    const createdToday = latest
+      ? rows.filter((c) => latest - new Date(c.filedOn).getTime() < dayMs).length
+      : 0;
+
     return {
       onTimeRate, csat, csatResp, csatRate,
       resolved: resolved.length, open: openRows.length,
+      total: rows.length,
+      openPct: pct(openRows.length, rows.length),
+      resolvedPct: pct(resolved.length, rows.length),
+      createdToday,
       flowRatio, oldestHrs,
     };
   }, [rows]);
