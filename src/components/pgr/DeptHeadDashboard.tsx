@@ -502,11 +502,12 @@ export function DeptHeadDashboard() {
       icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
       render: () => <BreachVsCaseload officers={caseload.officers} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload]);
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
-    "dh-ward-perf", "dh-subtype-perf", "dh-map",
+    "dh-total", "dh-pct-open", "dh-pct-resolved", "dh-created-today",
+    "dh-ward-perf", "dh-subtype-perf", "dh-by-type", "dh-map",
     "dh-over-time", "dh-inflow",
     "dh-recurring", "dh-channel",
     "dh-breach-scatter",
