@@ -411,19 +411,55 @@ export function DeptHeadDashboard() {
       getDelta: () => "Awaiting closure",
       getTrend: () => makeTrend(sparks.oldest, "down"),
     },
+    {
+      id: "dh-total", kind: "stat", label: "Total complaints",
+      description: "All complaints in scope.",
+      icon: BarChart3, intent: "neutral",
+      getValue: () => String(metrics.total),
+      getTrend: () => makeTrend(sparks.resolved.map((_, i) => sparks.resolved[i] + sparks.open[i]), "up"),
+    },
+    {
+      id: "dh-pct-open", kind: "stat", label: "% Open",
+      description: "Open complaints as a share of total in scope.",
+      icon: AlertTriangle, intent: "warning",
+      getValue: () => `${metrics.openPct}%`,
+      getDelta: () => `${metrics.open} of ${metrics.total} complaints`,
+      getTrend: () => makeTrend(sparks.open, "down"),
+    },
+    {
+      id: "dh-pct-resolved", kind: "stat", label: "% Resolved",
+      description: "Resolved + closed as a share of total in scope.",
+      icon: TrendingUp, intent: "positive",
+      getValue: () => `${metrics.resolvedPct}%`,
+      getDelta: () => `${metrics.resolved} of ${metrics.total} complaints`,
+      getTrend: () => makeTrend(sparks.resolved, "up"),
+    },
+    {
+      id: "dh-created-today", kind: "stat", label: "Created today",
+      description: "Complaints filed in the last 24 hours.",
+      icon: Activity, intent: "neutral",
+      getValue: () => String(metrics.createdToday),
+      getDelta: () => "Last 24 hours",
+    },
 
     // ----- Panels (Row 2+) -----
     {
       id: "dh-ward-perf", kind: "panel", label: "Ward performance",
       description: "Per-ward open count, breach %, resolution rate and CSAT.",
-      icon: BarChart3, title: "Ward performance", colSpan: 1, defaultRowSpan: 2,
+      icon: BarChart3, title: "Ward performance", colSpan: 1, defaultRowSpan: 1,
       render: () => <WardPerformanceTable rows={wardRows} />,
     },
     {
       id: "dh-subtype-perf", kind: "panel", label: "Sub-type performance",
       description: "Per sub-type avg resolution vs SLA, reopen %, on-time %, CSAT.",
-      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 2,
+      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 1,
       render: () => <SubtypePerformanceTable rows={subtypeRows} />,
+    },
+    {
+      id: "dh-by-type", kind: "panel", label: "Complaints by type",
+      description: "Complaint types, descending by complaints filed.",
+      icon: BarChart3, title: "Complaints by type", colSpan: 2, defaultRowSpan: 2,
+      render: () => <ComplaintsByTypeBars rows={complaintsByType} />,
     },
     {
       id: "dh-map", kind: "panel", label: "Complaints map",
