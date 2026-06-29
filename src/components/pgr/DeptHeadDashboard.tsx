@@ -442,22 +442,68 @@ export function DeptHeadDashboard() {
     "dh-caseload", "dh-breach-scatter",
   ], []);
 
+  const bannerLeft = (
+    <>
+      <div className="min-w-0 flex items-baseline gap-2">
+        <h1 className="text-[15px] font-semibold leading-tight text-foreground truncate">PGR Operations</h1>
+        <span className="hidden sm:inline text-[11px] text-muted-foreground truncate">All Localities · Last 7 days</span>
+      </div>
+      <div className="relative w-full sm:w-56 md:w-64 order-3 sm:order-none">
+        <svg className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+        <input
+          placeholder="Search complaints, wards, citizens…"
+          aria-label="Search dashboard"
+          className="h-8 w-full rounded-sm border border-border bg-background pl-7 pr-2 text-[12px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+        />
+      </div>
+    </>
+  );
+
+  const toolbarRight = (
+    <>
+      <select
+        value={presetIndex}
+        onChange={(e) => setPreset(parseInt(e.target.value, 10))}
+        aria-label="Demo scope"
+        className="h-8 rounded-sm border border-border bg-background px-2 text-[12px]"
+      >
+        {SCOPE_PRESETS.map((s, i) => (
+          <option key={i} value={i}>{s.label}</option>
+        ))}
+      </select>
+      <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:bg-muted">
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+        Export
+      </button>
+    </>
+  );
+
   return (
     <div className="p-4 lg:p-6 space-y-4 lg:space-y-5">
-      <ScopeBanner presetIndex={presetIndex} setPreset={setPreset} scopeLabel={scope.label} rowCount={rows.length} />
-
       {empty ? (
-        <Panel title="No data in scope">
-          <p className="text-[13px] text-muted-foreground">
-            The current scope ({scope.label}) contains no complaints. Pick a different scope above to see the dashboard.
-          </p>
-        </Panel>
+        <>
+          <div className="-mx-4 lg:-mx-6 -mt-4 lg:-mt-6 mb-1 border-b border-border bg-surface px-4 lg:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            {bannerLeft}
+            <div className="flex items-center gap-2 ml-auto">{toolbarRight}</div>
+          </div>
+          <Panel title="No data in scope">
+            <p className="text-[13px] text-muted-foreground">
+              The current scope ({scope.label}) contains no complaints. Pick a different scope above to see the dashboard.
+            </p>
+          </Panel>
+        </>
       ) : (
-        <CustomizableGrid registry={registry} defaultIds={defaultIds} />
+        <CustomizableGrid
+          registry={registry}
+          defaultIds={defaultIds}
+          bannerLeft={bannerLeft}
+          toolbarRight={toolbarRight}
+        />
       )}
     </div>
   );
 }
+
 
 // ===========================================================================
 // Sub-components
