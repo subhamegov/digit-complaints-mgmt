@@ -141,12 +141,14 @@ export function DeptHeadDashboard() {
       }
       m.set(c.ward, w);
     }
+    const totalAll = rows.length;
     return Array.from(m.values()).map((w) => ({
       ward: w.ward,
       open: w.open,
       breachPct: pct(w.breached, w.reached),
       resolutionRate: pct(w.resolved, w.total),
       csat: w.csatN ? Math.round((w.csatSum / w.csatN) * 10) / 10 : null,
+      pctOfTotal: pct(w.total, totalAll),
     }));
   }, [rows]);
 
