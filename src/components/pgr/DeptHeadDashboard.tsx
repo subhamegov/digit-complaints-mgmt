@@ -321,6 +321,18 @@ export function DeptHeadDashboard() {
     })).sort((a, b) => b.total - a.total);
   }, [rows]);
 
+  // --- Complaints by type (horizontal bar) ----------------------------------
+  const complaintsByType = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of rows) {
+      const name = complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
+      m.set(name, (m.get(name) ?? 0) + 1);
+    }
+    return Array.from(m.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [rows]);
+
   // --- Row 5: caseload --------------------------------------------------------
   const caseload = useMemo(() => {
     type O = { id: string; name: string; total: number; reached: number; breached: number };
