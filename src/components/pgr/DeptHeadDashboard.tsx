@@ -761,7 +761,7 @@ function BreachVsCaseload({ officers }: { officers: { id: string; name: string; 
             cursor={{ strokeDasharray: "3 3" }}
             contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }}
             formatter={(value: number | string, key: string) => [`${value}${key === "y" ? "%" : ""}`, key === "x" ? "Caseload" : "Breach %"]}
-            labelFormatter={(_, payload) => payload?.[0]?.payload?.name ?? ""}
+            labelFormatter={(_: unknown, payload: ReadonlyArray<{ payload?: { name?: string } }>) => payload?.[0]?.payload?.name ?? ""}
           />
           <Scatter data={data} fill="var(--color-chart-1)" />
         </ScatterChart>
