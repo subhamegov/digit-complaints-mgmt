@@ -599,14 +599,14 @@ function SortHeader<K extends string>({ label, k, sortKey, sortDir, onSort, alig
 
 // ---------- Row 2A — Ward performance --------------------------------------
 
-type WardRow = { ward: string; open: number; breachPct: number; resolutionRate: number; csat: number | null };
-type WardKey = "ward" | "open" | "breach" | "resolution" | "csat";
+type WardRow = { ward: string; open: number; breachPct: number; resolutionRate: number; csat: number | null; pctOfTotal: number };
+type WardKey = "ward" | "open" | "breach" | "resolution" | "csat" | "pct";
 
 function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<WardRow, WardKey>(
     rows, "breach", "desc",
     (r, k) => k === "ward" ? r.ward : k === "open" ? r.open : k === "breach" ? r.breachPct
-      : k === "resolution" ? r.resolutionRate : (r.csat ?? -1),
+      : k === "resolution" ? r.resolutionRate : k === "pct" ? r.pctOfTotal : (r.csat ?? -1),
   );
   if (rows.length === 0) return <Empty />;
   return (
@@ -616,6 +616,7 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
           <tr>
             <SortHeader label="Ward" k="ward" sortKey={sortKey} sortDir={sortDir} onSort={toggle} />
             <SortHeader label="Open" k="open" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
+            <SortHeader label="% of complaints" k="pct" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="SLA breach %" k="breach" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="Resolution rate" k="resolution" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="CSAT" k="csat" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
@@ -626,6 +627,7 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
             <tr key={r.ward} className="hover:bg-muted/40 cursor-pointer" title="Click to drill down (per-ward view coming soon)">
               <td className="px-3 py-1.5">{r.ward}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.open}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
               <td className={cn("px-3 py-1.5 text-right tabular-nums font-medium", r.breachPct > 50 && "bg-status-breach-bg text-status-breach")}>{r.breachPct.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.resolutionRate.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "—"}</td>
@@ -641,9 +643,9 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
 
 type SubtypeRow = {
   subtype: string; typeName: string; avgResolveHrs: number; slaHours: number; overSla: boolean;
-  reopenRate: number; oldestOpenHrs: number; onTimeRate: number; csat: number | null;
+  reopenRate: number; oldestOpenHrs: number; onTimeRate: number; csat: number | null; pctOfTotal: number;
 };
-type SubKey = "subtype" | "type" | "avg" | "sla" | "reopen" | "oldest" | "ontime" | "csat";
+type SubKey = "subtype" | "type" | "avg" | "sla" | "reopen" | "oldest" | "ontime" | "csat" | "pct";
 
 function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<SubtypeRow, SubKey>(
