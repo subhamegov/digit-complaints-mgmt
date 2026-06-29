@@ -241,7 +241,7 @@ export function DeptHeadDashboard() {
       const sub = (c as TestComplaint).subtype ?? complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
       const key = topSet.has(sub) ? sub : "Other";
       const i = hashBucket(c.id, 12);
-      (data[i][key] as number)++;
+      data[i][key] = ((data[i][key] as number) ?? 0) + 1;
     }
     return { data, series };
   }, [rows]);
