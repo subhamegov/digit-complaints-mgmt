@@ -437,12 +437,6 @@ export function DeptHeadDashboard() {
       render: () => <ChannelEquityTable rows={channelRows} />,
     },
     {
-      id: "dh-caseload", kind: "panel", label: "Caseload per officer",
-      description: "Per-officer assigned caseload with team avg / median / max.",
-      icon: Users, title: "Caseload per officer", colSpan: 2,
-      render: () => <CaseloadPanel data={caseload} />,
-    },
-    {
       id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload",
       description: "Scatter of officer caseload (x) vs breach % (y).",
       icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
@@ -455,7 +449,7 @@ export function DeptHeadDashboard() {
     "dh-ward-perf", "dh-subtype-perf", "dh-map",
     "dh-over-time", "dh-inflow",
     "dh-recurring", "dh-channel",
-    "dh-caseload", "dh-breach-scatter",
+    "dh-breach-scatter",
   ], []);
 
   const bannerLeft = (
