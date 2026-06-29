@@ -710,7 +710,7 @@ type SubKey = "subtype" | "type" | "avg" | "sla" | "reopen" | "oldest" | "ontime
 
 function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<SubtypeRow, SubKey>(
-    rows, "ontime", "asc",
+    rows, "avg", "desc",
     (r, k) => k === "subtype" ? r.subtype : k === "type" ? r.typeName
       : k === "avg" ? r.avgResolveHrs : k === "sla" ? r.slaHours
       : k === "reopen" ? r.reopenRate : k === "oldest" ? r.oldestOpenHrs
