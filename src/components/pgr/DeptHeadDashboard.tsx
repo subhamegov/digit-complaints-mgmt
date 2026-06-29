@@ -187,6 +187,7 @@ export function DeptHeadDashboard() {
       }
       m.set(sub, e);
     }
+    const totalAll = rows.length;
     return Array.from(m.values()).map((e) => {
       const avgHrs = e.resolveHrsN ? e.resolveHrsSum / e.resolveHrsN : 0;
       return {
@@ -199,6 +200,7 @@ export function DeptHeadDashboard() {
         oldestOpenHrs: e.oldestOpenHrs,
         onTimeRate: pct(e.onTime, e.resolved),
         csat: e.csatN ? Math.round((e.csatSum / e.csatN) * 10) / 10 : null,
+        pctOfTotal: pct(e.total, totalAll),
       };
     });
   }, [rows]);
