@@ -86,9 +86,21 @@ export function DeptHeadDashboard() {
     const now = Date.now();
     const oldestHrs = openRows.reduce((m, c) => Math.max(m, (now - new Date(c.filedOn).getTime()) / 3600_000), 0);
 
+    // "Today" anchored to the most recent filedOn in the dataset so demo
+    // numbers don't go stale relative to wall-clock time.
+    const latest = rows.reduce((m, c) => Math.max(m, new Date(c.filedOn).getTime()), 0);
+    const dayMs = 24 * 3600_000;
+    const createdToday = latest
+      ? rows.filter((c) => latest - new Date(c.filedOn).getTime() < dayMs).length
+      : 0;
+
     return {
       onTimeRate, csat, csatResp, csatRate,
       resolved: resolved.length, open: openRows.length,
+      total: rows.length,
+      openPct: pct(openRows.length, rows.length),
+      resolvedPct: pct(resolved.length, rows.length),
+      createdToday,
       flowRatio, oldestHrs,
     };
   }, [rows]);
@@ -309,6 +321,18 @@ export function DeptHeadDashboard() {
     })).sort((a, b) => b.total - a.total);
   }, [rows]);
 
+  // --- Complaints by type (horizontal bar) ----------------------------------
+  const complaintsByType = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of rows) {
+      const name = complaintTypeOf(c.typeCode)?.name ?? c.typeCode;
+      m.set(name, (m.get(name) ?? 0) + 1);
+    }
+    return Array.from(m.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [rows]);
+
   // --- Row 5: caseload --------------------------------------------------------
   const caseload = useMemo(() => {
     type O = { id: string; name: string; total: number; reached: number; breached: number };
@@ -387,19 +411,55 @@ export function DeptHeadDashboard() {
       getDelta: () => "Awaiting closure",
       getTrend: () => makeTrend(sparks.oldest, "down"),
     },
+    {
+      id: "dh-total", kind: "stat", label: "Total complaints",
+      description: "All complaints in scope.",
+      icon: BarChart3, intent: "neutral",
+      getValue: () => String(metrics.total),
+      getTrend: () => makeTrend(sparks.resolved.map((_, i) => sparks.resolved[i] + sparks.open[i]), "up"),
+    },
+    {
+      id: "dh-pct-open", kind: "stat", label: "% Open",
+      description: "Open complaints as a share of total in scope.",
+      icon: AlertTriangle, intent: "warning",
+      getValue: () => `${metrics.openPct}%`,
+      getDelta: () => `${metrics.open} of ${metrics.total} complaints`,
+      getTrend: () => makeTrend(sparks.open, "down"),
+    },
+    {
+      id: "dh-pct-resolved", kind: "stat", label: "% Resolved",
+      description: "Resolved + closed as a share of total in scope.",
+      icon: TrendingUp, intent: "positive",
+      getValue: () => `${metrics.resolvedPct}%`,
+      getDelta: () => `${metrics.resolved} of ${metrics.total} complaints`,
+      getTrend: () => makeTrend(sparks.resolved, "up"),
+    },
+    {
+      id: "dh-created-today", kind: "stat", label: "Created today",
+      description: "Complaints filed in the last 24 hours.",
+      icon: Activity, intent: "neutral",
+      getValue: () => String(metrics.createdToday),
+      getDelta: () => "Last 24 hours",
+    },
 
     // ----- Panels (Row 2+) -----
     {
       id: "dh-ward-perf", kind: "panel", label: "Ward performance",
       description: "Per-ward open count, breach %, resolution rate and CSAT.",
-      icon: BarChart3, title: "Ward performance", colSpan: 1, defaultRowSpan: 2,
+      icon: BarChart3, title: "Ward performance", colSpan: 1, defaultRowSpan: 1,
       render: () => <WardPerformanceTable rows={wardRows} />,
     },
     {
       id: "dh-subtype-perf", kind: "panel", label: "Sub-type performance",
       description: "Per sub-type avg resolution vs SLA, reopen %, on-time %, CSAT.",
-      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 2,
+      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 1,
       render: () => <SubtypePerformanceTable rows={subtypeRows} />,
+    },
+    {
+      id: "dh-by-type", kind: "panel", label: "Complaints by type",
+      description: "Complaint types, descending by complaints filed.",
+      icon: BarChart3, title: "Complaints by type", colSpan: 2, defaultRowSpan: 2,
+      render: () => <ComplaintsByTypeBars rows={complaintsByType} />,
     },
     {
       id: "dh-map", kind: "panel", label: "Complaints map",
@@ -442,11 +502,12 @@ export function DeptHeadDashboard() {
       icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
       render: () => <BreachVsCaseload officers={caseload.officers} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload]);
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
-    "dh-ward-perf", "dh-subtype-perf", "dh-map",
+    "dh-total", "dh-pct-open", "dh-pct-resolved", "dh-created-today",
+    "dh-ward-perf", "dh-subtype-perf", "dh-by-type", "dh-map",
     "dh-over-time", "dh-inflow",
     "dh-recurring", "dh-channel",
     "dh-breach-scatter",
@@ -841,7 +902,41 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ---------- Complaints by type — horizontal bar ----------------------------
+
+function ComplaintsByTypeBars({ rows }: { rows: { name: string; count: number }[] }) {
+  if (rows.length === 0) return <Empty />;
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <div className="w-full">
+      <p className="mb-3 text-[12px] text-muted-foreground">Complaint types, descending by complaints filed</p>
+      <div className="space-y-2.5">
+        {rows.map((r) => {
+          const widthPct = (r.count / max) * 100;
+          const inside = widthPct > 14;
+          return (
+            <div key={r.name} className="grid grid-cols-[160px_1fr_auto] items-center gap-3">
+              <div className="text-[12px] leading-tight text-foreground">{r.name}</div>
+              <div className="relative h-7">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-sm bg-[var(--color-chart-3)] flex items-center justify-end pr-2"
+                  style={{ width: `${widthPct}%` }}
+                >
+                  {inside && <span className="text-[11px] font-semibold text-white tabular-nums">{r.count}</span>}
+                </div>
+              </div>
+              <div className="text-[12px] font-semibold tabular-nums text-foreground w-8 text-right">{r.count}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ---------- Row 5B — breach vs caseload scatter ----------------------------
+
+
 
 function BreachVsCaseload({ officers }: { officers: { id: string; name: string; total: number; breachPct: number }[] }) {
   if (officers.length === 0) return <Empty message="No assigned officers in scope." />;
