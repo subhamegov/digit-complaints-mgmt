@@ -902,7 +902,41 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ---------- Complaints by type — horizontal bar ----------------------------
+
+function ComplaintsByTypeBars({ rows }: { rows: { name: string; count: number }[] }) {
+  if (rows.length === 0) return <Empty />;
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <div className="w-full">
+      <p className="mb-3 text-[12px] text-muted-foreground">Complaint types, descending by complaints filed</p>
+      <div className="space-y-2.5">
+        {rows.map((r) => {
+          const widthPct = (r.count / max) * 100;
+          const inside = widthPct > 14;
+          return (
+            <div key={r.name} className="grid grid-cols-[160px_1fr_auto] items-center gap-3">
+              <div className="text-[12px] leading-tight text-foreground">{r.name}</div>
+              <div className="relative h-7">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-sm bg-[var(--color-chart-3)] flex items-center justify-end pr-2"
+                  style={{ width: `${widthPct}%` }}
+                >
+                  {inside && <span className="text-[11px] font-semibold text-white tabular-nums">{r.count}</span>}
+                </div>
+              </div>
+              <div className="text-[12px] font-semibold tabular-nums text-foreground w-8 text-right">{r.count}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ---------- Row 5B — breach vs caseload scatter ----------------------------
+
+
 
 function BreachVsCaseload({ officers }: { officers: { id: string; name: string; total: number; breachPct: number }[] }) {
   if (officers.length === 0) return <Empty message="No assigned officers in scope." />;
