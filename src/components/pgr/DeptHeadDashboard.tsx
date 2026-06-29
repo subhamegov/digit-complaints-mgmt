@@ -653,7 +653,7 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
     (r, k) => k === "subtype" ? r.subtype : k === "type" ? r.typeName
       : k === "avg" ? r.avgResolveHrs : k === "sla" ? r.slaHours
       : k === "reopen" ? r.reopenRate : k === "oldest" ? r.oldestOpenHrs
-      : k === "ontime" ? r.onTimeRate : (r.csat ?? -1),
+      : k === "ontime" ? r.onTimeRate : k === "pct" ? r.pctOfTotal : (r.csat ?? -1),
   );
   if (rows.length === 0) return <Empty />;
   return (
@@ -663,6 +663,7 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
           <tr>
             <SortHeader label="Subtype" k="subtype" sortKey={sortKey} sortDir={sortDir} onSort={toggle} />
             <SortHeader label="Type" k="type" sortKey={sortKey} sortDir={sortDir} onSort={toggle} />
+            <SortHeader label="% of complaints" k="pct" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="Avg resolution" k="avg" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="SLA" k="sla" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="Reopen %" k="reopen" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
@@ -679,6 +680,7 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
                 {r.overSla && <span className="inline-block mt-0.5 rounded-sm bg-status-breach-bg px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-breach">Over SLA</span>}
               </td>
               <td className="px-3 py-1.5 text-muted-foreground">{r.typeName}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.avgResolveHrs ? fmtHrs(r.avgResolveHrs) : "—"}</td>
               <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{fmtHrs(r.slaHours)}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.reopenRate.toFixed(1)}%</td>
