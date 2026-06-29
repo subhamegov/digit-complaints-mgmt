@@ -20,6 +20,7 @@ import {
   Users, Activity, Repeat, TrendingUp, Layers, AlertTriangle, ThumbsUp, Clock,
 } from "lucide-react";
 import { StatCard, Panel, type StatTrend } from "@/components/pgr/primitives";
+import { CustomizableGrid, type GridKpiDef } from "@/components/pgr/CustomizableGrid";
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { complaintTypeOf, officerOf, type Complaint } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, type TestComplaint } from "@/lib/test-user-seed";
