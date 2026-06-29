@@ -42,12 +42,15 @@ export function CustomizableGrid({
   defaultIds,
   pickerLabel = "Add KPI",
   toolbarRight,
+  bannerLeft,
 }: {
   registry: GridKpiDef[];
   defaultIds: string[];
   pickerLabel?: string;
   toolbarRight?: ReactNode;
+  bannerLeft?: ReactNode;
 }) {
+
   const kpiById = useMemo(() => {
     const m = new Map<string, GridKpiDef>();
     registry.forEach((k) => m.set(k.id, k));
