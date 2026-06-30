@@ -136,31 +136,27 @@ export function DeptHeadDashboard() {
 
   // --- Row 2A: ward performance ---------------------------------------------
   const wardRows = useMemo(() => {
-    type W = { ward: string; total: number; open: number; reached: number; breached: number; resolved: number; csatSum: number; csatN: number };
+    type W = { ward: string; total: number; open: number; resolved: number; reopened: number; onTime: number; csatSum: number; csatN: number };
     const m = new Map<string, W>();
     for (const c of rows) {
-      const w = m.get(c.ward) ?? { ward: c.ward, total: 0, open: 0, reached: 0, breached: 0, resolved: 0, csatSum: 0, csatN: 0 };
+      const w = m.get(c.ward) ?? { ward: c.ward, total: 0, open: 0, resolved: 0, reopened: 0, onTime: 0, csatSum: 0, csatN: 0 };
       w.total++;
-      if (isOpen(c)) {
-        w.open++;
-        if (c.slaState === "BREACHED") { w.reached++; w.breached++; }
-      }
+      if (isOpen(c)) w.open++;
       if (isResolved(c)) {
         w.resolved++;
-        w.reached++;
-        if (c.slaState === "BREACHED") w.breached++;
+        if (c.slaState !== "BREACHED") w.onTime++;
         if (typeof c.csat === "number") { w.csatSum += c.csat; w.csatN++; }
       }
+      if (c.reopenCount > 0 || c.status === "REOPENED") w.reopened++;
       m.set(c.ward, w);
     }
-    const totalAll = rows.length;
     return Array.from(m.values()).map((w) => ({
       ward: w.ward,
+      created: w.total,
       open: w.open,
-      breachPct: pct(w.breached, w.reached),
-      resolutionRate: pct(w.resolved, w.total),
+      reopenRate: pct(w.reopened, w.resolved),
+      onTimeRate: pct(w.onTime, w.resolved),
       csat: w.csatN ? Math.round((w.csatSum / w.csatN) * 10) / 10 : null,
-      pctOfTotal: pct(w.total, totalAll),
     }));
   }, [rows]);
 
@@ -714,14 +710,14 @@ function SortHeader<K extends string>({ label, k, sortKey, sortDir, onSort, alig
 
 // ---------- Row 2A — Ward performance --------------------------------------
 
-type WardRow = { ward: string; open: number; breachPct: number; resolutionRate: number; csat: number | null; pctOfTotal: number };
-type WardKey = "ward" | "open" | "breach" | "resolution" | "csat" | "pct";
+type WardRow = { ward: string; created: number; open: number; reopenRate: number; onTimeRate: number; csat: number | null };
+type WardKey = "ward" | "created" | "open" | "reopen" | "ontime" | "csat";
 
 function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<WardRow, WardKey>(
-    rows, "breach", "desc",
-    (r, k) => k === "ward" ? r.ward : k === "open" ? r.open : k === "breach" ? r.breachPct
-      : k === "resolution" ? r.resolutionRate : k === "pct" ? r.pctOfTotal : (r.csat ?? -1),
+    rows, "ontime", "desc",
+    (r, k) => k === "ward" ? r.ward : k === "created" ? r.created : k === "open" ? r.open
+      : k === "reopen" ? r.reopenRate : k === "ontime" ? r.onTimeRate : (r.csat ?? -1),
   );
   if (rows.length === 0) return <Empty />;
   return (
@@ -730,10 +726,10 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
         <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
           <tr>
             <SortHeader label="Ward" k="ward" sortKey={sortKey} sortDir={sortDir} onSort={toggle} />
+            <SortHeader label="Created" k="created" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="Open" k="open" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="% of complaints" k="pct" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="SLA breach %" k="breach" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="Resolution rate" k="resolution" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
+            <SortHeader label="Reopen %" k="reopen" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
+            <SortHeader label="On-time %" k="ontime" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="CSAT" k="csat" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
           </tr>
         </thead>
@@ -741,10 +737,10 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
           {sorted.map((r) => (
             <tr key={r.ward} className="hover:bg-muted/40 cursor-pointer" title="Click to drill down (per-ward view coming soon)">
               <td className="px-3 py-1.5">{r.ward}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.created}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.open}</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
-              <td className={cn("px-3 py-1.5 text-right tabular-nums font-medium", r.breachPct > 50 && "bg-status-breach-bg text-status-breach")}>{r.breachPct.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.resolutionRate.toFixed(1)}%</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.reopenRate.toFixed(1)}%</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.onTimeRate.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "—"}</td>
             </tr>
           ))}
