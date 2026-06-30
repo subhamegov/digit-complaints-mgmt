@@ -495,7 +495,7 @@ export function DeptHeadDashboard() {
     {
       id: "dh-over-time", kind: "panel", label: "Complaints over time",
       description: "Created vs resolved over 12 months, with on-time % overlay.",
-      icon: LineChartIcon, title: "Complaints over time — last 12 months", colSpan: 2,
+      icon: LineChartIcon, title: "Complaints over time", colSpan: 2,
       render: () => <ComplaintsOverTimeChart data={overTime} />,
     },
     {
