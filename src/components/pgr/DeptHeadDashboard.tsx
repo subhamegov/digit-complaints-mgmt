@@ -825,7 +825,21 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
 
 // ---------- Row 3A — over time ---------------------------------------------
 
-function ComplaintsOverTimeChart({ data }: { data: { month: string; created: number; resolved: number; sla: number }[] }) {
+type OverTimeBar = "created" | "resolved" | "open";
+const BAR_META: { key: OverTimeBar; name: string; color: string }[] = [
+  { key: "created",  name: "Created",  color: "var(--color-chart-1)" },
+  { key: "resolved", name: "Resolved", color: "var(--color-chart-3)" },
+  { key: "open",     name: "Open",     color: "var(--color-chart-2)" },
+];
+
+function ComplaintsOverTimeChart({ data }: { data: { month: string; created: number; resolved: number; open: number; sla: number }[] }) {
+  // `active`: null = all three shown. Otherwise only that series is visible.
+  // The On-time % line is NOT toggleable — it's reference context.
+  const [active, setActive] = React.useState<OverTimeBar | null>(null);
+
+  const toggle = (k: OverTimeBar) => setActive((cur) => (cur === k ? null : k));
+  const isVisible = (k: OverTimeBar) => active === null || active === k;
+
   return (
     <div className="h-[260px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -835,9 +849,33 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
           <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
           <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="%" />
           <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Bar yAxisId="left" dataKey="created" fill="var(--color-chart-1)" name="Created" radius={[2, 2, 0, 0]} barSize={10} />
-          <Bar yAxisId="left" dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} barSize={10} />
+          <Legend
+            wrapperStyle={{ fontSize: 11 }}
+            onClick={(e: { dataKey?: string | number }) => {
+              const k = e?.dataKey as OverTimeBar | undefined;
+              if (k === "created" || k === "resolved" || k === "open") toggle(k);
+            }}
+            formatter={(value: string, entry: { dataKey?: string | number }) => {
+              const k = entry?.dataKey as OverTimeBar | "sla" | undefined;
+              if (k === "sla") return <span style={{ color: "var(--muted-foreground)" }}>{value}</span>;
+              const dim = active !== null && active !== k;
+              return <span style={{ opacity: dim ? 0.35 : 1, cursor: "pointer" }}>{value}</span>;
+            }}
+          />
+          {BAR_META.map((b) => (
+            <Bar
+              key={b.key}
+              yAxisId="left"
+              dataKey={b.key}
+              fill={b.color}
+              name={b.name}
+              radius={[2, 2, 0, 0]}
+              barSize={10}
+              hide={!isVisible(b.key)}
+              onClick={() => toggle(b.key)}
+              style={{ cursor: "pointer" }}
+            />
+          ))}
           <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-4)" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2.5 }} name="On-time %" />
         </ComposedChart>
       </ResponsiveContainer>
