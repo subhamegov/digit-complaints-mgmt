@@ -1335,7 +1335,7 @@ export function DashboardPage() {
         ];
         return (
           <div className="flex flex-col gap-3">
-            <div className="text-[11px] text-muted-foreground -mt-1">Top 5 complaint subtypes by average hours to resolve</div>
+            <div className="text-[11px] text-muted-foreground -mt-1">Top 7 complaint subtypes by average hours to resolve</div>
             <div className="flex items-end gap-3 h-[180px] pt-2">
               {rows.map((r) => {
                 const h = `${(r.avgHrs / max) * 100}%`;
