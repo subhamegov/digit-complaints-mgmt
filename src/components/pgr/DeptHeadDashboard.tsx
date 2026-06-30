@@ -13,7 +13,7 @@ import { useMemo, useState, Fragment } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
-  AreaChart, Area, ScatterChart, Scatter, ZAxis,
+  AreaChart, Area, ScatterChart, Scatter, ZAxis, ComposedChart, Bar, Legend,
 } from "recharts";
 import {
   ArrowUp, ArrowDown, ChevronsUpDown, MapPin, BarChart3, LineChart as LineChartIcon,
@@ -536,8 +536,7 @@ export function DeptHeadDashboard() {
   ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept]);
 
   const defaultIds = useMemo(() => [
-    "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
-    "dh-total",
+    "dh-ontime-rate", "dh-resolved", "dh-total", "dh-flow-ratio", "dh-oldest", "dh-csat",
     "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-map",
     "dh-over-time",
     "dh-breach-scatter",
@@ -792,16 +791,17 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
   return (
     <div className="h-[260px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
           <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="%" />
+          <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="%" />
           <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-          <Line yAxisId="left" type="monotone" dataKey="created" stroke="var(--color-chart-1)" strokeWidth={2} dot={{ r: 2.5 }} name="Created" />
-          <Line yAxisId="left" type="monotone" dataKey="resolved" stroke="var(--color-chart-3)" strokeWidth={2} dot={{ r: 2.5 }} name="Resolved" />
-          <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-2)" strokeWidth={2} strokeDasharray="4 3" dot={false} name="On-time %" />
-        </LineChart>
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <Bar yAxisId="left" dataKey="created" fill="var(--color-chart-1)" name="Created" radius={[2, 2, 0, 0]} barSize={10} />
+          <Bar yAxisId="left" dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} barSize={10} />
+          <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-2)" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2.5 }} name="On-time %" />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );
