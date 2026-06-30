@@ -536,8 +536,8 @@ export function DeptHeadDashboard() {
   ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept]);
 
   const defaultIds = useMemo(() => [
-    "dh-ontime-rate", "dh-csat", "dh-resolved", "dh-open", "dh-flow-ratio", "dh-oldest",
-    "dh-total",
+    "dh-ontime-rate", "dh-resolved", "dh-total", "dh-flow-ratio", "dh-oldest", "dh-csat",
+    "dh-open",
     "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-map",
     "dh-over-time",
     "dh-breach-scatter",
