@@ -548,12 +548,6 @@ export function DeptHeadDashboard() {
       render: () => <ComplaintsOverTimeChart data={overTime} />,
     },
     {
-      id: "dh-inflow", kind: "panel", label: "Inflow by sub-type",
-      description: "Stacked monthly inflow for the top 6 sub-types.",
-      icon: Layers, title: "Inflow by sub-type — last 12 months", colSpan: 2,
-      render: () => <InflowBySubtypeChart data={inflowBySubtype.data} series={inflowBySubtype.series} />,
-    },
-    {
       id: "dh-recurring", kind: "panel", label: "Recurring complaints",
       description: "Same problem, same locality (≥ 3 reports).",
       icon: Repeat, title: "Recurring complaints by ward & sub-type", colSpan: 2,
