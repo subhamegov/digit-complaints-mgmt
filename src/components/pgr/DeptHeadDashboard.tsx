@@ -448,8 +448,7 @@ export function DeptHeadDashboard() {
       description: "Age of the longest-open complaint in scope.",
       icon: Clock, intent: "warning",
       getValue: () => fmtHrs(metrics.oldestHrs),
-      getDelta: () => "Awaiting closure",
-      getTrend: () => makeTrend(sparks.oldest, "down"),
+      // No delta / sparkline by design — just label + value.
     },
     {
       id: "dh-total", kind: "stat", label: "Total complaints",
