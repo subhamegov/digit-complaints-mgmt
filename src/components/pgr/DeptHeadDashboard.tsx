@@ -851,10 +851,10 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
           <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
           <Legend
             wrapperStyle={{ fontSize: 11 }}
-            onClick={(e: { dataKey?: unknown }) => {
+            onClick={((e: { dataKey?: unknown }) => {
               const k = e?.dataKey;
               if (k === "created" || k === "resolved" || k === "open") toggle(k);
-            }}
+            }) as never}
             formatter={((value: string, entry: { dataKey?: unknown }) => {
               const k = entry?.dataKey;
               if (k === "sla") return <span style={{ color: "var(--muted-foreground)" }}>{value}</span>;
