@@ -376,6 +376,36 @@ export function DeptHeadDashboard() {
     return { officers, avg, median, max: loads[0] ?? 0, count: officers.length };
   }, [rows]);
 
+  // --- Ward load by SLA (same shape as test-user "team load by SLA") --------
+  const wardLoadBySla = useMemo(() => {
+    type Row = { id: string; name: string; resolved: number; onTrack: number; nearing: number; breached: number; total: number };
+    const m = new Map<string, Row>();
+    for (const c of rows) {
+      const id = c.ward;
+      if (!id) continue;
+      const e: Row = m.get(id) ?? { id, name: id, resolved: 0, onTrack: 0, nearing: 0, breached: 0, total: 0 };
+      if (isResolved(c)) e.resolved++;
+      else if (isOpen(c)) {
+        if (c.slaState === "BREACHED") e.breached++;
+        else if (c.slaState === "NEARING") e.nearing++;
+        else e.onTrack++;
+      }
+      e.total++;
+      m.set(id, e);
+    }
+    const out = Array.from(m.values()).sort((a, b) => b.breached - a.breached || b.total - a.total);
+    const max = Math.max(...out.map((r) => r.total), 1);
+    const mean = out.length ? out.reduce((a, r) => a + r.total, 0) / out.length : 0;
+    const raw = max / 6;
+    const pow = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))));
+    const norm = raw / pow;
+    const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * pow;
+    const upper = Math.max(step, Math.ceil(max / step) * step);
+    const ticks: number[] = [];
+    for (let v = 0; v <= upper + 0.0001; v += step) ticks.push(Math.round(v));
+    return { rows: out, max, mean, upper, ticks };
+  }, [rows]);
+
   const empty = rows.length === 0;
 
   const registry: GridKpiDef[] = useMemo(() => [
