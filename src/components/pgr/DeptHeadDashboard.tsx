@@ -710,8 +710,8 @@ function SortHeader<K extends string>({ label, k, sortKey, sortDir, onSort, alig
 
 // ---------- Row 2A — Ward performance --------------------------------------
 
-type WardRow = { ward: string; open: number; breachPct: number; resolutionRate: number; csat: number | null; pctOfTotal: number };
-type WardKey = "ward" | "open" | "breach" | "resolution" | "csat" | "pct";
+type WardRow = { ward: string; created: number; open: number; reopenRate: number; onTimeRate: number; csat: number | null };
+type WardKey = "ward" | "created" | "open" | "reopen" | "ontime" | "csat";
 
 function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<WardRow, WardKey>(
