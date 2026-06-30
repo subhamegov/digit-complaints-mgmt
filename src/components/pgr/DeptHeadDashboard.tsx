@@ -851,16 +851,16 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
           <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
           <Legend
             wrapperStyle={{ fontSize: 11 }}
-            onClick={(e: { dataKey?: string | number }) => {
-              const k = e?.dataKey as OverTimeBar | undefined;
+            onClick={(e: { dataKey?: unknown }) => {
+              const k = e?.dataKey;
               if (k === "created" || k === "resolved" || k === "open") toggle(k);
             }}
-            formatter={(value: string, entry: { dataKey?: string | number }) => {
-              const k = entry?.dataKey as OverTimeBar | "sla" | undefined;
+            formatter={((value: string, entry: { dataKey?: unknown }) => {
+              const k = entry?.dataKey;
               if (k === "sla") return <span style={{ color: "var(--muted-foreground)" }}>{value}</span>;
               const dim = active !== null && active !== k;
               return <span style={{ opacity: dim ? 0.35 : 1, cursor: "pointer" }}>{value}</span>;
-            }}
+            }) as never}
           />
           {BAR_META.map((b) => (
             <Bar
