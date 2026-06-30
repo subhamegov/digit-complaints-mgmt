@@ -390,6 +390,29 @@ export function DeptHeadDashboard() {
     return { officers, avg, median, max: loads[0] ?? 0, count: officers.length };
   }, [rows]);
 
+  // --- Breach rate vs caseload, anchored on departments --------------------
+  const deptCaseload = useMemo(() => {
+    type D = { id: string; name: string; total: number; reached: number; breached: number };
+    const m = new Map<string, D>();
+    for (const c of rows) {
+      const id = c.department;
+      if (!id) continue;
+      const d = m.get(id) ?? { id, name: id, total: 0, reached: 0, breached: 0 };
+      d.total++;
+      if (isResolved(c)) {
+        d.reached++;
+        if (c.slaState === "BREACHED") d.breached++;
+      } else if (isOpen(c) && c.slaState === "BREACHED") {
+        d.reached++;
+        d.breached++;
+      }
+      m.set(id, d);
+    }
+    return Array.from(m.values())
+      .map((d) => ({ id: d.id, name: d.name, total: d.total, breachPct: pct(d.breached, d.reached) }))
+      .sort((a, b) => b.total - a.total);
+  }, [rows]);
+
   // --- Ward load by SLA (same shape as test-user "team load by SLA") --------
   const wardLoadBySla = useMemo(() => {
     type Row = { id: string; name: string; resolved: number; onTrack: number; nearing: number; breached: number; total: number };
@@ -509,14 +532,8 @@ export function DeptHeadDashboard() {
     {
       id: "dh-subtype-perf", kind: "panel", label: "Sub-type performance",
       description: "Per sub-type avg resolution vs SLA, reopen %, on-time %, CSAT.",
-      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 1,
+      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 1, defaultRowSpan: 1,
       render: () => <SubtypePerformanceTable rows={subtypeRows} />,
-    },
-    {
-      id: "dh-by-type", kind: "panel", label: "Complaints by type",
-      description: "Complaint types, descending by complaints filed.",
-      icon: BarChart3, title: "Complaints by type", colSpan: 2, defaultRowSpan: 2,
-      render: () => <ComplaintsByTypeBars rows={complaintsByType} />,
     },
     {
       id: "dh-map", kind: "panel", label: "Complaints map",
@@ -529,12 +546,6 @@ export function DeptHeadDashboard() {
       description: "Created vs resolved over 12 months, with on-time % overlay.",
       icon: LineChartIcon, title: "Complaints over time", colSpan: 2,
       render: () => <ComplaintsOverTimeChart data={overTime} />,
-    },
-    {
-      id: "dh-inflow", kind: "panel", label: "Inflow by sub-type",
-      description: "Stacked monthly inflow for the top 6 sub-types.",
-      icon: Layers, title: "Inflow by sub-type — last 12 months", colSpan: 2,
-      render: () => <InflowBySubtypeChart data={inflowBySubtype.data} series={inflowBySubtype.series} />,
     },
     {
       id: "dh-recurring", kind: "panel", label: "Recurring complaints",
@@ -554,10 +565,10 @@ export function DeptHeadDashboard() {
       render: () => <ChannelEquityTable rows={channelRows} />,
     },
     {
-      id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload",
-      description: "Scatter of officer caseload (x) vs breach % (y).",
-      icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
-      render: () => <BreachVsCaseload officers={caseload.officers} />,
+      id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload by department",
+      description: "Scatter of department caseload (x) vs breach % (y).",
+      icon: Activity, title: "Breach rate vs caseload by department", colSpan: 2,
+      render: () => <BreachVsCaseload officers={deptCaseload} />,
     },
     {
       id: "dh-flow-ratio-dept", kind: "panel", label: "Flow ratio by department",
@@ -571,11 +582,13 @@ export function DeptHeadDashboard() {
       icon: MapPin, title: "Complaints by Wards", colSpan: 2,
       render: () => <WardLoadBySlaChart data={wardLoadBySla} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept, wardLoadBySla]);
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, recurring, channelRows, deptCaseload, flowRatioByDept, wardLoadBySla]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-resolved", "dh-total", "dh-flow-ratio", "dh-oldest", "dh-csat",
-    "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-ward-load-sla", "dh-map",
+    "dh-ward-load-sla", "dh-subtype-perf",
+    "dh-map",
+    "dh-recurring",
     "dh-over-time",
     "dh-breach-scatter",
   ], []);
