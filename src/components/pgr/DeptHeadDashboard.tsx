@@ -790,7 +790,7 @@ type SubKey = "subtype" | "type" | "avg" | "sla" | "reopen" | "oldest" | "ontime
 
 function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<SubtypeRow, SubKey>(
-    rows, "avg", "desc",
+    rows, "pct", "desc",
     (r, k) => k === "subtype" ? r.subtype : k === "type" ? r.typeName
       : k === "avg" ? r.avgResolveHrs : k === "sla" ? r.slaHours
       : k === "reopen" ? r.reopenRate : k === "oldest" ? r.oldestOpenHrs
@@ -815,10 +815,9 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
         </thead>
         <tbody className="divide-y divide-border">
           {sorted.map((r) => (
-            <tr key={r.subtype} className="hover:bg-muted/40">
+            <tr key={r.subtype} className={cn("hover:bg-muted/40", r.overSla && "bg-status-breach-bg/30")}>
               <td className="px-3 py-1.5">
                 <div>{r.subtype}</div>
-                {r.overSla && <span className="inline-block mt-0.5 rounded-sm bg-status-breach-bg px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-status-breach">Over SLA</span>}
               </td>
               <td className="px-3 py-1.5 text-muted-foreground">{r.typeName}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
