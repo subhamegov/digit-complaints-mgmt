@@ -13,7 +13,7 @@ import { useMemo, useState, Fragment } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
-  AreaChart, Area, ScatterChart, Scatter, ZAxis,
+  AreaChart, Area, ScatterChart, Scatter, ZAxis, ComposedChart, Bar, Legend,
 } from "recharts";
 import {
   ArrowUp, ArrowDown, ChevronsUpDown, MapPin, BarChart3, LineChart as LineChartIcon,
