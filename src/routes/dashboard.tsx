@@ -1320,7 +1320,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint subtypes by average hours to resolve.",
+      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 7 complaint subtypes by average hours to resolve.",
       icon: Clock, colSpan: 2, title: "Resolution time by sub-type",
       render: () => {
         const { rows, max } = resolutionTimeBySubtype;
