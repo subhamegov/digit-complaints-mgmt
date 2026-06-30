@@ -214,22 +214,40 @@ export function DeptHeadDashboard() {
   }, [rows]);
 
   // --- Row 3A: complaints over time (12 months) -----------------------------
+  // `open` is an END-OF-MONTH SNAPSHOT: count of complaints created on or before
+  // the last day of month m AND not resolved as of that day. It is NOT a running
+  // cumulative `created - resolved`, and NOT a live "currently open" count.
+  // When wiring to real data, derive each month's snapshot from createdAt and
+  // resolvedAt timestamps against the month boundary — do not substitute the
+  // live open count.
   const overTime = useMemo(() => {
     const buckets = Array.from({ length: 12 }, () => ({ created: 0, resolved: 0, onTime: 0, reached: 0 }));
+    // Per-complaint create/resolve month indices, for the end-of-month open snapshot.
+    const lifecycles: { createdM: number; resolvedM: number | null }[] = [];
     for (const c of rows) {
       const i = hashBucket(c.id, 12);
       buckets[i].created++;
+      let resolvedM: number | null = null;
       if (isResolved(c)) {
         buckets[i].resolved++;
         buckets[i].reached++;
         if (c.slaState !== "BREACHED") buckets[i].onTime++;
+        // Resolved month must be >= created month in the mock timeline.
+        const r = hashBucket(c.id + "::r", 12);
+        resolvedM = r < i ? i : r;
       }
       if (isOpen(c) && c.slaState === "BREACHED") buckets[i].reached++;
+      lifecycles.push({ createdM: i, resolvedM });
     }
+    const openSnapshot = Array.from({ length: 12 }, (_, m) =>
+      lifecycles.reduce((n, l) =>
+        n + (l.createdM <= m && (l.resolvedM === null || l.resolvedM > m) ? 1 : 0), 0)
+    );
     return buckets.map((b, i) => ({
       month: MONTHS[i],
       created: b.created,
       resolved: b.resolved,
+      open: openSnapshot[i],
       sla: b.reached ? Math.round((b.onTime / b.reached) * 1000) / 10 : 0,
     }));
   }, [rows]);
