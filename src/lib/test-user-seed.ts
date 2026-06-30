@@ -126,43 +126,36 @@ const DESCRIPTIONS: Record<string, string[]> = {
 
 const CHANNELS: Channel[] = ["MOBILE_APP", "WEB", "CALL_CENTER", "COUNTER", "WHATSAPP"];
 
-// 60 status assignments — distribution gives every status non-zero presence
-// and produces the SLA / age / stage variety the dashboard needs.
-const STATUS_PATTERN: ComplaintStatus[] = [
-  // 10 OPEN (pending assignment)
-  "OPEN","OPEN","OPEN","OPEN","OPEN","OPEN","OPEN","OPEN","OPEN","OPEN",
-  // 12 ASSIGNED
-  "ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED",
-  "ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED","ASSIGNED",
-  // 16 IN_PROGRESS (pending resolution)
-  "IN_PROGRESS","IN_PROGRESS","IN_PROGRESS","IN_PROGRESS",
-  "IN_PROGRESS","IN_PROGRESS","IN_PROGRESS","IN_PROGRESS",
-  "IN_PROGRESS","IN_PROGRESS","IN_PROGRESS","IN_PROGRESS",
-  "IN_PROGRESS","IN_PROGRESS","IN_PROGRESS","IN_PROGRESS",
-  // 4 REOPENED
-  "REOPENED","REOPENED","REOPENED","REOPENED",
-  // 12 RESOLVED
-  "RESOLVED","RESOLVED","RESOLVED","RESOLVED","RESOLVED","RESOLVED",
-  "RESOLVED","RESOLVED","RESOLVED","RESOLVED","RESOLVED","RESOLVED",
-  // 4 CLOSED
-  "CLOSED","CLOSED","CLOSED","CLOSED",
-  // 2 REJECTED
-  "REJECTED","REJECTED",
+// 143 complaints — distribution preserves the original status mix while
+// scaling up so every widget has realistic data density.
+const STATUS_DISTRIBUTION: Array<[ComplaintStatus, number]> = [
+  ["OPEN", 24],
+  ["ASSIGNED", 29],
+  ["IN_PROGRESS", 38],
+  ["REOPENED", 10],
+  ["RESOLVED", 29],
+  ["CLOSED", 9],
+  ["REJECTED", 4],
 ];
 
-// Ages in hours — covers <1d / 1–3d / 3–7d / >7d buckets and forces a healthy
-// mix of WITHIN / NEARING / BREACHED SLA states.
-const AGE_PATTERN: number[] = [
-  // <24h (12 rows)
-   4,  6,  8, 10, 14, 16, 18, 20, 22,  5, 11, 19,
-  // 24–72h (16 rows)
-  28, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 32, 44, 56, 68,
-  // 72–168h (18 rows)
-  76, 84, 92, 100, 108, 116, 124, 132, 140, 148, 156, 164,
-  80, 96, 112, 128, 144, 160,
-  // >168h (14 rows)
-  176, 192, 208, 224, 240, 260, 280, 300, 320, 336, 200, 252, 288, 312,
-];
+const STATUS_PATTERN: ComplaintStatus[] = STATUS_DISTRIBUTION.flatMap(
+  ([s, n]) => Array.from({ length: n }, () => s),
+);
+
+// Deterministic age generator — spans <1d, 1–3d, 3–7d, >7d buckets with a
+// healthy WITHIN / NEARING / BREACHED mix.
+const AGE_PATTERN: number[] = Array.from({ length: STATUS_PATTERN.length }, (_, i) => {
+  // Mix four buckets in a repeating cycle, with per-row jitter.
+  const bucket = i % 4;
+  const jitter = ((i * 2654435761) >>> 0) % 24; // 0..23
+  switch (bucket) {
+    case 0: return 2 + jitter;             // <24h
+    case 1: return 26 + (jitter * 2);      // 26..72h
+    case 2: return 76 + (jitter * 4);      // 76..168h
+    default: return 176 + (jitter * 8);    // 176..360h
+  }
+});
+
 
 const TYPES = [
   "SWM_GARBAGE","STR_STREETLIGHT","WS_LEAKAGE","SEW_OVERFLOW",
