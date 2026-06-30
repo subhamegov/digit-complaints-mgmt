@@ -136,31 +136,27 @@ export function DeptHeadDashboard() {
 
   // --- Row 2A: ward performance ---------------------------------------------
   const wardRows = useMemo(() => {
-    type W = { ward: string; total: number; open: number; reached: number; breached: number; resolved: number; csatSum: number; csatN: number };
+    type W = { ward: string; total: number; open: number; resolved: number; reopened: number; onTime: number; csatSum: number; csatN: number };
     const m = new Map<string, W>();
     for (const c of rows) {
-      const w = m.get(c.ward) ?? { ward: c.ward, total: 0, open: 0, reached: 0, breached: 0, resolved: 0, csatSum: 0, csatN: 0 };
+      const w = m.get(c.ward) ?? { ward: c.ward, total: 0, open: 0, resolved: 0, reopened: 0, onTime: 0, csatSum: 0, csatN: 0 };
       w.total++;
-      if (isOpen(c)) {
-        w.open++;
-        if (c.slaState === "BREACHED") { w.reached++; w.breached++; }
-      }
+      if (isOpen(c)) w.open++;
       if (isResolved(c)) {
         w.resolved++;
-        w.reached++;
-        if (c.slaState === "BREACHED") w.breached++;
+        if (c.slaState !== "BREACHED") w.onTime++;
         if (typeof c.csat === "number") { w.csatSum += c.csat; w.csatN++; }
       }
+      if (c.reopenCount > 0 || c.status === "REOPENED") w.reopened++;
       m.set(c.ward, w);
     }
-    const totalAll = rows.length;
     return Array.from(m.values()).map((w) => ({
       ward: w.ward,
+      created: w.total,
       open: w.open,
-      breachPct: pct(w.breached, w.reached),
-      resolutionRate: pct(w.resolved, w.total),
+      reopenRate: pct(w.reopened, w.resolved),
+      onTimeRate: pct(w.onTime, w.resolved),
       csat: w.csatN ? Math.round((w.csatSum / w.csatN) * 10) / 10 : null,
-      pctOfTotal: pct(w.total, totalAll),
     }));
   }, [rows]);
 
