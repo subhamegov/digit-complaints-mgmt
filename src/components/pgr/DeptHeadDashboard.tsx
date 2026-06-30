@@ -715,9 +715,9 @@ type WardKey = "ward" | "created" | "open" | "reopen" | "ontime" | "csat";
 
 function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
   const { sorted, sortKey, sortDir, toggle } = useSort<WardRow, WardKey>(
-    rows, "breach", "desc",
-    (r, k) => k === "ward" ? r.ward : k === "open" ? r.open : k === "breach" ? r.breachPct
-      : k === "resolution" ? r.resolutionRate : k === "pct" ? r.pctOfTotal : (r.csat ?? -1),
+    rows, "ontime", "desc",
+    (r, k) => k === "ward" ? r.ward : k === "created" ? r.created : k === "open" ? r.open
+      : k === "reopen" ? r.reopenRate : k === "ontime" ? r.onTimeRate : (r.csat ?? -1),
   );
   if (rows.length === 0) return <Empty />;
   return (
@@ -726,10 +726,10 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
         <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
           <tr>
             <SortHeader label="Ward" k="ward" sortKey={sortKey} sortDir={sortDir} onSort={toggle} />
+            <SortHeader label="Created" k="created" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="Open" k="open" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="% of complaints" k="pct" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="SLA breach %" k="breach" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
-            <SortHeader label="Resolution rate" k="resolution" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
+            <SortHeader label="Reopen %" k="reopen" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
+            <SortHeader label="On-time %" k="ontime" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
             <SortHeader label="CSAT" k="csat" sortKey={sortKey} sortDir={sortDir} onSort={toggle} align="right" />
           </tr>
         </thead>
@@ -737,10 +737,10 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
           {sorted.map((r) => (
             <tr key={r.ward} className="hover:bg-muted/40 cursor-pointer" title="Click to drill down (per-ward view coming soon)">
               <td className="px-3 py-1.5">{r.ward}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.created}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.open}</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
-              <td className={cn("px-3 py-1.5 text-right tabular-nums font-medium", r.breachPct > 50 && "bg-status-breach-bg text-status-breach")}>{r.breachPct.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.resolutionRate.toFixed(1)}%</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.reopenRate.toFixed(1)}%</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.onTimeRate.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "—"}</td>
             </tr>
           ))}
