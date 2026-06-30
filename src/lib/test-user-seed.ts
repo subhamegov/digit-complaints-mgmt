@@ -69,17 +69,18 @@ const TYPE_TO_OFFICERS: Record<string, string[]> = {
   STR_STRAY_ANIMAL: ["EMP-1042", "EMP-1124"],
 };
 
-const SUBTYPES: Record<string, string> = {
-  SWM_GARBAGE:      "Door-to-door collection skipped",
-  SWM_DEAD_ANIMAL:  "Stray animal carcass",
-  STR_POTHOLE:      "Carriageway pothole",
-  STR_STREETLIGHT:  "Pole non-functional",
-  WS_LEAKAGE:       "Mainline leakage",
-  WS_NO_SUPPLY:     "Supply interruption",
-  SEW_OVERFLOW:     "Manhole overflow",
-  ENC_ILLEGAL:      "Footpath encroachment",
-  STR_STRAY_ANIMAL: "Aggressive pack sighting",
+const SUBTYPES: Record<string, string[]> = {
+  SWM_GARBAGE:      ["Door-to-door collection skipped", "Bulk waste not lifted", "Bin overflow at hotspot"],
+  SWM_DEAD_ANIMAL:  ["Stray animal carcass", "Cattle carcass removal"],
+  STR_POTHOLE:      ["Carriageway pothole", "Edge crater after rain", "Junction surface damage"],
+  STR_STREETLIGHT:  ["Pole non-functional", "Flickering luminaire", "Cable theft outage"],
+  WS_LEAKAGE:       ["Mainline leakage", "Service connection leak", "Valve chamber seepage"],
+  WS_NO_SUPPLY:     ["Supply interruption", "Low pressure complaint"],
+  SEW_OVERFLOW:     ["Manhole overflow", "Choked lateral line", "Pump station backflow"],
+  ENC_ILLEGAL:      ["Footpath encroachment", "Unauthorised hoarding"],
+  STR_STRAY_ANIMAL: ["Aggressive pack sighting", "Cattle on carriageway"],
 };
+
 
 const DESCRIPTIONS: Record<string, string[]> = {
   SWM_GARBAGE: [
@@ -357,7 +358,7 @@ function build(i: number): TestComplaint {
     csat,
     reassignCount,
     escalated,
-    subtype: SUBTYPES[typeCode] ?? type.name,
+    subtype: (SUBTYPES[typeCode] && SUBTYPES[typeCode][i % SUBTYPES[typeCode].length]) ?? type.name,
   };
 }
 

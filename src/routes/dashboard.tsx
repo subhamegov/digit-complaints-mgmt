@@ -523,7 +523,7 @@ export function DashboardPage() {
     })
       .filter((r) => r.n > 0)
       .sort((a, b) => b.avgHrs - a.avgHrs)
-      .slice(0, 5);
+      .slice(0, 7);
     const max = Math.max(...rows.map((r) => r.avgHrs), 1);
     return { rows, max };
   }, [filteredComplaints]);
@@ -1320,7 +1320,7 @@ export function DashboardPage() {
       },
     },
     {
-      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 5 complaint subtypes by average hours to resolve.",
+      id: "resolution-time-subtype", kind: "panel", label: "Resolution time by sub-type", description: "Top 7 complaint subtypes by average hours to resolve.",
       icon: Clock, colSpan: 2, title: "Resolution time by sub-type",
       render: () => {
         const { rows, max } = resolutionTimeBySubtype;
@@ -1335,7 +1335,7 @@ export function DashboardPage() {
         ];
         return (
           <div className="flex flex-col gap-3">
-            <div className="text-[11px] text-muted-foreground -mt-1">Top 5 complaint subtypes by average hours to resolve</div>
+            <div className="text-[11px] text-muted-foreground -mt-1">Top 7 complaint subtypes by average hours to resolve</div>
             <div className="flex items-end gap-3 h-[180px] pt-2">
               {rows.map((r) => {
                 const h = `${(r.avgHrs / max) * 100}%`;
