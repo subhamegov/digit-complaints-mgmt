@@ -565,10 +565,10 @@ export function DeptHeadDashboard() {
       render: () => <ChannelEquityTable rows={channelRows} />,
     },
     {
-      id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload",
-      description: "Scatter of officer caseload (x) vs breach % (y).",
-      icon: Activity, title: "Breach rate vs caseload", colSpan: 1,
-      render: () => <BreachVsCaseload officers={caseload.officers} />,
+      id: "dh-breach-scatter", kind: "panel", label: "Breach rate vs caseload by department",
+      description: "Scatter of department caseload (x) vs breach % (y).",
+      icon: Activity, title: "Breach rate vs caseload by department", colSpan: 2,
+      render: () => <BreachVsCaseload officers={deptCaseload} />,
     },
     {
       id: "dh-flow-ratio-dept", kind: "panel", label: "Flow ratio by department",
@@ -582,11 +582,13 @@ export function DeptHeadDashboard() {
       icon: MapPin, title: "Complaints by Wards", colSpan: 2,
       render: () => <WardLoadBySlaChart data={wardLoadBySla} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept, wardLoadBySla]);
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, recurring, channelRows, deptCaseload, flowRatioByDept, wardLoadBySla]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-resolved", "dh-total", "dh-flow-ratio", "dh-oldest", "dh-csat",
-    "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-ward-load-sla", "dh-map",
+    "dh-ward-load-sla", "dh-subtype-perf",
+    "dh-map",
+    "dh-recurring",
     "dh-over-time",
     "dh-breach-scatter",
   ], []);
