@@ -127,12 +127,13 @@ export function StatCard({
 
   let arrowEl: ReactNode = null;
   let sparkEl: ReactNode = null;
+  let trendColorClass = "";
   if (trend) {
     const dir: "up" | "down" = trend.change >= 0 ? "up" : "down";
     const isGood = dir === trend.improveDirection;
-    const arrowColor = isGood ? "text-status-resolved" : "text-status-breach";
+    trendColorClass = isGood ? "text-status-resolved" : "text-status-breach";
     arrowEl = (
-      <span className={cn("ml-2 inline-flex items-baseline text-[12px] font-semibold tabular-nums", arrowColor)}>
+      <span className={cn("ml-2 inline-flex items-baseline text-[12px] font-semibold tabular-nums", trendColorClass)}>
         <span aria-hidden>{dir === "up" ? "▲" : "▼"}</span>
         <span className="ml-0.5">{trend.display}</span>
       </span>
@@ -157,7 +158,7 @@ export function StatCard({
         <svg
           viewBox={`0 0 ${w} ${h}`}
           preserveAspectRatio="none"
-          className="mt-3 h-6 w-full"
+          className={cn("mt-3 h-6 w-full", trendColorClass)}
           aria-hidden
         >
           <polyline
@@ -188,7 +189,7 @@ export function StatCard({
       )}
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="mt-2 flex items-baseline">
-        <span className={cn("text-[26px] font-semibold tabular-nums leading-none", intentMap[intent])}>{value}</span>
+        <span className="text-[26px] font-semibold tabular-nums leading-none text-foreground">{value}</span>
         {arrowEl}
       </div>
       {!trend && delta && <div className="mt-2 text-[12px] text-muted-foreground">{delta}</div>}
