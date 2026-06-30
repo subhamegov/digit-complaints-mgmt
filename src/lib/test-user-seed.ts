@@ -358,7 +358,7 @@ function build(i: number): TestComplaint {
     csat,
     reassignCount,
     escalated,
-    subtype: SUBTYPES[typeCode] ?? type.name,
+    subtype: (SUBTYPES[typeCode] && SUBTYPES[typeCode][i % SUBTYPES[typeCode].length]) ?? type.name,
   };
 }
 
