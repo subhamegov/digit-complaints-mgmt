@@ -9,7 +9,7 @@
  * Reuses the existing test-user widgets (StatCard, Panel, ComplaintMap,
  * recharts line/bar) so visual styling stays identical.
  */
-import { useMemo, useState, Fragment } from "react";
+import React, { useMemo, useState, Fragment } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
