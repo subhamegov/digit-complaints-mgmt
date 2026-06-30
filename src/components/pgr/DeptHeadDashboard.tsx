@@ -9,7 +9,7 @@
  * Reuses the existing test-user widgets (StatCard, Panel, ComplaintMap,
  * recharts line/bar) so visual styling stays identical.
  */
-import { useMemo, useState, Fragment } from "react";
+import React, { useMemo, useState, Fragment } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
@@ -214,22 +214,40 @@ export function DeptHeadDashboard() {
   }, [rows]);
 
   // --- Row 3A: complaints over time (12 months) -----------------------------
+  // `open` is an END-OF-MONTH SNAPSHOT: count of complaints created on or before
+  // the last day of month m AND not resolved as of that day. It is NOT a running
+  // cumulative `created - resolved`, and NOT a live "currently open" count.
+  // When wiring to real data, derive each month's snapshot from createdAt and
+  // resolvedAt timestamps against the month boundary — do not substitute the
+  // live open count.
   const overTime = useMemo(() => {
     const buckets = Array.from({ length: 12 }, () => ({ created: 0, resolved: 0, onTime: 0, reached: 0 }));
+    // Per-complaint create/resolve month indices, for the end-of-month open snapshot.
+    const lifecycles: { createdM: number; resolvedM: number | null }[] = [];
     for (const c of rows) {
       const i = hashBucket(c.id, 12);
       buckets[i].created++;
+      let resolvedM: number | null = null;
       if (isResolved(c)) {
         buckets[i].resolved++;
         buckets[i].reached++;
         if (c.slaState !== "BREACHED") buckets[i].onTime++;
+        // Resolved month must be >= created month in the mock timeline.
+        const r = hashBucket(c.id + "::r", 12);
+        resolvedM = r < i ? i : r;
       }
       if (isOpen(c) && c.slaState === "BREACHED") buckets[i].reached++;
+      lifecycles.push({ createdM: i, resolvedM });
     }
+    const openSnapshot = Array.from({ length: 12 }, (_, m) =>
+      lifecycles.reduce((n, l) =>
+        n + (l.createdM <= m && (l.resolvedM === null || l.resolvedM > m) ? 1 : 0), 0)
+    );
     return buckets.map((b, i) => ({
       month: MONTHS[i],
       created: b.created,
       resolved: b.resolved,
+      open: openSnapshot[i],
       sla: b.reached ? Math.round((b.onTime / b.reached) * 1000) / 10 : 0,
     }));
   }, [rows]);
@@ -448,8 +466,7 @@ export function DeptHeadDashboard() {
       description: "Age of the longest-open complaint in scope.",
       icon: Clock, intent: "warning",
       getValue: () => fmtHrs(metrics.oldestHrs),
-      getDelta: () => "Awaiting closure",
-      getTrend: () => makeTrend(sparks.oldest, "down"),
+      // No delta / sparkline by design — just label + value.
     },
     {
       id: "dh-total", kind: "stat", label: "Total complaints",
@@ -808,7 +825,21 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
 
 // ---------- Row 3A — over time ---------------------------------------------
 
-function ComplaintsOverTimeChart({ data }: { data: { month: string; created: number; resolved: number; sla: number }[] }) {
+type OverTimeBar = "created" | "resolved" | "open";
+const BAR_META: { key: OverTimeBar; name: string; color: string }[] = [
+  { key: "created",  name: "Created",  color: "var(--color-chart-1)" },
+  { key: "resolved", name: "Resolved", color: "var(--color-chart-3)" },
+  { key: "open",     name: "Open",     color: "var(--color-chart-2)" },
+];
+
+function ComplaintsOverTimeChart({ data }: { data: { month: string; created: number; resolved: number; open: number; sla: number }[] }) {
+  // `active`: null = all three shown. Otherwise only that series is visible.
+  // The On-time % line is NOT toggleable — it's reference context.
+  const [active, setActive] = React.useState<OverTimeBar | null>(null);
+
+  const toggle = (k: OverTimeBar) => setActive((cur) => (cur === k ? null : k));
+  const isVisible = (k: OverTimeBar) => active === null || active === k;
+
   return (
     <div className="h-[260px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -818,9 +849,33 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
           <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
           <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} unit="%" />
           <Tooltip contentStyle={{ fontSize: 12, borderRadius: 4, border: "1px solid var(--border)" }} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Bar yAxisId="left" dataKey="created" fill="var(--color-chart-1)" name="Created" radius={[2, 2, 0, 0]} barSize={10} />
-          <Bar yAxisId="left" dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} barSize={10} />
+          <Legend
+            wrapperStyle={{ fontSize: 11 }}
+            onClick={((e: { dataKey?: unknown }) => {
+              const k = e?.dataKey;
+              if (k === "created" || k === "resolved" || k === "open") toggle(k);
+            }) as never}
+            formatter={((value: string, entry: { dataKey?: unknown }) => {
+              const k = entry?.dataKey;
+              if (k === "sla") return <span style={{ color: "var(--muted-foreground)" }}>{value}</span>;
+              const dim = active !== null && active !== k;
+              return <span style={{ opacity: dim ? 0.35 : 1, cursor: "pointer" }}>{value}</span>;
+            }) as never}
+          />
+          {BAR_META.map((b) => (
+            <Bar
+              key={b.key}
+              yAxisId="left"
+              dataKey={b.key}
+              fill={b.color}
+              name={b.name}
+              radius={[2, 2, 0, 0]}
+              barSize={10}
+              hide={!isVisible(b.key)}
+              onClick={() => toggle(b.key)}
+              style={{ cursor: "pointer" }}
+            />
+          ))}
           <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-4)" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2.5 }} name="On-time %" />
         </ComposedChart>
       </ResponsiveContainer>
