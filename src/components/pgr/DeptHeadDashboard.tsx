@@ -552,11 +552,17 @@ export function DeptHeadDashboard() {
       icon: BarChart3, title: "Flow ratio by department", colSpan: 2,
       render: () => <FlowRatioByDeptChart rows={flowRatioByDept} />,
     },
-  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept]);
+    {
+      id: "dh-ward-load-sla", kind: "panel", label: "Complaints by Wards",
+      description: "All complaints by SLA state — per-ward totals on a shared scale.",
+      icon: MapPin, title: "Complaints by Wards", colSpan: 2,
+      render: () => <WardLoadBySlaChart data={wardLoadBySla} />,
+    },
+  ], [metrics, sparks, wardRows, subtypeRows, rows, overTime, inflowBySubtype, recurring, channelRows, caseload, complaintsByType, flowRatioByDept, wardLoadBySla]);
 
   const defaultIds = useMemo(() => [
     "dh-ontime-rate", "dh-resolved", "dh-total", "dh-flow-ratio", "dh-oldest", "dh-csat",
-    "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-map",
+    "dh-ward-perf", "dh-subtype-perf", "dh-recurring", "dh-ward-load-sla", "dh-map",
     "dh-over-time",
     "dh-breach-scatter",
   ], []);
