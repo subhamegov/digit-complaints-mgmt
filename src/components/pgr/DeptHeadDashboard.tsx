@@ -800,7 +800,7 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
           <Legend wrapperStyle={{ fontSize: 11 }} />
           <Bar yAxisId="left" dataKey="created" fill="var(--color-chart-1)" name="Created" radius={[2, 2, 0, 0]} barSize={10} />
           <Bar yAxisId="left" dataKey="resolved" fill="var(--color-chart-3)" name="Resolved" radius={[2, 2, 0, 0]} barSize={10} />
-          <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-2)" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2.5 }} name="On-time %" />
+          <Line yAxisId="right" type="monotone" dataKey="sla" stroke="var(--color-chart-4)" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2.5 }} name="On-time %" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
