@@ -1094,6 +1094,94 @@ function FlowRatioByDeptChart({ rows }: { rows: { department: string; created: n
   );
 }
 
+type WardLoadData = {
+  rows: { id: string; name: string; resolved: number; onTrack: number; nearing: number; breached: number; total: number }[];
+  mean: number;
+  upper: number;
+  ticks: number[];
+};
+
+function WardLoadBySlaChart({ data }: { data: WardLoadData }) {
+  const { rows, mean, upper, ticks } = data;
+  if (!rows.length) return <Empty />;
+  const pctW = (v: number) => `${(v / upper) * 100}%`;
+  const segs = [
+    { key: "resolved", label: "Resolved", color: "var(--color-chart-3)", recede: true },
+    { key: "onTrack", label: "On track", color: "var(--color-chart-1)", recede: true },
+    { key: "nearing", label: "Nearing breach", color: "var(--color-chart-2)", recede: false },
+    { key: "breached", label: "Breached", color: "var(--color-chart-4)", recede: false },
+  ] as const;
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="text-[11px] text-muted-foreground -mt-1">All complaints by SLA state — per ward</div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+        {segs.map((s) => (
+          <span key={s.key} className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: s.color, opacity: s.recede ? 0.55 : 1 }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+      <div className="flex">
+        <div className="w-[140px] shrink-0">
+          <div className="flex flex-col gap-3 py-1">
+            {rows.map((r) => (
+              <div key={r.id} className="h-6 flex items-center text-[12px] text-foreground truncate pr-2" title={r.name}>
+                {r.name}
+              </div>
+            ))}
+          </div>
+          <div className="h-5" />
+        </div>
+        <div className="flex-1 relative min-w-0">
+          <div className="absolute inset-0 bottom-5 pointer-events-none">
+            {ticks.map((t) => (
+              <div key={t} className="absolute top-0 bottom-0 border-l border-border/60" style={{ left: pctW(t) }} />
+            ))}
+            {mean > 0 && (
+              <div className="absolute top-0 bottom-0" style={{ left: pctW(mean) }}>
+                <div className="h-full border-l border-dashed border-foreground/50" />
+                <div className="absolute -top-0.5 left-1 text-[10px] text-muted-foreground bg-surface px-1 rounded-sm whitespace-nowrap">
+                  ward avg
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="relative flex flex-col gap-3 py-1">
+            {rows.map((r) => {
+              const tip = `Resolved: ${r.resolved} · On track: ${r.onTrack} · Nearing breach: ${r.nearing} · Breached: ${r.breached}`;
+              return (
+                <div key={r.id} className="h-6 relative" title={tip}>
+                  <div className="absolute inset-y-0 left-0 flex overflow-hidden rounded-sm" style={{ width: pctW(r.total) }}>
+                    {segs.map((s) => {
+                      const v = (r as unknown as Record<string, number>)[s.key];
+                      if (!v) return null;
+                      return (
+                        <div key={s.key} style={{ width: `${(v / r.total) * 100}%`, background: s.color, opacity: s.recede ? 0.55 : 1 }} />
+                      );
+                    })}
+                  </div>
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 text-[11px] font-semibold tabular-nums text-foreground"
+                    style={{ left: `calc(${pctW(r.total)} + 6px)` }}
+                  >
+                    {r.total}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="relative h-5 mt-1">
+            {ticks.map((t) => (
+              <div key={t} className="absolute top-0 text-[10px] text-muted-foreground -translate-x-1/2" style={{ left: pctW(t) }}>{t}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Avoid unused-import flags for icons reserved for future drill-down.
 void MapPin; void BarChart3; void LineChartIcon; void Users; void Activity; void Repeat;
 void TrendingUp; void Layers; void AlertTriangle; void ThumbsUp; void Clock;
