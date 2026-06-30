@@ -390,6 +390,29 @@ export function DeptHeadDashboard() {
     return { officers, avg, median, max: loads[0] ?? 0, count: officers.length };
   }, [rows]);
 
+  // --- Breach rate vs caseload, anchored on departments --------------------
+  const deptCaseload = useMemo(() => {
+    type D = { id: string; name: string; total: number; reached: number; breached: number };
+    const m = new Map<string, D>();
+    for (const c of rows) {
+      const id = c.department;
+      if (!id) continue;
+      const d = m.get(id) ?? { id, name: id, total: 0, reached: 0, breached: 0 };
+      d.total++;
+      if (isResolved(c)) {
+        d.reached++;
+        if (c.slaState === "BREACHED") d.breached++;
+      } else if (isOpen(c) && c.slaState === "BREACHED") {
+        d.reached++;
+        d.breached++;
+      }
+      m.set(id, d);
+    }
+    return Array.from(m.values())
+      .map((d) => ({ id: d.id, name: d.name, total: d.total, breachPct: pct(d.breached, d.reached) }))
+      .sort((a, b) => b.total - a.total);
+  }, [rows]);
+
   // --- Ward load by SLA (same shape as test-user "team load by SLA") --------
   const wardLoadBySla = useMemo(() => {
     type Row = { id: string; name: string; resolved: number; onTrack: number; nearing: number; breached: number; total: number };
