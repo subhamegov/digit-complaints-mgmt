@@ -536,15 +536,6 @@ export function DeptHeadDashboard() {
       render: () => <SubtypePerformanceTable rows={subtypeRows} />,
     },
     {
-      render: () => <SubtypePerformanceTable rows={subtypeRows} />,
-    },
-    {
-      id: "dh-by-type", kind: "panel", label: "Complaints by type",
-      description: "Complaint types, descending by complaints filed.",
-      icon: BarChart3, title: "Complaints by type", colSpan: 2, defaultRowSpan: 2,
-      render: () => <ComplaintsByTypeBars rows={complaintsByType} />,
-    },
-    {
       id: "dh-map", kind: "panel", label: "Complaints map",
       description: "Geographic view of complaints across wards in scope.",
       icon: MapPin, title: "Complaints map", colSpan: 3, defaultRowSpan: 2, padded: false,
