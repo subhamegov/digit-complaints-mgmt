@@ -532,7 +532,10 @@ export function DeptHeadDashboard() {
     {
       id: "dh-subtype-perf", kind: "panel", label: "Sub-type performance",
       description: "Per sub-type avg resolution vs SLA, reopen %, on-time %, CSAT.",
-      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 2, defaultRowSpan: 1,
+      icon: BarChart3, title: "Complaint sub-type performance", colSpan: 1, defaultRowSpan: 1,
+      render: () => <SubtypePerformanceTable rows={subtypeRows} />,
+    },
+    {
       render: () => <SubtypePerformanceTable rows={subtypeRows} />,
     },
     {
