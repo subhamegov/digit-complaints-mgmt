@@ -523,7 +523,7 @@ export function DashboardPage() {
     })
       .filter((r) => r.n > 0)
       .sort((a, b) => b.avgHrs - a.avgHrs)
-      .slice(0, 5);
+      .slice(0, 7);
     const max = Math.max(...rows.map((r) => r.avgHrs), 1);
     return { rows, max };
   }, [filteredComplaints]);
