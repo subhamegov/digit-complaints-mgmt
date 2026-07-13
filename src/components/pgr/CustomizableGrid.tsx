@@ -61,6 +61,8 @@ export function CustomizableGrid({
   useEffect(() => { setVisibleIds(defaultIds); }, [defaultIds]);
 
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [hoveredKpiId, setHoveredKpiId] = useState<string | null>(null);
+
   const [dragId, setDragId] = useState<string | null>(null);
   const removeKpi = (id: string) => setVisibleIds((p) => p.filter((x) => x !== id));
   const addKpi = (id: string) => {
@@ -226,7 +228,7 @@ export function CustomizableGrid({
 
   const toolbar = (
     <>
-      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+      <Popover open={pickerOpen} onOpenChange={(o) => { setPickerOpen(o); if (!o) setHoveredKpiId(null); }}>
         <PopoverTrigger asChild>
           <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
             <Plus className="h-3.5 w-3.5" /> {pickerLabel}
@@ -234,23 +236,34 @@ export function CustomizableGrid({
         </PopoverTrigger>
         <PopoverContent align="end" className="w-80 p-1">
           <div className="px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">Available KPIs</div>
-          <ul className="max-h-96 overflow-auto">
+          <ul
+            className="max-h-96 overflow-auto"
+            onMouseLeave={() => setHoveredKpiId(null)}
+          >
             {availableToAdd.map((k) => {
               const Icon = k.icon;
+              const isHovered = hoveredKpiId === k.id;
               return (
                 <li key={k.id}>
-                  <HoverCard openDelay={120} closeDelay={60}>
+                  <HoverCard open={isHovered} openDelay={0} closeDelay={0}>
                     <HoverCardTrigger asChild>
-                      <button onClick={() => addKpi(k.id)} className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted">
+                      <button
+                        onClick={() => addKpi(k.id)}
+                        onPointerEnter={() => setHoveredKpiId(k.id)}
+                        onFocus={() => setHoveredKpiId(k.id)}
+                        className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] hover:bg-muted"
+                      >
                         <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="flex-1 truncate">{k.label}</span>
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.kind === "stat" ? "Stat" : "Chart"}</span>
                         <Plus className="h-3 w-3 text-muted-foreground" />
                       </button>
                     </HoverCardTrigger>
-                    <HoverCardContent side="left" align="start" className="w-72 p-3">
-                      <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
-                    </HoverCardContent>
+                    {isHovered && (
+                      <HoverCardContent side="left" align="start" className="w-72 p-3">
+                        <p className="text-[12px] leading-snug text-muted-foreground">{k.description}</p>
+                      </HoverCardContent>
+                    )}
                   </HoverCard>
                 </li>
               );
@@ -260,6 +273,7 @@ export function CustomizableGrid({
             )}
           </ul>
         </PopoverContent>
+
       </Popover>
       {toolbarRight}
     </>
