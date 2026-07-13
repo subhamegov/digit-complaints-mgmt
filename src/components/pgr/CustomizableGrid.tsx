@@ -61,6 +61,8 @@ export function CustomizableGrid({
   useEffect(() => { setVisibleIds(defaultIds); }, [defaultIds]);
 
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [hoveredKpiId, setHoveredKpiId] = useState<string | null>(null);
+
   const [dragId, setDragId] = useState<string | null>(null);
   const removeKpi = (id: string) => setVisibleIds((p) => p.filter((x) => x !== id));
   const addKpi = (id: string) => {
