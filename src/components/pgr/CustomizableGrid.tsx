@@ -228,7 +228,7 @@ export function CustomizableGrid({
 
   const toolbar = (
     <>
-      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+      <Popover open={pickerOpen} onOpenChange={(o) => { setPickerOpen(o); if (!o) setHoveredKpiId(null); }}>
         <PopoverTrigger asChild>
           <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-dashed border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:border-primary hover:text-primary">
             <Plus className="h-3.5 w-3.5" /> {pickerLabel}
