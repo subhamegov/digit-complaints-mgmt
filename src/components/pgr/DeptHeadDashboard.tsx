@@ -653,6 +653,7 @@ export function DeptHeadDashboard() {
           toolbarRight={toolbarRight}
         />
       )}
+      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>
   );
 }
