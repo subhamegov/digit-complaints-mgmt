@@ -143,7 +143,6 @@ function S3ExportForm({ onCancel }: { onCancel: () => void }) {
 
 function ExcelExportForm({ onCancel }: { onCancel: () => void }) {
   const [sheets, setSheets] = useState({ list: true, log: true });
-  const [columns, setColumns] = useState(COLUMN_SETS[0]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
@@ -163,13 +162,6 @@ function ExcelExportForm({ onCancel }: { onCancel: () => void }) {
             Complaints log <span className="text-muted-foreground text-[11px]">(event grain)</span>
           </label>
         </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <FieldLabel>Columns</FieldLabel>
-        <select className={inputCls} value={columns} onChange={(e) => setColumns(e.target.value)}>
-          {COLUMN_SETS.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
       </div>
 
       <div className="space-y-1.5">
