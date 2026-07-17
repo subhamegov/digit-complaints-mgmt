@@ -63,6 +63,11 @@ function S3ExportForm({ onCancel }: { onCancel: () => void }) {
   const [region, setRegion] = useState("ap-south-1");
   const [selectEvents, setSelectEvents] = useState("all");
   const [frequency, setFrequency] = useState("15m");
+  const [authMethod, setAuthMethod] = useState<"iam" | "keys">("iam");
+  const [roleArn, setRoleArn] = useState("");
+  const [externalId, setExternalId] = useState("dgt-8f2a-pg-export");
+  const [accessKeyId, setAccessKeyId] = useState("");
+  const [secretAccessKey, setSecretAccessKey] = useState("");
 
   const today = new Date().toISOString().slice(0, 10);
   const sampleEpoch = 1721203200;
