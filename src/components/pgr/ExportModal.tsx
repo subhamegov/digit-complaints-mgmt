@@ -10,8 +10,6 @@ const REGIONS = [
   "ap-south-1", "ap-southeast-1", "us-east-1", "us-west-2", "eu-west-1", "eu-central-1",
 ];
 
-const COLUMN_SETS = ["All columns", "Default columns", "Minimal (ID, Status, SLA)"];
-
 type Destination = {
   id: string;
   name: string;
