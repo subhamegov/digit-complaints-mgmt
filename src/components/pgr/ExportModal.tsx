@@ -75,6 +75,85 @@ function S3ExportForm({ onCancel }: { onCancel: () => void }) {
 
   return (
     <div className="space-y-4">
+      <SectionHeading>Authentication</SectionHeading>
+
+      <div className="flex rounded-sm border border-border p-0.5">
+        <button
+          type="button"
+          onClick={() => setAuthMethod("iam")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium transition-colors",
+            authMethod === "iam"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+          )}
+        >
+          <Shield className="h-3.5 w-3.5" /> IAM role
+        </button>
+        <button
+          type="button"
+          onClick={() => setAuthMethod("keys")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-1.5 py-1.5 text-[12px] font-medium transition-colors",
+            authMethod === "keys"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+          )}
+        >
+          <Key className="h-3.5 w-3.5" /> Access keys
+        </button>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">
+        {authMethod === "iam"
+          ? "Recommended. No long-lived secrets stored — the export service assumes a role in your account."
+          : "Fallback. Only if role assumption is not available in your environment."}
+      </p>
+
+      {authMethod === "iam" ? (
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <FieldLabel required tooltip>Role ARN</FieldLabel>
+            <input
+              className={cn(inputCls, "font-mono")}
+              value={roleArn}
+              onChange={(e) => setRoleArn(e.target.value)}
+              placeholder="arn:aws:iam::123456789012:role/digit-export"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel required tooltip>External ID</FieldLabel>
+            <input
+              className={cn(inputCls, "font-mono")}
+              value={externalId}
+              readOnly
+            />
+            <p className="text-[11px] text-muted-foreground">Generated for you. Paste into your role's trust policy condition.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <FieldLabel required tooltip>Access Key ID</FieldLabel>
+            <input
+              className={cn(inputCls, "font-mono")}
+              value={accessKeyId}
+              onChange={(e) => setAccessKeyId(e.target.value)}
+              placeholder="AKIA…"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <FieldLabel required tooltip>Secret Access Key</FieldLabel>
+            <input
+              type="password"
+              className={cn(inputCls, "font-mono")}
+              value={secretAccessKey}
+              onChange={(e) => setSecretAccessKey(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
       <SectionHeading>Connection details</SectionHeading>
 
       <div className="space-y-1.5">
