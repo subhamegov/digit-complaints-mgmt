@@ -3,7 +3,7 @@
  * Left rail: destinations (config-driven). Right pane: registry of forms.
  */
 import { useMemo, useState, type ReactNode } from "react";
-import { X, Info, Cloud, FileSpreadsheet } from "lucide-react";
+import { X, Info, Cloud, FileSpreadsheet, Shield, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const REGIONS = [
