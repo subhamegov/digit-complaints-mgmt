@@ -298,7 +298,7 @@ export function ExportModal({ open, onClose }: { open: boolean; onClose: () => v
           </button>
         </div>
         <div className="flex flex-1 overflow-hidden">
-          <aside className="flex w-2/5 flex-col border-r border-border bg-muted/30 p-2">
+          <aside className="flex w-[30%] flex-col border-r border-border bg-muted/30 p-2">
             {DESTINATIONS.map((d) => {
               const Icon = d.icon;
               const active = d.id === selectedId;
