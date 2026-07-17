@@ -62,6 +62,7 @@ function monthlySeries<T>(rows: T[], get: (r: T) => string, value: (bucket: T[])
 
 export function DeptHeadDashboard() {
   const { scope, presetIndex, setPreset } = useUserScope();
+  const [exportOpen, setExportOpen] = useState(false);
 
   // SINGLE source of truth: every aggregation below derives from `rows`.
   const rows = useMemo(
