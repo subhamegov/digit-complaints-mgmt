@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { StatCard, Panel, type StatTrend } from "@/components/pgr/primitives";
 import { CustomizableGrid, type GridKpiDef } from "@/components/pgr/CustomizableGrid";
+import { ExportModal } from "@/components/pgr/ExportModal";
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { complaintTypeOf, officerOf, type Complaint } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, type TestComplaint } from "@/lib/test-user-seed";
@@ -61,6 +62,7 @@ function monthlySeries<T>(rows: T[], get: (r: T) => string, value: (bucket: T[])
 
 export function DeptHeadDashboard() {
   const { scope, presetIndex, setPreset } = useUserScope();
+  const [exportOpen, setExportOpen] = useState(false);
 
   // SINGLE source of truth: every aggregation below derives from `rows`.
   const rows = useMemo(
@@ -622,7 +624,7 @@ export function DeptHeadDashboard() {
           <option key={i} value={i}>{s.label}</option>
         ))}
       </select>
-      <button className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:bg-muted">
+      <button onClick={() => setExportOpen(true)} className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-surface px-2.5 text-[12px] font-medium text-foreground hover:bg-muted">
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
         Export
       </button>
@@ -651,6 +653,7 @@ export function DeptHeadDashboard() {
           toolbarRight={toolbarRight}
         />
       )}
+      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>
   );
 }
