@@ -18,6 +18,7 @@ import {
 } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
 import { DeptHeadDashboard } from "@/components/pgr/DeptHeadDashboard";
+import { ExportModal } from "@/components/pgr/ExportModal";
 
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar,
@@ -1635,6 +1636,7 @@ export function DashboardPage() {
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Role is hydrated from storage AFTER first render, so re-sync the visible
   // widget set whenever the role-specific defaults change.
@@ -1815,7 +1817,8 @@ export function DashboardPage() {
               </PopoverContent>
             </Popover>
           )}
-          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />} onClick={() => setExportOpen(true)}>{t("COMMON_EXPORT")}</ActionButton>
+          <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
           <Link to="/complaints/new">
             <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
               {t("ACTION_REGISTER")}
