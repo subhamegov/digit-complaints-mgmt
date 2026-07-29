@@ -1636,6 +1636,7 @@ export function DashboardPage() {
   const [visibleIds, setVisibleIds] = useState<string[]>(defaultIds);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Role is hydrated from storage AFTER first render, so re-sync the visible
   // widget set whenever the role-specific defaults change.
