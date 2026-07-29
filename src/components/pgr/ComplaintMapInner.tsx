@@ -391,7 +391,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
       </div>
 
       {/* Map */}
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-sm border border-border">
+      <div className="relative isolate z-0 min-h-0 flex-1 overflow-hidden rounded-sm border border-border">
         <MapContainer
           center={BANGALORE_CENTER}
           zoom={11}
