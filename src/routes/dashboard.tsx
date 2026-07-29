@@ -1817,7 +1817,8 @@ export function DashboardPage() {
               </PopoverContent>
             </Popover>
           )}
-          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />}>{t("COMMON_EXPORT")}</ActionButton>
+          <ActionButton variant="secondary" icon={<Download className="h-3.5 w-3.5" />} onClick={() => setExportOpen(true)}>{t("COMMON_EXPORT")}</ActionButton>
+          <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
           <Link to="/complaints/new">
             <ActionButton permission="PGR_COMPLAINT_CREATE" variant="primary" icon={<Plus className="h-3.5 w-3.5" />}>
               {t("ACTION_REGISTER")}
