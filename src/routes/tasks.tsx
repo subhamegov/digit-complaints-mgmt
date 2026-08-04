@@ -144,13 +144,13 @@ function OrgTab() {
   const [service, setService] = useState("ALL");
   const [locality, setLocality] = useState("ALL");
   const [sla, setSla] = useState("ALL");
-  const [range, setRange] = useState("30");
+  const [range, setRange] = useState("ALL");
 
   const allowed = PERSONA_FILTER_FIELDS[role] ?? [];
   const scoped = useMemo(() => (profile ? orgScoped(profile, jurisdiction.code) : []), [profile, jurisdiction.code]);
 
   const rows = useMemo(() => {
-    const cutoff = Date.now() - Number(range) * 86_400_000;
+    const cutoff = range === "ALL" ? 0 : Date.now() - Number(range) * 86_400_000;
     return scoped.filter((c) => {
       if (!matchesOrgFilter(c, summary, role)) return false;
       if (unit !== "ALL" && c.department !== unit) return false;
@@ -234,6 +234,7 @@ function OrgTab() {
         )}
         {allowed.includes("date") && (
           <select className={sel} value={range} onChange={(e) => setRange(e.target.value)} aria-label="Date range">
+            <option value="ALL">Any date</option>
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
             <option value="90">Last 90 days</option>
