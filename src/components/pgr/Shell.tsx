@@ -52,6 +52,21 @@ const PRIMARY_NAV: NavItem[] = [
 
 const ADMIN_NAV: NavItem[] = [];
 
+/** Personas that use the simplified operational navigation. */
+const OPERATIONAL_ROLES: Role[] = ["LME", "GRO", "DEPT_HEAD"];
+
+/** Simplified nav for field/operational personas. Routes are existing destinations. */
+const OPERATIONAL_NAV: NavItem[] = [
+  { to: "/dashboard", labelCode: "Dashboard",         icon: Home },
+  { to: "/tasks",     labelCode: "My Complaints",     icon: Inbox },
+  { to: "/inbox",     labelCode: "Search Complaints", icon: Search },
+  { to: "/reports",   labelCode: "Reports",           icon: BarChart3 },
+];
+
+const OPERATIONAL_FOOTER_NAV: NavItem[] = [
+  { to: "/admin/help", labelCode: "Help", icon: HelpCircle },
+];
+
 function SidebarContextSwitchers() {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
