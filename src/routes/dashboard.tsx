@@ -9,7 +9,7 @@ import {
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { useRbac } from "@/lib/rbac";
+import { useRbac, type Role } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
@@ -17,7 +17,6 @@ import {
   type Complaint,
 } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
-import { DeptHeadDashboard } from "@/components/pgr/DeptHeadDashboard";
 import { ExportModal } from "@/components/pgr/ExportModal";
 
 import {
@@ -186,13 +185,18 @@ function sortValue(c: Complaint, key: RiskSortKey): string | number {
 }
 
 
+/**
+ * Personas that get the full (Test User) dashboard experience: same layout,
+ * KPIs, filters, export and customization. Add a role here to opt it in —
+ * there is intentionally no duplicated dashboard implementation.
+ */
+const FULL_DASHBOARD_ROLES: Role[] = ["TEST_USER", "LME", "GRO", "DEPT_HEAD"];
+
 export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
 
-  // Department Head gets a dedicated, RBAC-scoped dashboard.
-  if (role === "DEPT_HEAD") return <DeptHeadDashboard />;
+  const canCustomize = FULL_DASHBOARD_ROLES.includes(role);
 
-  const canCustomize = role === "TEST_USER";
 
   // Filter state (TEST_USER only)
   const [fromDate, setFromDate] = useState("");
@@ -2084,7 +2088,8 @@ function TestUserPrompt() {
     return window.localStorage.getItem(TEST_USER_PROMPT_KEY) === "1";
   });
 
-  if (role === "TEST_USER" || dismissed) return null;
+  // Roles that already have the full dashboard don't need the upsell.
+  if (FULL_DASHBOARD_ROLES.includes(role) || dismissed) return null;
 
   const onSwitch = () => {
     setRole("TEST_USER");
