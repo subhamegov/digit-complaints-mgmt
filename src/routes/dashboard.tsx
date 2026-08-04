@@ -17,7 +17,6 @@ import {
   type Complaint,
 } from "@/lib/mock-data";
 import { TEST_USER_COMPLAINTS, TEST_USER_WARDS, median, type TestComplaint } from "@/lib/test-user-seed";
-import { DeptHeadDashboard } from "@/components/pgr/DeptHeadDashboard";
 import { ExportModal } from "@/components/pgr/ExportModal";
 
 import {
