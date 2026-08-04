@@ -186,13 +186,18 @@ function sortValue(c: Complaint, key: RiskSortKey): string | number {
 }
 
 
+/**
+ * Personas that get the full (Test User) dashboard experience: same layout,
+ * KPIs, filters, export and customization. Add a role here to opt it in —
+ * there is intentionally no duplicated dashboard implementation.
+ */
+const FULL_DASHBOARD_ROLES: Role[] = ["TEST_USER", "LME", "GRO", "DEPT_HEAD"];
+
 export function DashboardPage() {
   const { jurisdiction, role } = useRbac();
 
-  // Department Head gets a dedicated, RBAC-scoped dashboard.
-  if (role === "DEPT_HEAD") return <DeptHeadDashboard />;
+  const canCustomize = FULL_DASHBOARD_ROLES.includes(role);
 
-  const canCustomize = role === "TEST_USER";
 
   // Filter state (TEST_USER only)
   const [fromDate, setFromDate] = useState("");
