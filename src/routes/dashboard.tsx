@@ -2089,7 +2089,8 @@ function TestUserPrompt() {
     return window.localStorage.getItem(TEST_USER_PROMPT_KEY) === "1";
   });
 
-  if (role === "TEST_USER" || dismissed) return null;
+  // Roles that already have the full dashboard don't need the upsell.
+  if (FULL_DASHBOARD_ROLES.includes(role) || dismissed) return null;
 
   const onSwitch = () => {
     setRole("TEST_USER");
