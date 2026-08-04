@@ -215,7 +215,7 @@ const ROLE_TITLE: Record<string, string> = {
 
 export function escalationOf(c: Complaint, role: Role): EscalationInfo | null {
   const overdueBy = -c.slaRemainingHrs;
-  const formallyEscalated = c.slaState === "BREACHED" && overdueBy >= 24;
+  const formallyEscalated = !isCompleted(c) && c.slaState === "BREACHED" && overdueBy >= 24;
   if (!formallyEscalated) return null;
   const level = overdueBy >= 48 ? "Level 3" : "Level 2";
   const officer = officerOf(c.assignedOfficerId);
