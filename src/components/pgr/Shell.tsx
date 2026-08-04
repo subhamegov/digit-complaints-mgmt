@@ -9,7 +9,6 @@ import {
   ScrollText,
   Search,
   Bell,
-  ChevronDown,
   Building2,
   MapPin,
   LogOut,
