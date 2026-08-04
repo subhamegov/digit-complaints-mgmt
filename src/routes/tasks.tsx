@@ -41,6 +41,14 @@ function MyComplaintsWorkspace() {
   const { role, tenant, jurisdiction } = useRbac();
   const profile = useMemo(() => orgProfileFor(role, tenant.name), [role, tenant.name]);
   const [tab, setTab] = useState<"mine" | "org">(PERSONA_DEFAULT_TAB[role] ?? "mine");
+  // Persona default tab; re-applied when the working-context role resolves/changes.
+  const lastRole = useRef(role);
+  useEffect(() => {
+    if (lastRole.current !== role) {
+      lastRole.current = role;
+      setTab(PERSONA_DEFAULT_TAB[role] ?? "mine");
+    }
+  }, [role]);
   const [drawer, setDrawer] = useState(false);
 
   const mineGroups = useMemo(
