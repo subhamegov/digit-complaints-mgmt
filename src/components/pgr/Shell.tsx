@@ -9,7 +9,6 @@ import {
   ScrollText,
   Search,
   Bell,
-  ChevronDown,
   Building2,
   MapPin,
   LogOut,
@@ -27,6 +26,8 @@ import {
 import { useRbac, ROLE_LABEL, type Role, type Permission, TENANTS, JURISDICTIONS } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { ContextCombobox } from "@/components/pgr/ContextCombobox";
+
 
 interface NavItem {
   to: string;
@@ -75,50 +76,31 @@ function SidebarContextSwitchers() {
       <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
         Working context
       </div>
-      <SidebarField icon={Building2} label={t("COMMON_TENANT")}>
-        <select
-          value={tenant.code}
-          onChange={(e) => setTenant(TENANTS.find((tn) => tn.code === e.target.value)!)}
-          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
-        >
-          {TENANTS.map((tn) => <option key={tn.code} value={tn.code}>{tn.name}</option>)}
-        </select>
-      </SidebarField>
-      <SidebarField icon={MapPin} label={t("COMMON_JURISDICTION")}>
-        <select
-          value={jurisdiction.code}
-          onChange={(e) => setJurisdiction(JURISDICTIONS.find((j) => j.code === e.target.value)!)}
-          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
-        >
-          {JURISDICTIONS.map((j) => <option key={j.code} value={j.code}>{j.name}</option>)}
-        </select>
-      </SidebarField>
-      <SidebarField icon={ShieldCheck} label={t("COMMON_ROLE")}>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
-          className="w-full appearance-none bg-transparent text-[12px] text-chrome-foreground outline-none [&>option]:bg-chrome [&>option]:text-chrome-foreground"
-          aria-label="Role switcher (demo)"
-        >
-          {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
-            <option key={r} value={r}>{ROLE_LABEL[r]}</option>
-          ))}
-        </select>
-      </SidebarField>
+      <ContextCombobox
+        icon={Building2}
+        label={t("COMMON_TENANT")}
+        value={tenant.code}
+        options={TENANTS.map((tn) => ({ value: tn.code, label: tn.name, hint: tn.code }))}
+        onChange={(v) => setTenant(TENANTS.find((tn) => tn.code === v)!)}
+      />
+      <ContextCombobox
+        icon={MapPin}
+        label={t("COMMON_JURISDICTION")}
+        value={jurisdiction.code}
+        options={JURISDICTIONS.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
+        onChange={(v) => setJurisdiction(JURISDICTIONS.find((j) => j.code === v)!)}
+      />
+      <ContextCombobox
+        icon={ShieldCheck}
+        label={t("COMMON_ROLE")}
+        value={role}
+        options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
+        onChange={(v) => setRole(v as Role)}
+      />
     </div>
   );
 }
 
-function SidebarField({ icon: Icon, label, children }: { icon: React.ComponentType<{ className?: string }>; label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex items-center gap-2 rounded-sm border border-white/10 bg-white/[0.03] px-2 py-1.5">
-      <Icon className="h-3.5 w-3.5 shrink-0 text-chrome-muted" />
-      <span className="sr-only">{label}</span>
-      <div className="flex-1 min-w-0">{children}</div>
-      <ChevronDown className="h-3 w-3 shrink-0 text-chrome-muted" />
-    </label>
-  );
-}
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { hasAnyPermission, userName, role } = useRbac();
