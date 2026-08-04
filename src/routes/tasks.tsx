@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Network } from "lucide-react";
 import { PageHeader, Panel, StatusBadge, SlaBadge, PriorityPill, EmptyState } from "@/components/pgr/primitives";
 import { ComplaintList } from "@/components/pgr/ComplaintList";
