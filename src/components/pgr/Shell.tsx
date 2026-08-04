@@ -27,6 +27,8 @@ import {
 import { useRbac, ROLE_LABEL, type Role, type Permission, TENANTS, JURISDICTIONS } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { ContextCombobox } from "@/components/pgr/ContextCombobox";
+
 
 interface NavItem {
   to: string;
