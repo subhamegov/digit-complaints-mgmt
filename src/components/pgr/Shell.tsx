@@ -21,6 +21,7 @@ import {
   FormInput,
   Plug,
   BookOpen,
+  HelpCircle,
   Plus,
 } from "lucide-react";
 import { useRbac, ROLE_LABEL, type Role, type Permission, TENANTS, JURISDICTIONS } from "@/lib/rbac";
@@ -51,6 +52,21 @@ const PRIMARY_NAV: NavItem[] = [
 ];
 
 const ADMIN_NAV: NavItem[] = [];
+
+/** Personas that use the simplified operational navigation. */
+const OPERATIONAL_ROLES: Role[] = ["LME", "GRO", "DEPT_HEAD"];
+
+/** Simplified nav for field/operational personas. Routes are existing destinations. */
+const OPERATIONAL_NAV: NavItem[] = [
+  { to: "/dashboard", labelCode: "Dashboard",         icon: Home },
+  { to: "/tasks",     labelCode: "My Complaints",     icon: Inbox },
+  { to: "/inbox",     labelCode: "Search Complaints", icon: Search },
+  { to: "/reports",   labelCode: "Reports",           icon: BarChart3 },
+];
+
+const OPERATIONAL_FOOTER_NAV: NavItem[] = [
+  { to: "/admin/help", labelCode: "Help", icon: HelpCircle },
+];
 
 function SidebarContextSwitchers() {
   const { role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
@@ -132,8 +148,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         );
       });
 
-  const primary = renderItems(PRIMARY_NAV);
+  const isOperational = OPERATIONAL_ROLES.includes(role);
+  const primary = renderItems(isOperational ? OPERATIONAL_NAV : PRIMARY_NAV);
   const admin = renderItems(ADMIN_NAV);
+  const footerNav = isOperational ? renderItems(OPERATIONAL_FOOTER_NAV) : null;
 
   return (
     <>
@@ -152,6 +170,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="flex-1 overflow-y-auto px-2 py-3">
         <div className="space-y-0.5">{primary}</div>
       </nav>
+
+      {footerNav && (
+        <nav className="border-t border-white/10 px-2 py-2">
+          <div className="space-y-0.5">{footerNav}</div>
+        </nav>
+      )}
+
+
 
 
       <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
