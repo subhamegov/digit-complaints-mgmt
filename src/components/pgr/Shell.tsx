@@ -21,6 +21,7 @@ import {
   FormInput,
   Plug,
   BookOpen,
+  HelpCircle,
   Plus,
 } from "lucide-react";
 import { useRbac, ROLE_LABEL, type Role, type Permission, TENANTS, JURISDICTIONS } from "@/lib/rbac";
