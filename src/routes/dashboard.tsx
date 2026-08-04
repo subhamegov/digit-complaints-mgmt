@@ -9,7 +9,7 @@ import {
 import { ComplaintMap } from "@/components/pgr/ComplaintMap";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { useRbac } from "@/lib/rbac";
+import { useRbac, type Role } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import {
