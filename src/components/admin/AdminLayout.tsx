@@ -32,7 +32,6 @@ import {
   MapPinned,
   Database,
   BookOpen,
-  Activity,
   BarChart3,
   ScrollText,
   HelpCircle,
