@@ -427,8 +427,3 @@ export const PERSONA_FILTER_FIELDS: Record<string, ("unit" | "assignee" | "statu
   DEPT_HEAD: ["unit", "assignee", "status", "service", "locality", "sla", "date"],
 };
 
-export const PERSONA_DEFAULT_TAB: Record<string, "mine" | "org"> = {
-  LME: "mine",
-  GRO: "mine",
-  DEPT_HEAD: "org",
-};
