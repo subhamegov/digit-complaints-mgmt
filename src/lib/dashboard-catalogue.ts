@@ -55,12 +55,13 @@ export const DASHBOARD_CATALOGUE: DashboardDefinition[] = [
       "Average resolution time",
     ],
     layout: [
-      { label: "Complaints assigned", kind: "stat", span: 3 },
-      { label: "Complaints resolved", kind: "stat", span: 3 },
+      { label: "Assigned complaints", kind: "stat", span: 3 },
       { label: "Due today", kind: "stat", span: 3 },
       { label: "SLA breached", kind: "stat", span: 3 },
-      { label: "Average resolution time", kind: "chart", span: 6 },
-      { label: "My complaints queue", kind: "table", span: 6 },
+      { label: "Resolved", kind: "stat", span: 3 },
+      { label: "My workload by status", kind: "chart", span: 6 },
+      { label: "Complaints approaching SLA", kind: "table", span: 6 },
+      { label: "Recent complaint activity", kind: "table", span: 12 },
     ],
   },
   {
