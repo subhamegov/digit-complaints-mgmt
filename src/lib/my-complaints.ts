@@ -208,20 +208,36 @@ export function orgScoped(profile: OrgProfile, jurisdictionCode: string): Compla
   });
 }
 
-/** Complaints the signed-in user is personally responsible for. */
+/** Complaints where the signed-in user is the current owner. */
 export function personallyOwned(profile: OrgProfile, jurisdictionCode: string): Complaint[] {
   const scoped = orgScoped(profile, jurisdictionCode);
   if (profile.role === "LME") {
     const team = new Set(OFFICERS.filter((o) => o.department === profile.department).map((o) => o.id));
-    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId));
+    // Escalation transfers ownership upward, so escalated work leaves this inbox.
+    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId) && !escalatedAwayFrom(c, "LME"));
   }
   if (profile.role === "GRO") {
-    // Routing responsibility: unassigned intake, returned/reopened work and breaches.
-    return scoped.filter((c) => !c.assignedOfficerId || c.status === "REOPENED" || c.slaState !== "WITHIN");
+    // Routing ownership: intake awaiting routing and work returned for correction.
+    return scoped.filter((c) => !c.assignedOfficerId || c.status === "REOPENED");
   }
-  // Department Head: monitoring + approval responsibility.
-  return scoped.filter((c) => c.slaState !== "WITHIN" || c.status === "REOPENED" || isCompleted(c) === false && !c.assignedOfficerId);
+  // Department Head owns complaints escalated to them plus resolutions awaiting approval.
+  return scoped.filter((c) => isActivelyEscalated(c) || c.status === "RESOLVED");
 }
+
+/**
+ * Complaints requiring the user's intervention, regardless of who owns them.
+ * Field Employees stay inside their own assignments; supervisory personas see
+ * their whole authorised scope.
+ */
+export function attentionScope(profile: OrgProfile, jurisdictionCode: string): Complaint[] {
+  if (profile.role === "LME") {
+    const scoped = orgScoped(profile, jurisdictionCode);
+    const team = new Set(OFFICERS.filter((o) => o.department === profile.department).map((o) => o.id));
+    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId));
+  }
+  return orgScoped(profile, jurisdictionCode);
+}
+
 
 /* ------------------------------------------------------------------ */
 /* Escalation view model (derived from existing SLA + workflow state)   */
