@@ -65,7 +65,6 @@ import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templ
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
 import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
-import { Route as AdminDashboardsLiveRouteImport } from './routes/admin.dashboards.live'
 import { Route as AdminDashboardsDashboardIdRouteImport } from './routes/admin.dashboards.$dashboardId'
 
 const UsersRoute = UsersRouteImport.update({
@@ -354,11 +353,6 @@ const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
   path: '/templates/forms',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminDashboardsLiveRoute = AdminDashboardsLiveRouteImport.update({
-  id: '/live',
-  path: '/live',
-  getParentRoute: () => AdminDashboardsRoute,
-} as any)
 const AdminDashboardsDashboardIdRoute =
   AdminDashboardsDashboardIdRouteImport.update({
     id: '/$dashboardId',
@@ -414,7 +408,6 @@ export interface FileRoutesByFullPath {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
-  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -472,7 +465,6 @@ export interface FileRoutesByTo {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
-  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -533,7 +525,6 @@ export interface FileRoutesById {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
-  '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -595,7 +586,6 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
-    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -653,7 +643,6 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
-    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -713,7 +702,6 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
-    | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -1139,13 +1127,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTemplatesFormsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/dashboards/live': {
-      id: '/admin/dashboards/live'
-      path: '/live'
-      fullPath: '/admin/dashboards/live'
-      preLoaderRoute: typeof AdminDashboardsLiveRouteImport
-      parentRoute: typeof AdminDashboardsRoute
-    }
     '/admin/dashboards/$dashboardId': {
       id: '/admin/dashboards/$dashboardId'
       path: '/$dashboardId'
@@ -1158,13 +1139,11 @@ declare module '@tanstack/react-router' {
 
 interface AdminDashboardsRouteChildren {
   AdminDashboardsDashboardIdRoute: typeof AdminDashboardsDashboardIdRoute
-  AdminDashboardsLiveRoute: typeof AdminDashboardsLiveRoute
   AdminDashboardsIndexRoute: typeof AdminDashboardsIndexRoute
 }
 
 const AdminDashboardsRouteChildren: AdminDashboardsRouteChildren = {
   AdminDashboardsDashboardIdRoute: AdminDashboardsDashboardIdRoute,
-  AdminDashboardsLiveRoute: AdminDashboardsLiveRoute,
   AdminDashboardsIndexRoute: AdminDashboardsIndexRoute,
 }
 
@@ -1288,3 +1267,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
