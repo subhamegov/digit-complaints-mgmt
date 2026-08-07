@@ -83,13 +83,13 @@ export const DASHBOARD_CATALOGUE: DashboardDefinition[] = [
     ],
     layout: [
       { label: "Active complaints", kind: "stat", span: 3 },
-      { label: "Resolved within SLA", kind: "stat", span: 3 },
+      { label: "SLA compliance", kind: "stat", span: 3 },
       { label: "SLA breached", kind: "stat", span: 3 },
       { label: "Escalated complaints", kind: "stat", span: 3 },
-      { label: "Unassigned complaints", kind: "stat", span: 3 },
-      { label: "Average resolution time", kind: "stat", span: 3 },
+      { label: "Complaints by status", kind: "chart", span: 6 },
       { label: "Workload by resolver", kind: "chart", span: 6 },
-      { label: "Complaints requiring intervention", kind: "table", span: 12 },
+      { label: "SLA performance", kind: "chart", span: 5 },
+      { label: "Complaints requiring intervention", kind: "table", span: 7 },
     ],
   },
   {
