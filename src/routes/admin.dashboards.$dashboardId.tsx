@@ -96,7 +96,7 @@ function DashboardDetailPage() {
             </p>
           </div>
           <ul className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 lg:grid-cols-3">
-            {dashboard.kpis.map((k) => (
+            {dashboard.kpis.map((k: string) => (
               <li
                 key={k}
                 className="rounded-sm border border-border bg-background px-3 py-2 text-[12.5px] text-foreground"
