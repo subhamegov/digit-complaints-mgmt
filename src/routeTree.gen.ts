@@ -66,6 +66,7 @@ import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.template
 import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
 import { Route as AdminDashboardsLiveRouteImport } from './routes/admin.dashboards.live'
+import { Route as AdminDashboardsDashboardIdRouteImport } from './routes/admin.dashboards.$dashboardId'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
@@ -358,6 +359,12 @@ const AdminDashboardsLiveRoute = AdminDashboardsLiveRouteImport.update({
   path: '/live',
   getParentRoute: () => AdminDashboardsRoute,
 } as any)
+const AdminDashboardsDashboardIdRoute =
+  AdminDashboardsDashboardIdRouteImport.update({
+    id: '/$dashboardId',
+    path: '/$dashboardId',
+    getParentRoute: () => AdminDashboardsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -406,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
@@ -463,6 +471,7 @@ export interface FileRoutesByTo {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
+  '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
@@ -523,6 +532,7 @@ export interface FileRoutesById {
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/dashboards/live': typeof AdminDashboardsLiveRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/dashboards/$dashboardId'
     | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
@@ -641,6 +652,7 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox'
+    | '/admin/dashboards/$dashboardId'
     | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
@@ -700,6 +712,7 @@ export interface FileRouteTypes {
     | '/config/workflow'
     | '/inbox/$id'
     | '/inbox/'
+    | '/admin/dashboards/$dashboardId'
     | '/admin/dashboards/live'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
@@ -1133,15 +1146,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardsLiveRouteImport
       parentRoute: typeof AdminDashboardsRoute
     }
+    '/admin/dashboards/$dashboardId': {
+      id: '/admin/dashboards/$dashboardId'
+      path: '/$dashboardId'
+      fullPath: '/admin/dashboards/$dashboardId'
+      preLoaderRoute: typeof AdminDashboardsDashboardIdRouteImport
+      parentRoute: typeof AdminDashboardsRoute
+    }
   }
 }
 
 interface AdminDashboardsRouteChildren {
+  AdminDashboardsDashboardIdRoute: typeof AdminDashboardsDashboardIdRoute
   AdminDashboardsLiveRoute: typeof AdminDashboardsLiveRoute
   AdminDashboardsIndexRoute: typeof AdminDashboardsIndexRoute
 }
 
 const AdminDashboardsRouteChildren: AdminDashboardsRouteChildren = {
+  AdminDashboardsDashboardIdRoute: AdminDashboardsDashboardIdRoute,
   AdminDashboardsLiveRoute: AdminDashboardsLiveRoute,
   AdminDashboardsIndexRoute: AdminDashboardsIndexRoute,
 }
