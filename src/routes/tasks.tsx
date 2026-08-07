@@ -32,7 +32,15 @@ const WORKSPACE_ROLES: Role[] = ["LME", "GRO", "DEPT_HEAD"];
 type TabKey = "assigned" | "attention" | "org";
 
 function TasksPage() {
-  const { role } = useRbac();
+  const { role, hasPermission } = useRbac();
+  const navigate = useNavigate();
+  const allowed = hasPermission("PGR_TASKS_VIEW");
+  // Administrative personas (e.g. Account Administrator) have no personal
+  // complaint inbox — send them back to their Home page.
+  useEffect(() => {
+    if (!allowed) navigate({ to: "/admin/home", replace: true });
+  }, [allowed, navigate]);
+  if (!allowed) return null;
   return WORKSPACE_ROLES.includes(role) ? <ComplaintsWorkspace /> : <LegacyTasks />;
 }
 
