@@ -27,7 +27,11 @@ function RelTime({ iso }: { iso: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const absolute = new Date(iso).toISOString().slice(0, 10);
-  return <span title={absolute}>{mounted ? relTime(iso) : absolute}</span>;
+  return (
+    <span suppressHydrationWarning title={mounted ? absolute : undefined}>
+      {mounted ? relTime(iso) : ""}
+    </span>
+  );
 }
 
 function SlaCell({ c }: { c: Complaint }) {
