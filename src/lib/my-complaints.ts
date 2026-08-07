@@ -16,37 +16,66 @@ import {
 import type { Role } from "./rbac";
 
 export type GroupKey =
-  | "actionable"
-  | "escalated"
-  | "overdue"
-  | "due_soon"
+  // Assigned to me
+  | "action_required"
   | "in_progress"
   | "waiting"
-  | "completed";
-
-export const GROUP_ORDER: GroupKey[] = [
-  "actionable", "escalated", "overdue", "due_soon", "in_progress", "waiting", "completed",
-];
+  | "completed"
+  // Needs my attention
+  | "escalated_to_me"
+  | "awaiting_review"
+  | "sla_breached"
+  | "at_risk_today"
+  | "unassigned_stalled"
+  | "due_today"
+  | "returned"
+  | "citizen_response";
 
 export const GROUP_LABEL: Record<GroupKey, string> = {
-  actionable: "Actionable today",
-  escalated: "Escalated",
-  overdue: "Overdue",
-  due_soon: "Due soon",
+  action_required: "Action required",
   in_progress: "In progress",
   waiting: "Waiting on others",
   completed: "Completed",
+  escalated_to_me: "Escalated to me",
+  awaiting_review: "Awaiting my review",
+  sla_breached: "SLA breached",
+  at_risk_today: "At risk today",
+  unassigned_stalled: "Unassigned or stalled",
+  due_today: "Due today",
+  returned: "Returned for action",
+  citizen_response: "Citizen response received",
+};
+
+/** Section order for the "Assigned to me" tab. */
+export const ASSIGNED_ORDER: GroupKey[] = ["action_required", "in_progress", "waiting", "completed"];
+
+/** Section order for "Needs my attention", per persona. */
+export const ATTENTION_ORDER: Record<string, GroupKey[]> = {
+  LME: ["action_required", "due_today", "returned", "citizen_response", "at_risk_today"],
+  GRO: ["escalated_to_me", "awaiting_review", "sla_breached", "at_risk_today", "unassigned_stalled"],
+  DEPT_HEAD: ["escalated_to_me", "awaiting_review", "sla_breached", "at_risk_today", "unassigned_stalled"],
 };
 
 /** Groups expanded on first render. Completed stays collapsed. */
-export const DEFAULT_EXPANDED: GroupKey[] = ["actionable", "escalated"];
+export const DEFAULT_EXPANDED: GroupKey[] = [
+  "action_required", "escalated_to_me", "awaiting_review", "due_today",
+  "returned", "citizen_response", "sla_breached", "at_risk_today", "unassigned_stalled", "in_progress",
+];
+
+/** Landing tab per persona. */
+export const PERSONA_DEFAULT_TAB: Record<string, "assigned" | "attention" | "org"> = {
+  LME: "assigned",
+  GRO: "attention",
+  DEPT_HEAD: "attention",
+};
 
 export const EMPTY_COPY = {
-  mine: "No complaints currently require your attention.",
-  escalated: "No complaints have been escalated to you.",
+  assigned: "No complaints are currently assigned to you.",
+  attention: "Nothing currently requires your intervention.",
   org: "No complaints were found for your organisation in the selected working context.",
   noOrg: "Your organisational structure has not been configured. Contact your administrator.",
 };
+
 
 /* ------------------------------------------------------------------ */
 /* Organisation model (read-only reference, sourced from role config)  */
