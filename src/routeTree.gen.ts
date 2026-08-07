@@ -56,6 +56,7 @@ import { Route as AdminAuthenticationRouteImport } from './routes/admin.authenti
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
 import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
+import { Route as AdminDataDictionaryIndexRouteImport } from './routes/admin.data-dictionary.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
 import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
 import { Route as AdminWorkflowConfigSlaMapsRouteImport } from './routes/admin.workflow-config.sla-maps'
@@ -65,6 +66,7 @@ import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templ
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
 import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
+import { Route as AdminDataDictionaryKpiIdRouteImport } from './routes/admin.data-dictionary.$kpiId'
 import { Route as AdminDashboardsDashboardIdRouteImport } from './routes/admin.dashboards.$dashboardId'
 
 const UsersRoute = UsersRouteImport.update({
@@ -305,6 +307,12 @@ const AdminWorkflowConfigIndexRoute =
     path: '/',
     getParentRoute: () => AdminWorkflowConfigRoute,
   } as any)
+const AdminDataDictionaryIndexRoute =
+  AdminDataDictionaryIndexRouteImport.update({
+    id: '/data-dictionary/',
+    path: '/data-dictionary/',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -353,6 +361,12 @@ const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
   path: '/templates/forms',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDataDictionaryKpiIdRoute =
+  AdminDataDictionaryKpiIdRouteImport.update({
+    id: '/data-dictionary/$kpiId',
+    path: '/data-dictionary/$kpiId',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDashboardsDashboardIdRoute =
   AdminDashboardsDashboardIdRouteImport.update({
     id: '/$dashboardId',
@@ -408,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
+  '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -417,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
   '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesByTo {
@@ -465,6 +481,7 @@ export interface FileRoutesByTo {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
+  '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -474,6 +491,7 @@ export interface FileRoutesByTo {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
+  '/admin/data-dictionary': typeof AdminDataDictionaryIndexRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesById {
@@ -525,6 +543,7 @@ export interface FileRoutesById {
   '/inbox/$id': typeof InboxIdRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
+  '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -534,6 +553,7 @@ export interface FileRoutesById {
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
+  '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
   '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRouteTypes {
@@ -586,6 +606,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
+    | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -595,6 +616,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/data-dictionary/'
     | '/admin/workflow-config/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -643,6 +665,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
+    | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -652,6 +675,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards'
+    | '/admin/data-dictionary'
     | '/admin/workflow-config'
   id:
     | '__root__'
@@ -702,6 +726,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
+    | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -711,6 +736,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
+    | '/admin/data-dictionary/'
     | '/admin/workflow-config/'
   fileRoutesById: FileRoutesById
 }
@@ -1064,6 +1090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWorkflowConfigIndexRouteImport
       parentRoute: typeof AdminWorkflowConfigRoute
     }
+    '/admin/data-dictionary/': {
+      id: '/admin/data-dictionary/'
+      path: '/data-dictionary'
+      fullPath: '/admin/data-dictionary/'
+      preLoaderRoute: typeof AdminDataDictionaryIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/dashboards/': {
       id: '/admin/dashboards/'
       path: '/'
@@ -1125,6 +1158,13 @@ declare module '@tanstack/react-router' {
       path: '/templates/forms'
       fullPath: '/admin/templates/forms'
       preLoaderRoute: typeof AdminTemplatesFormsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/data-dictionary/$kpiId': {
+      id: '/admin/data-dictionary/$kpiId'
+      path: '/data-dictionary/$kpiId'
+      fullPath: '/admin/data-dictionary/$kpiId'
+      preLoaderRoute: typeof AdminDataDictionaryKpiIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/dashboards/$dashboardId': {
@@ -1199,11 +1239,13 @@ interface AdminRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminValidationRulesRoute: typeof AdminValidationRulesRoute
   AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRouteWithChildren
+  AdminDataDictionaryKpiIdRoute: typeof AdminDataDictionaryKpiIdRoute
   AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
   AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
   AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
   AdminTemplatesUseCasesRoute: typeof AdminTemplatesUseCasesRoute
   AdminTemplatesWorkflowsRoute: typeof AdminTemplatesWorkflowsRoute
+  AdminDataDictionaryIndexRoute: typeof AdminDataDictionaryIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1237,11 +1279,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminValidationRulesRoute: AdminValidationRulesRoute,
   AdminWorkflowConfigRoute: AdminWorkflowConfigRouteWithChildren,
+  AdminDataDictionaryKpiIdRoute: AdminDataDictionaryKpiIdRoute,
   AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
   AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
   AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
   AdminTemplatesUseCasesRoute: AdminTemplatesUseCasesRoute,
   AdminTemplatesWorkflowsRoute: AdminTemplatesWorkflowsRoute,
+  AdminDataDictionaryIndexRoute: AdminDataDictionaryIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

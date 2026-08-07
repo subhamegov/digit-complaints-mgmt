@@ -1,6 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Copy, ExternalLink, Check, Globe2, AlertTriangle } from "lucide-react";
+import { z } from "zod";
+import {
+  ArrowLeft,
+  Copy,
+  ExternalLink,
+  Check,
+  Globe2,
+  AlertTriangle,
+  BookOpen,
+} from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/AdminLayout";
 import {
   StatusPill,
@@ -12,6 +21,8 @@ import {
   writePublicAccess,
   type DashboardDefinition,
 } from "@/lib/dashboard-catalogue";
+import { getDashboardKpiRows } from "@/lib/kpi-dictionary";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +32,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const searchSchema = z.object({
+  tab: z.enum(["dashboard", "kpis"]).default("dashboard"),
+});
+
 export const Route = createFileRoute("/admin/dashboards/$dashboardId")({
+  validateSearch: searchSchema,
   loader: ({ params }) => {
     const dashboard = getDashboard(params.dashboardId);
     if (!dashboard) throw notFound();
@@ -40,6 +56,13 @@ export const Route = createFileRoute("/admin/dashboards/$dashboardId")({
       meta: [
         { title: `${loaderData.dashboard.name} — Account Administrator` },
         { name: "description", content: loaderData.dashboard.purpose },
+        {
+          property: "og:title",
+          content: `${loaderData.dashboard.name} — Account Administrator`,
+        },
+        { property: "og:description", content: loaderData.dashboard.purpose },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary" },
       ],
     };
   },
@@ -48,12 +71,15 @@ export const Route = createFileRoute("/admin/dashboards/$dashboardId")({
 
 function DashboardDetailPage() {
   const { dashboard } = Route.useLoaderData();
+  const { tab } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const isPublic = Boolean(dashboard.publicAccess);
 
   const [publicOn, setPublicOn] = useState(true);
   useEffect(() => setPublicOn(readPublicAccess()), []);
 
   const status = isPublic && !publicOn ? "INACTIVE" : dashboard.status;
+  const kpiRows = getDashboardKpiRows(dashboard.id);
 
   return (
     <div className="flex h-full flex-col">
@@ -70,7 +96,7 @@ function DashboardDetailPage() {
 
         {/* Metadata */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <MetaCard label="Available to" value={dashboard.role} emphasis />
+          <MetaCard label="Assigned role" value={dashboard.role} emphasis />
           <div className="rounded-sm border border-border bg-surface p-3">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
               Status
@@ -82,48 +108,115 @@ function DashboardDetailPage() {
           <MetaCard label="Last published" value={dashboard.lastPublished} />
         </div>
 
-        {/* KPIs */}
-        <section
-          aria-labelledby="kpis-heading"
-          className="rounded-sm border border-border bg-surface"
+        <Tabs
+          value={tab}
+          onValueChange={(next) =>
+            navigate({
+              search: { tab: next as "dashboard" | "kpis" },
+              replace: true,
+              resetScroll: false,
+            })
+          }
         >
-          <div className="border-b border-border px-4 py-2.5">
-            <h2 id="kpis-heading" className="text-[13px] font-semibold text-foreground">
-              KPIs included
-            </h2>
-            <p className="text-[12px] text-muted-foreground">
-              Read-only. KPI composition is managed outside this console.
-            </p>
-          </div>
-          <ul className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 lg:grid-cols-3">
-            {dashboard.kpis.map((k: string) => (
-              <li
-                key={k}
-                className="rounded-sm border border-border bg-background px-3 py-2 text-[12.5px] text-foreground"
-              >
-                {k}
-              </li>
-            ))}
-          </ul>
-        </section>
+          <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="kpis">KPIs</TabsTrigger>
+          </TabsList>
 
-        {/* Preview */}
-        <section
-          aria-labelledby="preview-heading"
-          className="rounded-sm border border-border bg-surface"
-        >
-          <div className="border-b border-border px-4 py-2.5">
-            <h2 id="preview-heading" className="text-[13px] font-semibold text-foreground">
-              Preview
-            </h2>
-            <p className="text-[12px] text-muted-foreground">
-              This is how the dashboard appears to its users.
-            </p>
-          </div>
-          <div className="p-4">
-            <DashboardPreviewGrid layout={dashboard.layout} />
-          </div>
-        </section>
+          <TabsContent value="dashboard" className="mt-4">
+            <section
+              aria-labelledby="preview-heading"
+              className="rounded-sm border border-border bg-surface"
+            >
+              <div className="border-b border-border px-4 py-2.5">
+                <h2
+                  id="preview-heading"
+                  className="text-[13px] font-semibold text-foreground"
+                >
+                  Dashboard preview
+                </h2>
+                <p className="text-[12px] text-muted-foreground">
+                  Preview the dashboard as it appears to its users.
+                </p>
+              </div>
+              <div className="p-4">
+                <DashboardPreviewGrid layout={dashboard.layout} />
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="kpis" className="mt-4">
+            <section
+              aria-labelledby="kpis-heading"
+              className="rounded-sm border border-border bg-surface"
+            >
+              <div className="border-b border-border px-4 py-2.5">
+                <h2
+                  id="kpis-heading"
+                  className="text-[13px] font-semibold text-foreground"
+                >
+                  KPIs
+                </h2>
+                <p className="text-[12px] text-muted-foreground">
+                  Review the measures used in this dashboard and their definitions.
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <caption className="sr-only">
+                    Measures used by {dashboard.name} and their data dictionary
+                    definitions
+                  </caption>
+                  <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th scope="col" className="px-4 py-2 text-left font-medium">KPI</th>
+                      <th scope="col" className="px-4 py-2 text-left font-medium">
+                        What it measures
+                      </th>
+                      <th scope="col" className="px-4 py-2 text-left font-medium">Source</th>
+                      <th scope="col" className="px-4 py-2 text-left font-medium">Refresh</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {kpiRows.map((k) => (
+                      <tr key={k.id} className="align-top">
+                        <th
+                          scope="row"
+                          className="px-4 py-3 text-left font-medium text-foreground"
+                        >
+                          {k.name}
+                        </th>
+                        <td
+                          className={
+                            "max-w-[360px] px-4 py-3 " +
+                            (k.mapped ? "text-muted-foreground" : "italic text-muted-foreground")
+                          }
+                        >
+                          {k.measures}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">{k.source}</td>
+                        <td className="whitespace-nowrap px-4 py-3">{k.refresh}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right">
+                          <Link
+                            to="/admin/data-dictionary/$kpiId"
+                            params={{ kpiId: k.id }}
+                            search={{ from: dashboard.id }}
+                            aria-label={`View ${k.name} in data dictionary`}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 text-[12px] font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                          >
+                            <BookOpen className="h-3.5 w-3.5" aria-hidden />
+                            View in data dictionary
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </TabsContent>
+        </Tabs>
 
         {isPublic && (
           <PublicAccessSection
@@ -204,9 +297,7 @@ function PublicAccessSection({
         Public access
       </h2>
       <p className="mt-1 text-[12.5px] text-muted-foreground">
-        {enabled
-          ? "This dashboard is publicly available."
-          : "Public access is turned off."}
+        {enabled ? "Publicly available." : "Public access is turned off."}
       </p>
 
       <div className="mt-3">
@@ -264,7 +355,7 @@ function PublicAccessSection({
             <DialogTitle>Public dashboard status</DialogTitle>
             <DialogDescription>
               {enabled
-                ? "Anyone with the public link can currently view this dashboard. No sign-in is required."
+                ? "Anyone with this link can view the dashboard without signing in."
                 : "The public link is currently disabled. Enabling it makes the dashboard viewable by anyone with the link."}
             </DialogDescription>
           </DialogHeader>
@@ -283,7 +374,7 @@ function PublicAccessSection({
                 }}
                 className="inline-flex h-9 items-center rounded-sm border border-destructive/40 bg-background px-3 text-[12.5px] font-medium text-destructive hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
-                Disable public dashboard
+                Turn off public dashboard
               </button>
             ) : (
               <button
@@ -294,7 +385,7 @@ function PublicAccessSection({
                 }}
                 className="inline-flex h-9 items-center rounded-sm bg-primary px-3 text-[12.5px] font-medium text-primary-foreground hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
-                Enable public dashboard
+                Turn on public dashboard
               </button>
             )}
           </DialogFooter>
@@ -308,8 +399,8 @@ function PublicAccessSection({
             <DialogTitle>Turn off public dashboard?</DialogTitle>
             <DialogDescription>
               The Citizen Dashboard will no longer be accessible through its public
-              URL. Existing links to the dashboard will stop working until public
-              access is enabled again.
+              URL. Existing links will stop working until public access is enabled
+              again.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
