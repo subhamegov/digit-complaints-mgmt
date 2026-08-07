@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight, AlertTriangle, Clock } from "lucide-react";
+import { ChevronDown, ChevronRight, AlertTriangle, Clock, ArrowUpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmptyState, PriorityPill } from "@/components/pgr/primitives";
 import type { Complaint } from "@/lib/mock-data";
 import type { Role } from "@/lib/rbac";
 import {
   ACTION_LABEL, DEFAULT_EXPANDED, STATUS_SENTENCE,
-  actionsFor, assigneeLabel, escalationOf, serviceLabel, slaLabel, waitingReason,
+  actionsFor, assigneeLabel, escalationCell, escalationOf, serviceLabel, slaLabel, waitingReason,
   type GroupKey,
 } from "@/lib/my-complaints";
 
@@ -20,6 +20,14 @@ function relTime(iso: string) {
   if (hrs < 24) return `${hrs}h ago`;
   const d = Math.round(hrs / 24);
   return d === 1 ? "1 day ago" : `${d} days ago`;
+}
+
+/** Relative time is clock-dependent, so render it only after hydration. */
+function RelTime({ iso }: { iso: string }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const absolute = new Date(iso).toISOString().slice(0, 10);
+  return <span title={absolute}>{mounted ? relTime(iso) : absolute}</span>;
 }
 
 function SlaCell({ c }: { c: Complaint }) {
@@ -45,12 +53,12 @@ function EscalationDetails({ c, role }: { c: Complaint; role: Role }) {
     ["Escalation level", e.level],
     ["Escalated from", e.from],
     ["Escalated to", e.to],
-    ["Reason", e.reason],
+    ["Escalation reason", e.reason],
     ["Time since escalation", `${e.sinceHrs}h`],
-    ["Required action", e.requiredAction],
+    ["Required intervention", e.requiredAction],
   ];
   return (
-    <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 rounded-sm border border-status-breach/25 bg-status-breach-bg/40 px-3 py-2 text-[11px] lg:grid-cols-3">
+    <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 rounded-sm border border-border bg-muted/50 px-3 py-2 text-[11px] lg:grid-cols-3">
       {items.map(([k, v]) => (
         <div key={k} className="min-w-0">
           <dt className="text-muted-foreground">{k}</dt>
@@ -61,10 +69,13 @@ function EscalationDetails({ c, role }: { c: Complaint; role: Role }) {
   );
 }
 
-function EscalatedBadge() {
+function EscalationCell({ c }: { c: Complaint }) {
+  const { escalated, label } = escalationCell(c);
+  if (!escalated) return <span className="text-[12px] text-muted-foreground">{label}</span>;
   return (
-    <span className="inline-flex items-center gap-1 rounded-sm border border-status-breach/40 bg-status-breach-bg px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-status-breach">
-      <AlertTriangle className="h-3 w-3" /> Escalated
+    <span className="inline-flex items-center gap-1 rounded-sm border border-border bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-foreground">
+      <ArrowUpCircle className="h-3 w-3" aria-hidden />
+      {label}
     </span>
   );
 }
@@ -82,7 +93,7 @@ function Actions({ c, role }: { c: Complaint; role: Role }) {
       >
         {ACTION_LABEL[primary]}
       </Link>
-      {rest.slice(0, 2).map((k) => (
+      {rest.slice(0, 1).map((k) => (
         <Link
           key={k}
           to="/inbox/$id"
@@ -96,8 +107,10 @@ function Actions({ c, role }: { c: Complaint; role: Role }) {
   );
 }
 
-function Row({ c, role, group }: { c: Complaint; role: Role; group: GroupKey | "flat" }) {
-  const escalated = !!escalationOf(c, role);
+type RowProps = { c: Complaint; role: Role; group: GroupKey | "flat"; showEscalation: boolean };
+
+function Row({ c, role, group, showEscalation }: RowProps) {
+  const escalation = escalationOf(c, role);
   return (
     <div className="grid grid-cols-12 items-start gap-3 px-4 py-3 hover:bg-muted/40">
       <div className="col-span-3 min-w-0">
@@ -106,7 +119,6 @@ function Row({ c, role, group }: { c: Complaint; role: Role; group: GroupKey | "
             {c.id}
           </Link>
           <PriorityPill p={c.priority} />
-          {escalated && <EscalatedBadge />}
         </div>
         <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">{c.description}</p>
       </div>
@@ -114,61 +126,63 @@ function Row({ c, role, group }: { c: Complaint; role: Role; group: GroupKey | "
         <div className="truncate font-medium">{serviceLabel(c)}</div>
         <div className="truncate text-muted-foreground">{c.locality} · {c.ward}</div>
       </div>
-      <div className="col-span-2 text-[12px]">
+      <div className={cn("text-[12px]", showEscalation ? "col-span-1" : "col-span-2")}>
         <div className="font-medium">{STATUS_SENTENCE[c.status] ?? c.status}</div>
         {group === "waiting" && <div className="text-muted-foreground">{waitingReason(c)}</div>}
       </div>
+      {showEscalation && <div className="col-span-2"><EscalationCell c={c} /></div>}
       <div className="col-span-1 truncate text-[12px]">{assigneeLabel(c)}</div>
-      <div className="col-span-1 text-[12px] text-muted-foreground">{relTime(c.lastUpdated)}</div>
+      <div className="col-span-1 text-[12px] text-muted-foreground"><RelTime iso={c.lastUpdated} /></div>
       <div className="col-span-1"><SlaCell c={c} /></div>
-      <div className="col-span-2"><Actions c={c} role={role} /></div>
-      {escalated && <div className="col-span-12"><EscalationDetails c={c} role={role} /></div>}
+      <div className={showEscalation ? "col-span-1" : "col-span-2"}><Actions c={c} role={role} /></div>
+      {escalation && group === "escalated_to_me" && (
+        <div className="col-span-12"><EscalationDetails c={c} role={role} /></div>
+      )}
     </div>
   );
 }
 
-function Card({ c, role, group }: { c: Complaint; role: Role; group: GroupKey | "flat" }) {
-  const escalated = !!escalationOf(c, role);
+function Card({ c, role, group, showEscalation }: RowProps) {
+  const escalation = escalationOf(c, role);
   return (
     <div className="space-y-2 px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <Link to="/inbox/$id" params={{ id: c.id }} className="font-mono text-[12px] text-primary">{c.id}</Link>
         <PriorityPill p={c.priority} />
-        {escalated && <EscalatedBadge />}
       </div>
       <p className="text-[13px] font-medium">{serviceLabel(c)}</p>
       <p className="line-clamp-2 text-[12px] text-muted-foreground">{c.description}</p>
       <div className="grid grid-cols-2 gap-y-1 text-[12px]">
         <span className="text-muted-foreground">Locality</span><span>{c.locality} · {c.ward}</span>
         <span className="text-muted-foreground">Status</span><span>{STATUS_SENTENCE[c.status] ?? c.status}</span>
+        {showEscalation && (<><span className="text-muted-foreground">Escalation</span><span><EscalationCell c={c} /></span></>)}
         <span className="text-muted-foreground">Assigned to</span><span>{assigneeLabel(c)}</span>
-        <span className="text-muted-foreground">Last updated</span><span>{relTime(c.lastUpdated)}</span>
+        <span className="text-muted-foreground">Last updated</span><span><RelTime iso={c.lastUpdated} /></span>
         <span className="text-muted-foreground">SLA</span><span><SlaCell c={c} /></span>
         {group === "waiting" && (<><span className="text-muted-foreground">Waiting</span><span>{waitingReason(c)}</span></>)}
       </div>
-      {escalated && <EscalationDetails c={c} role={role} />}
+      {escalation && group === "escalated_to_me" && <EscalationDetails c={c} role={role} />}
       <Actions c={c} role={role} />
     </div>
   );
 }
 
-const HEADERS = ["Complaint", "Service and locality", "Status", "Assigned to", "Last updated", "SLA", "Action"];
-const SPANS = ["col-span-3", "col-span-2", "col-span-2", "col-span-1", "col-span-1", "col-span-1", "col-span-2 text-right"];
-
 /**
- * Shared complaint list. Used by both tabs — grouped (My Complaints)
- * and flat (My Organisation's Complaints).
+ * Shared complaint list used by all three tabs — grouped (Assigned to me,
+ * Needs my attention) and flat (My Organisation's Complaints).
  */
 export function ComplaintList({
   groups,
   role,
   grouped,
   emptyMessage,
+  showEscalation = false,
 }: {
   groups: ComplaintGroup[];
   role: Role;
   grouped: boolean;
   emptyMessage: string;
+  showEscalation?: boolean;
 }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
@@ -176,13 +190,25 @@ export function ComplaintList({
     return init;
   });
 
+  const headers = showEscalation
+    ? [
+        ["Complaint", "col-span-3"], ["Service and locality", "col-span-2"], ["Status", "col-span-1"],
+        ["Escalation", "col-span-2"], ["Assigned to", "col-span-1"], ["Last updated", "col-span-1"],
+        ["SLA", "col-span-1"], ["Action", "col-span-1 text-right"],
+      ]
+    : [
+        ["Complaint", "col-span-3"], ["Service and locality", "col-span-2"], ["Status", "col-span-2"],
+        ["Assigned to", "col-span-1"], ["Last updated", "col-span-1"], ["SLA", "col-span-1"],
+        ["Action", "col-span-2 text-right"],
+      ];
+
   const total = groups.reduce((n, g) => n + g.rows.length, 0);
   if (total === 0) return <EmptyState message={emptyMessage} />;
 
   return (
     <div className="divide-y divide-border">
       <div className="hidden grid-cols-12 gap-3 bg-muted/50 px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground lg:grid">
-        {HEADERS.map((h, i) => <span key={h} className={SPANS[i]}>{h}</span>)}
+        {headers.map(([h, span]) => <span key={h} className={span}>{h}</span>)}
       </div>
       {groups.map((g) => {
         const isCollapsed = !!collapsed[g.key];
@@ -208,8 +234,8 @@ export function ComplaintList({
               <div className="divide-y divide-border">
                 {g.rows.map((c) => (
                   <div key={c.id}>
-                    <div className="hidden lg:block"><Row c={c} role={role} group={g.key} /></div>
-                    <div className="lg:hidden"><Card c={c} role={role} group={g.key} /></div>
+                    <div className="hidden lg:block"><Row c={c} role={role} group={g.key} showEscalation={showEscalation} /></div>
+                    <div className="lg:hidden"><Card c={c} role={role} group={g.key} showEscalation={showEscalation} /></div>
                   </div>
                 ))}
               </div>

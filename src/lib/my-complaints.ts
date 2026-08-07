@@ -16,37 +16,66 @@ import {
 import type { Role } from "./rbac";
 
 export type GroupKey =
-  | "actionable"
-  | "escalated"
-  | "overdue"
-  | "due_soon"
+  // Assigned to me
+  | "action_required"
   | "in_progress"
   | "waiting"
-  | "completed";
-
-export const GROUP_ORDER: GroupKey[] = [
-  "actionable", "escalated", "overdue", "due_soon", "in_progress", "waiting", "completed",
-];
+  | "completed"
+  // Needs my attention
+  | "escalated_to_me"
+  | "awaiting_review"
+  | "sla_breached"
+  | "at_risk_today"
+  | "unassigned_stalled"
+  | "due_today"
+  | "returned"
+  | "citizen_response";
 
 export const GROUP_LABEL: Record<GroupKey, string> = {
-  actionable: "Actionable today",
-  escalated: "Escalated",
-  overdue: "Overdue",
-  due_soon: "Due soon",
+  action_required: "Action required",
   in_progress: "In progress",
   waiting: "Waiting on others",
   completed: "Completed",
+  escalated_to_me: "Escalated to me",
+  awaiting_review: "Awaiting my review",
+  sla_breached: "SLA breached",
+  at_risk_today: "At risk today",
+  unassigned_stalled: "Unassigned or stalled",
+  due_today: "Due today",
+  returned: "Returned for action",
+  citizen_response: "Citizen response received",
+};
+
+/** Section order for the "Assigned to me" tab. */
+export const ASSIGNED_ORDER: GroupKey[] = ["action_required", "in_progress", "waiting", "completed"];
+
+/** Section order for "Needs my attention", per persona. */
+export const ATTENTION_ORDER: Record<string, GroupKey[]> = {
+  LME: ["action_required", "due_today", "returned", "citizen_response", "at_risk_today"],
+  GRO: ["escalated_to_me", "awaiting_review", "sla_breached", "at_risk_today", "unassigned_stalled"],
+  DEPT_HEAD: ["escalated_to_me", "awaiting_review", "sla_breached", "at_risk_today", "unassigned_stalled"],
 };
 
 /** Groups expanded on first render. Completed stays collapsed. */
-export const DEFAULT_EXPANDED: GroupKey[] = ["actionable", "escalated"];
+export const DEFAULT_EXPANDED: GroupKey[] = [
+  "action_required", "escalated_to_me", "awaiting_review", "due_today",
+  "returned", "citizen_response", "sla_breached", "at_risk_today", "unassigned_stalled", "in_progress",
+];
+
+/** Landing tab per persona. */
+export const PERSONA_DEFAULT_TAB: Record<string, "assigned" | "attention" | "org"> = {
+  LME: "assigned",
+  GRO: "attention",
+  DEPT_HEAD: "attention",
+};
 
 export const EMPTY_COPY = {
-  mine: "No complaints currently require your attention.",
-  escalated: "No complaints have been escalated to you.",
+  assigned: "No complaints are currently assigned to you.",
+  attention: "Nothing currently requires your intervention.",
   org: "No complaints were found for your organisation in the selected working context.",
   noOrg: "Your organisational structure has not been configured. Contact your administrator.",
 };
+
 
 /* ------------------------------------------------------------------ */
 /* Organisation model (read-only reference, sourced from role config)  */
@@ -179,20 +208,36 @@ export function orgScoped(profile: OrgProfile, jurisdictionCode: string): Compla
   });
 }
 
-/** Complaints the signed-in user is personally responsible for. */
+/** Complaints where the signed-in user is the current owner. */
 export function personallyOwned(profile: OrgProfile, jurisdictionCode: string): Complaint[] {
   const scoped = orgScoped(profile, jurisdictionCode);
   if (profile.role === "LME") {
     const team = new Set(OFFICERS.filter((o) => o.department === profile.department).map((o) => o.id));
-    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId));
+    // Escalation transfers ownership upward, so escalated work leaves this inbox.
+    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId) && !escalatedAwayFrom(c, "LME"));
   }
   if (profile.role === "GRO") {
-    // Routing responsibility: unassigned intake, returned/reopened work and breaches.
-    return scoped.filter((c) => !c.assignedOfficerId || c.status === "REOPENED" || c.slaState !== "WITHIN");
+    // Routing ownership: intake awaiting routing and work returned for correction.
+    return scoped.filter((c) => !c.assignedOfficerId || c.status === "REOPENED");
   }
-  // Department Head: monitoring + approval responsibility.
-  return scoped.filter((c) => c.slaState !== "WITHIN" || c.status === "REOPENED" || isCompleted(c) === false && !c.assignedOfficerId);
+  // Department Head owns complaints escalated to them plus resolutions awaiting approval.
+  return scoped.filter((c) => isActivelyEscalated(c) || c.status === "RESOLVED");
 }
+
+/**
+ * Complaints requiring the user's intervention, regardless of who owns them.
+ * Field Employees stay inside their own assignments; supervisory personas see
+ * their whole authorised scope.
+ */
+export function attentionScope(profile: OrgProfile, jurisdictionCode: string): Complaint[] {
+  if (profile.role === "LME") {
+    const scoped = orgScoped(profile, jurisdictionCode);
+    const team = new Set(OFFICERS.filter((o) => o.department === profile.department).map((o) => o.id));
+    return scoped.filter((c) => c.assignedOfficerId && team.has(c.assignedOfficerId));
+  }
+  return orgScoped(profile, jurisdictionCode);
+}
+
 
 /* ------------------------------------------------------------------ */
 /* Escalation view model (derived from existing SLA + workflow state)   */
@@ -213,22 +258,55 @@ const ROLE_TITLE: Record<string, string> = {
   DEPT_HEAD: "Department Head",
 };
 
+/** Overdue hours past SLA, 0 when still within SLA. */
+function overdueHrs(c: Complaint) {
+  return Math.max(0, -c.slaRemainingHrs);
+}
+
+/**
+ * A complaint is *actively* escalated when it breached SLA, the escalation is
+ * still open and the complaint is not completed. SLA breach alone (< the
+ * configured escalation threshold) is NOT an escalation.
+ */
+export function isActivelyEscalated(c: Complaint): boolean {
+  return !isCompleted(c) && c.slaState === "BREACHED" && overdueHrs(c) >= 24;
+}
+
+/** Routing-type escalations are the only ones that reach the GRO. */
+function isRoutingEscalation(c: Complaint): boolean {
+  return isActivelyEscalated(c) && (!c.assignedOfficerId || c.status === "REOPENED");
+}
+
+export function escalationLevel(c: Complaint): string {
+  const o = overdueHrs(c);
+  if (o >= 96) return "Final level";
+  if (o >= 48) return "Level 2";
+  return "Level 1";
+}
+
+/**
+ * Escalation visible to this persona. Field Employees are outside the
+ * escalation chain — escalation never surfaces in their workspace.
+ */
 export function escalationOf(c: Complaint, role: Role): EscalationInfo | null {
-  const overdueBy = -c.slaRemainingHrs;
-  const formallyEscalated = !isCompleted(c) && c.slaState === "BREACHED" && overdueBy >= 24;
-  if (!formallyEscalated) return null;
-  const level = overdueBy >= 48 ? "Level 3" : "Level 2";
+  if (role === "LME") return null;
+  if (role === "GRO" ? !isRoutingEscalation(c) : !isActivelyEscalated(c)) return null;
   const officer = officerOf(c.assignedOfficerId);
   return {
-    level,
+    level: escalationLevel(c),
     from: officer ? `${officer.name} · ${officer.designation}` : "Grievance Routing Unit",
     to: ROLE_TITLE[role] ?? "Assigned officer",
-    reason: c.reopenCount > 0 ? "Reopened after resolution and still unresolved" : "SLA exceeded without resolution",
-    sinceHrs: Math.max(1, overdueBy - c.slaHours > 0 ? overdueBy - c.slaHours : overdueBy),
-    requiredAction: role === "LME" ? "Resolve and record closure evidence"
-      : role === "GRO" ? "Reassign or correct routing"
-      : "Review, add direction or resolve escalation",
+    reason: c.reopenCount > 0
+      ? "Reopened after resolution and still unresolved"
+      : !c.assignedOfficerId ? "No eligible assignee — routing incomplete" : "SLA exceeded without resolution",
+    sinceHrs: Math.max(1, overdueHrs(c)),
+    requiredAction: role === "GRO" ? "Correct routing and reassign" : "Review, add direction or resolve escalation",
   };
+}
+
+/** Ownership moves to the escalated level, so it leaves the employee's inbox. */
+export function escalatedAwayFrom(c: Complaint, role: Role): boolean {
+  return role === "LME" && isActivelyEscalated(c);
 }
 
 /* ------------------------------------------------------------------ */
@@ -243,28 +321,58 @@ function needsActionToday(c: Complaint, role: Role): boolean {
   return c.slaRemainingHrs > 0 && c.slaRemainingHrs <= 24;   // due today
 }
 
-/** Assign each complaint to exactly one group, by documented priority. */
-export function groupOf(c: Complaint, role: Role): GroupKey {
-  if (needsActionToday(c, role)) return "actionable";
-  if (escalationOf(c, role)) return "escalated";
+const dueToday = (c: Complaint) => !isCompleted(c) && c.slaRemainingHrs > 0 && c.slaRemainingHrs <= 24;
+const atRisk = (c: Complaint) => !isCompleted(c) && (c.slaState === "NEARING" || dueToday(c));
+
+/** Section for the "Assigned to me" tab — one section per complaint. */
+export function assignedGroupOf(c: Complaint, role: Role): GroupKey {
   if (isCompleted(c)) return "completed";
-  if (c.slaState === "BREACHED") return "overdue";
-  if (c.slaState === "NEARING") return "due_soon";
+  if (needsActionToday(c, role)) return "action_required";
   if (c.status === "IN_PROGRESS") return "in_progress";
-  if (c.status === "OPEN" || c.status === "ASSIGNED") return "waiting";
+  if (c.status === "OPEN") return "waiting";
   return "in_progress";
 }
 
-export function groupComplaints(rows: Complaint[], role: Role) {
+/** Section for the "Needs my attention" tab — one section per complaint. */
+export function attentionGroupOf(c: Complaint, role: Role): GroupKey | null {
+  if (isCompleted(c)) return null;
+  if (role === "LME") {
+    if (escalatedAwayFrom(c, role)) return null;            // ownership left this persona
+    if (c.status === "REOPENED") return "returned";
+    if (c.status === "ASSIGNED") return "action_required";
+    if (c.reopenCount > 0) return "citizen_response";
+    if (dueToday(c)) return "due_today";
+    if (atRisk(c)) return "at_risk_today";
+    return null;
+  }
+  if (escalationOf(c, role)) return "escalated_to_me";
+  if (c.status === "RESOLVED" || c.status === "REOPENED") return "awaiting_review";
+  if (c.slaState === "BREACHED") return "sla_breached";
+  if (atRisk(c)) return "at_risk_today";
+  if (!c.assignedOfficerId) return "unassigned_stalled";
+  return null;
+}
+
+function build(rows: Complaint[], order: GroupKey[], pick: (c: Complaint) => GroupKey | null) {
   const map = new Map<GroupKey, Complaint[]>();
   for (const c of rows) {
-    const g = groupOf(c, role);
+    const g = pick(c);
+    if (!g) continue;
     map.set(g, [...(map.get(g) ?? []), c]);
   }
-  return GROUP_ORDER
+  return order
     .filter((g) => (map.get(g)?.length ?? 0) > 0)
     .map((g) => ({ key: g, label: GROUP_LABEL[g], rows: map.get(g)! }));
 }
+
+export function groupAssigned(rows: Complaint[], role: Role) {
+  return build(rows, ASSIGNED_ORDER, (c) => assignedGroupOf(c, role));
+}
+
+export function groupAttention(rows: Complaint[], role: Role) {
+  return build(rows, ATTENTION_ORDER[role] ?? ATTENTION_ORDER.DEPT_HEAD, (c) => attentionGroupOf(c, role));
+}
+
 
 /** Waiting reason shown in the Waiting on others group. */
 export function waitingReason(c: Complaint): string {
@@ -398,8 +506,31 @@ export const PERSONA_FILTER_FIELDS: Record<string, ("unit" | "assignee" | "statu
   DEPT_HEAD: ["unit", "assignee", "status", "service", "locality", "sla", "date"],
 };
 
-export const PERSONA_DEFAULT_TAB: Record<string, "mine" | "org"> = {
-  LME: "mine",
-  GRO: "mine",
-  DEPT_HEAD: "org",
-};
+
+/* ------------------------------------------------------------------ */
+/* Escalation filter (organisation tab, supervisory personas only)      */
+/* ------------------------------------------------------------------ */
+
+export type EscalationFilterKey = "ALL" | "ACTIVE" | "NONE" | "RESOLVED";
+
+export const ESCALATION_FILTERS: { key: EscalationFilterKey; label: string }[] = [
+  { key: "ALL", label: "All complaints" },
+  { key: "ACTIVE", label: "Actively escalated" },
+  { key: "NONE", label: "Not escalated" },
+  { key: "RESOLVED", label: "Escalation resolved" },
+];
+
+export function matchesEscalationFilter(c: Complaint, key: EscalationFilterKey): boolean {
+  switch (key) {
+    case "ALL": return true;
+    case "ACTIVE": return isActivelyEscalated(c);
+    case "NONE": return !isActivelyEscalated(c) && !(isCompleted(c) && c.slaState === "BREACHED");
+    case "RESOLVED": return isCompleted(c) && c.slaState === "BREACHED";
+  }
+}
+
+/** Escalation column value. */
+export function escalationCell(c: Complaint): { escalated: boolean; label: string } {
+  if (isActivelyEscalated(c)) return { escalated: true, label: `Escalated · ${escalationLevel(c)}` };
+  return { escalated: false, label: "Not escalated" };
+}

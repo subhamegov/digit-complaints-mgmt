@@ -9,18 +9,19 @@ import { useRbac, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
-  EMPTY_COPY, ORG_FILTERS, PERSONA_DEFAULT_TAB, PERSONA_FILTER_FIELDS, STATUS_SENTENCE,
-  groupComplaints, matchesOrgFilter, orgProfileFor, orgScoped, personallyOwned,
-  type OrgFilterKey,
+  EMPTY_COPY, ESCALATION_FILTERS, ORG_FILTERS, PERSONA_DEFAULT_TAB, PERSONA_FILTER_FIELDS, STATUS_SENTENCE,
+  attentionScope, groupAssigned, groupAttention, matchesEscalationFilter, matchesOrgFilter,
+  orgProfileFor, orgScoped, personallyOwned,
+  type EscalationFilterKey, type OrgFilterKey,
 } from "@/lib/my-complaints";
 
 export const Route = createFileRoute("/tasks")({
   head: () => ({
     meta: [
-      { title: "My Complaints — DIGIT Complaint Management" },
-      { name: "description", content: "Complaints assigned to you and complaints handled by your organisation, grouped by operational priority." },
-      { property: "og:title", content: "My Complaints — DIGIT Complaint Management" },
-      { property: "og:description", content: "Complaints assigned to you and complaints handled by your organisation, grouped by operational priority." },
+      { title: "Complaints — DIGIT Complaint Management" },
+      { name: "description", content: "Complaints assigned to you, complaints requiring your attention and complaints handled by your organisation." },
+      { property: "og:title", content: "Complaints — DIGIT Complaint Management" },
+      { property: "og:description", content: "Complaints assigned to you, complaints requiring your attention and complaints handled by your organisation." },
     ],
   }),
   component: TasksPage,
@@ -28,39 +29,62 @@ export const Route = createFileRoute("/tasks")({
 
 const WORKSPACE_ROLES: Role[] = ["LME", "GRO", "DEPT_HEAD"];
 
+type TabKey = "assigned" | "attention" | "org";
+
 function TasksPage() {
   const { role } = useRbac();
-  return WORKSPACE_ROLES.includes(role) ? <MyComplaintsWorkspace /> : <LegacyTasks />;
+  return WORKSPACE_ROLES.includes(role) ? <ComplaintsWorkspace /> : <LegacyTasks />;
 }
 
 /* ------------------------------------------------------------------ */
-/* My Complaints workspace (Field Employee, GRO, Department Head)      */
+/* Complaints workspace (Field Employee, GRO, Department Head)         */
 /* ------------------------------------------------------------------ */
 
-function MyComplaintsWorkspace() {
+function ComplaintsWorkspace() {
   const { role, tenant, jurisdiction } = useRbac();
   const profile = useMemo(() => orgProfileFor(role, tenant.name), [role, tenant.name]);
-  const [tab, setTab] = useState<"mine" | "org">(PERSONA_DEFAULT_TAB[role] ?? "mine");
+  const [tab, setTab] = useState<TabKey>(PERSONA_DEFAULT_TAB[role] ?? "assigned");
   // Persona default tab; re-applied when the working-context role resolves/changes.
   const lastRole = useRef(role);
   useEffect(() => {
     if (lastRole.current !== role) {
       lastRole.current = role;
-      setTab(PERSONA_DEFAULT_TAB[role] ?? "mine");
+      setTab(PERSONA_DEFAULT_TAB[role] ?? "assigned");
     }
   }, [role]);
   const [drawer, setDrawer] = useState(false);
 
-  const mineGroups = useMemo(
-    () => (profile ? groupComplaints(personallyOwned(profile, jurisdiction.code), role) : []),
-    [profile, jurisdiction.code, role],
+  const showEscalation = role !== "LME";
+
+  const assignedRows = useMemo(
+    () => (profile ? personallyOwned(profile, jurisdiction.code) : []),
+    [profile, jurisdiction.code],
   );
+  const attentionRows = useMemo(
+    () => (profile ? attentionScope(profile, jurisdiction.code) : []),
+    [profile, jurisdiction.code],
+  );
+  const assignedGroups = useMemo(() => groupAssigned(assignedRows, role), [assignedRows, role]);
+  const attentionGroups = useMemo(() => groupAttention(attentionRows, role), [attentionRows, role]);
+  const orgRows = useMemo(() => (profile ? orgScoped(profile, jurisdiction.code) : []), [profile, jurisdiction.code]);
+
+  const counts: Record<TabKey, number> = {
+    assigned: assignedGroups.reduce((n, g) => n + g.rows.length, 0),
+    attention: attentionGroups.reduce((n, g) => n + g.rows.length, 0),
+    org: orgRows.length,
+  };
+
+  const TABS: { key: TabKey; label: string }[] = [
+    { key: "assigned", label: "Assigned to me" },
+    { key: "attention", label: "Needs my attention" },
+    { key: "org", label: "My organisation’s complaints" },
+  ];
 
   return (
     <div>
       <PageHeader
-        title="My Complaints"
-        subtitle="View complaints assigned to you and complaints handled by your organisation."
+        title="Complaints"
+        subtitle="Manage complaints assigned to you, complaints requiring your attention and complaints handled by your organisation."
       >
         <div className="flex flex-wrap items-center gap-3">
           <div className="rounded-sm border border-border bg-muted/50 px-3 py-1.5">
@@ -81,16 +105,13 @@ function MyComplaintsWorkspace() {
 
       <div className="p-4 lg:p-6 space-y-4">
         {!profile ? (
-          <Panel title="My Complaints" padded={false}>
+          <Panel title="Complaints" padded={false}>
             <EmptyState message={EMPTY_COPY.noOrg} />
           </Panel>
         ) : (
           <>
             <div className="flex items-center gap-1 border-b border-border">
-              {([
-                { key: "mine", label: "My Complaints" },
-                { key: "org", label: "My Organisation’s Complaints" },
-              ] as const).map((x) => (
+              {TABS.map((x) => (
                 <button
                   key={x.key}
                   type="button"
@@ -103,23 +124,36 @@ function MyComplaintsWorkspace() {
                   )}
                   aria-current={tab === x.key}
                 >
-                  {x.label}
+                  {x.label} <span className="tabular-nums opacity-70">({counts[x.key]})</span>
                 </button>
               ))}
             </div>
 
-            {tab === "mine" ? (
-              <Panel title="Grouped by operational priority" padded={false}>
+            {tab === "assigned" && (
+              <Panel title="Complaints you currently own" padded={false}>
                 <ComplaintList
-                  groups={mineGroups}
+                  groups={assignedGroups}
                   role={role}
                   grouped
-                  emptyMessage={EMPTY_COPY.mine}
+                  showEscalation={showEscalation}
+                  emptyMessage={EMPTY_COPY.assigned}
                 />
               </Panel>
-            ) : (
-              <OrgTab />
             )}
+
+            {tab === "attention" && (
+              <Panel title="Complaints requiring your intervention" padded={false}>
+                <ComplaintList
+                  groups={attentionGroups}
+                  role={role}
+                  grouped
+                  showEscalation={showEscalation}
+                  emptyMessage={EMPTY_COPY.attention}
+                />
+              </Panel>
+            )}
+
+            {tab === "org" && <OrgTab showEscalation={showEscalation} />}
           </>
         )}
       </div>
@@ -134,10 +168,10 @@ function MyComplaintsWorkspace() {
   );
 }
 
-function OrgTab() {
+function OrgTab({ showEscalation }: { showEscalation: boolean }) {
   const { role, tenant, jurisdiction } = useRbac();
   const profile = useMemo(() => orgProfileFor(role, tenant.name), [role, tenant.name]);
-  const [summary, setSummary] = useState<OrgFilterKey>("needs_action");
+  const [summary, setSummary] = useState<OrgFilterKey>("all");
   const [unit, setUnit] = useState("ALL");
   const [assignee, setAssignee] = useState("ALL");
   const [status, setStatus] = useState("ALL");
@@ -145,6 +179,7 @@ function OrgTab() {
   const [locality, setLocality] = useState("ALL");
   const [sla, setSla] = useState("ALL");
   const [range, setRange] = useState("ALL");
+  const [escalation, setEscalation] = useState<EscalationFilterKey>("ALL");
 
   const allowed = PERSONA_FILTER_FIELDS[role] ?? [];
   const scoped = useMemo(() => (profile ? orgScoped(profile, jurisdiction.code) : []), [profile, jurisdiction.code]);
@@ -153,6 +188,7 @@ function OrgTab() {
     const cutoff = range === "ALL" ? 0 : Date.now() - Number(range) * 86_400_000;
     return scoped.filter((c) => {
       if (!matchesOrgFilter(c, summary, role)) return false;
+      if (showEscalation && !matchesEscalationFilter(c, escalation)) return false;
       if (unit !== "ALL" && c.department !== unit) return false;
       if (assignee !== "ALL" && (c.assignedOfficerId ?? "UNASSIGNED") !== assignee) return false;
       if (status !== "ALL" && c.status !== status) return false;
@@ -162,7 +198,7 @@ function OrgTab() {
       if (new Date(c.filedOn).getTime() < cutoff) return false;
       return true;
     });
-  }, [scoped, summary, unit, assignee, status, service, locality, sla, range, role]);
+  }, [scoped, summary, unit, assignee, status, service, locality, sla, range, role, escalation, showEscalation]);
 
   const units = Array.from(new Set(scoped.map((c) => c.department)));
   const localities = Array.from(new Set(scoped.map((c) => c.ward)));
@@ -172,7 +208,7 @@ function OrgTab() {
   return (
     <Panel title="Organisation workload" padded={false}>
       <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-2.5">
-        {ORG_FILTERS.map((f) => {
+        {ORG_FILTERS.filter((f) => showEscalation || f.key !== "escalated").map((f) => {
           const count = scoped.filter((c) => matchesOrgFilter(c, f.key, role)).length;
           return (
             <button
@@ -193,6 +229,16 @@ function OrgTab() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
+        {showEscalation && (
+          <select
+            className={sel}
+            value={escalation}
+            onChange={(e) => setEscalation(e.target.value as EscalationFilterKey)}
+            aria-label="Escalation"
+          >
+            {ESCALATION_FILTERS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+          </select>
+        )}
         {allowed.includes("unit") && (
           <select className={sel} value={unit} onChange={(e) => setUnit(e.target.value)} aria-label="Organisational unit">
             <option value="ALL">All units</option>
@@ -247,11 +293,13 @@ function OrgTab() {
         groups={[{ key: "flat", label: "All", rows }]}
         role={role}
         grouped={false}
+        showEscalation={showEscalation}
         emptyMessage={EMPTY_COPY.org}
       />
     </Panel>
   );
 }
+
 
 /* ------------------------------------------------------------------ */
 /* Legacy task list — unchanged for all other personas                 */
