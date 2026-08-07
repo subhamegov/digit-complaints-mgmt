@@ -30,19 +30,19 @@ function DashboardCataloguePage() {
         subtitle="View dashboards available to different users and manage their availability."
       />
       <div className="flex-1 p-4 lg:p-6">
-        <div className="overflow-x-auto rounded-sm border border-border bg-surface">
-          <table className="w-full text-[13px]">
+        <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-[0_1px_2px_0_color-mix(in_oklab,var(--foreground)_6%,transparent)]">
+          <table className="w-full border-collapse text-[13px] leading-5">
             <caption className="sr-only">
               Published dashboards, their audience, status and last publication date
             </caption>
-            <thead className="bg-surface-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+            <thead className="border-b border-border bg-surface-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               <tr>
-                <th scope="col" className="px-4 py-2 text-left font-medium">Dashboard</th>
-                <th scope="col" className="px-4 py-2 text-left font-medium">Purpose</th>
-                <th scope="col" className="px-4 py-2 text-left font-medium">Assigned role</th>
-                <th scope="col" className="px-4 py-2 text-left font-medium">Status</th>
-                <th scope="col" className="px-4 py-2 text-left font-medium">Last published</th>
-                <th scope="col" className="px-4 py-2 text-right font-medium">Action</th>
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Dashboard</th>
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Purpose</th>
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Assigned role</th>
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Status</th>
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Last published</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -50,26 +50,34 @@ function DashboardCataloguePage() {
                 const status =
                   d.publicAccess && !publicOn ? "INACTIVE" : d.status;
                 return (
-                  <tr key={d.id} className="align-top hover:bg-muted/40">
-                    <th scope="row" className="px-4 py-3 text-left font-medium text-foreground">
+                  <tr
+                    key={d.id}
+                    className="align-middle transition-colors hover:bg-primary/[0.04]"
+                  >
+                    <th
+                      scope="row"
+                      className="border-l-2 border-transparent px-4 py-3.5 text-left text-[13.5px] font-semibold text-foreground"
+                    >
                       {d.name}
                     </th>
-                    <td className="max-w-[360px] px-4 py-3 text-muted-foreground">
+                    <td className="max-w-[360px] px-4 py-3.5 text-muted-foreground">
                       {d.purpose}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">{d.role}</td>
-                    <td className="whitespace-nowrap px-4 py-3">
+                    <td className="whitespace-nowrap px-4 py-3.5 text-foreground">
+                      {d.role}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3.5">
                       <StatusPill status={status} />
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 tabular-nums text-muted-foreground">
+                    <td className="whitespace-nowrap px-4 py-3.5 tabular-nums text-muted-foreground">
                       {d.lastPublished}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <td className="whitespace-nowrap px-4 py-3.5 text-right">
                       <Link
                         to="/admin/dashboards/$dashboardId"
                         params={{ dashboardId: d.id }}
                         aria-label={`View ${d.name}`}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 text-[12px] font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-primary/30 bg-primary/[0.06] px-2.5 text-[12px] font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                       >
                         View dashboard
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -82,6 +90,7 @@ function DashboardCataloguePage() {
           </table>
         </div>
       </div>
+
     </div>
   );
 }
