@@ -206,7 +206,7 @@ function SidebarShell({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const { userName } = useRbac();
+  const { userName, role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
     <>
       <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
@@ -220,7 +220,34 @@ function SidebarShell({
           </div>
         </div>
       </div>
+      <div className="space-y-2 border-b border-white/10 px-3 py-3">
+        <div className="px-1 pb-0.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
+          Working context
+        </div>
+        <ContextCombobox
+          icon={Building2}
+          label={t("COMMON_TENANT")}
+          value={tenant.code}
+          options={TENANTS.map((tn) => ({ value: tn.code, label: tn.name, hint: tn.code }))}
+          onChange={(v) => setTenant(TENANTS.find((tn) => tn.code === v)!)}
+        />
+        <ContextCombobox
+          icon={MapPin}
+          label={t("COMMON_JURISDICTION")}
+          value={jurisdiction.code}
+          options={JURISDICTIONS.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
+          onChange={(v) => setJurisdiction(JURISDICTIONS.find((j) => j.code === v)!)}
+        />
+        <ContextCombobox
+          icon={ShieldCheck}
+          label={t("COMMON_ROLE")}
+          value={role}
+          options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
+          onChange={(v) => setRole(v as Role)}
+        />
+      </div>
       <SidebarNavigation pathname={pathname} onNavigate={onNavigate} />
+
       <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
         <div className="truncate font-medium text-chrome-foreground">{userName}</div>
         <div className="truncate text-chrome-muted">
