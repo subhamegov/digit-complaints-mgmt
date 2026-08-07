@@ -242,22 +242,55 @@ const ROLE_TITLE: Record<string, string> = {
   DEPT_HEAD: "Department Head",
 };
 
+/** Overdue hours past SLA, 0 when still within SLA. */
+function overdueHrs(c: Complaint) {
+  return Math.max(0, -c.slaRemainingHrs);
+}
+
+/**
+ * A complaint is *actively* escalated when it breached SLA, the escalation is
+ * still open and the complaint is not completed. SLA breach alone (< the
+ * configured escalation threshold) is NOT an escalation.
+ */
+export function isActivelyEscalated(c: Complaint): boolean {
+  return !isCompleted(c) && c.slaState === "BREACHED" && overdueHrs(c) >= 24;
+}
+
+/** Routing-type escalations are the only ones that reach the GRO. */
+function isRoutingEscalation(c: Complaint): boolean {
+  return isActivelyEscalated(c) && (!c.assignedOfficerId || c.status === "REOPENED");
+}
+
+export function escalationLevel(c: Complaint): string {
+  const o = overdueHrs(c);
+  if (o >= 96) return "Final level";
+  if (o >= 48) return "Level 2";
+  return "Level 1";
+}
+
+/**
+ * Escalation visible to this persona. Field Employees are outside the
+ * escalation chain — escalation never surfaces in their workspace.
+ */
 export function escalationOf(c: Complaint, role: Role): EscalationInfo | null {
-  const overdueBy = -c.slaRemainingHrs;
-  const formallyEscalated = !isCompleted(c) && c.slaState === "BREACHED" && overdueBy >= 24;
-  if (!formallyEscalated) return null;
-  const level = overdueBy >= 48 ? "Level 3" : "Level 2";
+  if (role === "LME") return null;
+  if (role === "GRO" ? !isRoutingEscalation(c) : !isActivelyEscalated(c)) return null;
   const officer = officerOf(c.assignedOfficerId);
   return {
-    level,
+    level: escalationLevel(c),
     from: officer ? `${officer.name} · ${officer.designation}` : "Grievance Routing Unit",
     to: ROLE_TITLE[role] ?? "Assigned officer",
-    reason: c.reopenCount > 0 ? "Reopened after resolution and still unresolved" : "SLA exceeded without resolution",
-    sinceHrs: Math.max(1, overdueBy - c.slaHours > 0 ? overdueBy - c.slaHours : overdueBy),
-    requiredAction: role === "LME" ? "Resolve and record closure evidence"
-      : role === "GRO" ? "Reassign or correct routing"
-      : "Review, add direction or resolve escalation",
+    reason: c.reopenCount > 0
+      ? "Reopened after resolution and still unresolved"
+      : !c.assignedOfficerId ? "No eligible assignee — routing incomplete" : "SLA exceeded without resolution",
+    sinceHrs: Math.max(1, overdueHrs(c)),
+    requiredAction: role === "GRO" ? "Correct routing and reassign" : "Review, add direction or resolve escalation",
   };
+}
+
+/** Ownership moves to the escalated level, so it leaves the employee's inbox. */
+export function escalatedAwayFrom(c: Complaint, role: Role): boolean {
+  return role === "LME" && isActivelyEscalated(c);
 }
 
 /* ------------------------------------------------------------------ */
@@ -272,28 +305,58 @@ function needsActionToday(c: Complaint, role: Role): boolean {
   return c.slaRemainingHrs > 0 && c.slaRemainingHrs <= 24;   // due today
 }
 
-/** Assign each complaint to exactly one group, by documented priority. */
-export function groupOf(c: Complaint, role: Role): GroupKey {
-  if (needsActionToday(c, role)) return "actionable";
-  if (escalationOf(c, role)) return "escalated";
+const dueToday = (c: Complaint) => !isCompleted(c) && c.slaRemainingHrs > 0 && c.slaRemainingHrs <= 24;
+const atRisk = (c: Complaint) => !isCompleted(c) && (c.slaState === "NEARING" || dueToday(c));
+
+/** Section for the "Assigned to me" tab — one section per complaint. */
+export function assignedGroupOf(c: Complaint, role: Role): GroupKey {
   if (isCompleted(c)) return "completed";
-  if (c.slaState === "BREACHED") return "overdue";
-  if (c.slaState === "NEARING") return "due_soon";
+  if (needsActionToday(c, role)) return "action_required";
   if (c.status === "IN_PROGRESS") return "in_progress";
-  if (c.status === "OPEN" || c.status === "ASSIGNED") return "waiting";
+  if (c.status === "OPEN") return "waiting";
   return "in_progress";
 }
 
-export function groupComplaints(rows: Complaint[], role: Role) {
+/** Section for the "Needs my attention" tab — one section per complaint. */
+export function attentionGroupOf(c: Complaint, role: Role): GroupKey | null {
+  if (isCompleted(c)) return null;
+  if (role === "LME") {
+    if (escalatedAwayFrom(c, role)) return null;            // ownership left this persona
+    if (c.status === "REOPENED") return "returned";
+    if (c.status === "ASSIGNED") return "action_required";
+    if (c.reopenCount > 0) return "citizen_response";
+    if (dueToday(c)) return "due_today";
+    if (atRisk(c)) return "at_risk_today";
+    return null;
+  }
+  if (escalationOf(c, role)) return "escalated_to_me";
+  if (c.status === "RESOLVED" || c.status === "REOPENED") return "awaiting_review";
+  if (c.slaState === "BREACHED") return "sla_breached";
+  if (atRisk(c)) return "at_risk_today";
+  if (!c.assignedOfficerId) return "unassigned_stalled";
+  return null;
+}
+
+function build(rows: Complaint[], order: GroupKey[], pick: (c: Complaint) => GroupKey | null) {
   const map = new Map<GroupKey, Complaint[]>();
   for (const c of rows) {
-    const g = groupOf(c, role);
+    const g = pick(c);
+    if (!g) continue;
     map.set(g, [...(map.get(g) ?? []), c]);
   }
-  return GROUP_ORDER
+  return order
     .filter((g) => (map.get(g)?.length ?? 0) > 0)
     .map((g) => ({ key: g, label: GROUP_LABEL[g], rows: map.get(g)! }));
 }
+
+export function groupAssigned(rows: Complaint[], role: Role) {
+  return build(rows, ASSIGNED_ORDER, (c) => assignedGroupOf(c, role));
+}
+
+export function groupAttention(rows: Complaint[], role: Role) {
+  return build(rows, ATTENTION_ORDER[role] ?? ATTENTION_ORDER.DEPT_HEAD, (c) => attentionGroupOf(c, role));
+}
+
 
 /** Waiting reason shown in the Waiting on others group. */
 export function waitingReason(c: Complaint): string {
