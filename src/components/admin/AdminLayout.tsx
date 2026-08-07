@@ -32,7 +32,6 @@ import {
   MapPinned,
   Database,
   BookOpen,
-  Activity,
   BarChart3,
   ScrollText,
   HelpCircle,
@@ -74,7 +73,6 @@ export const ADMIN_NAV: AdminNavSection[] = [
     items: [
       { to: "/admin/home",               labelCode: "ADMIN_NAV_HOME",                label: "Home",                    icon: Home },
       { to: "/admin/dashboards",         labelCode: "ADMIN_NAV_DASHBOARDS",          label: "Dashboards",              icon: LayoutDashboard },
-      { to: "/admin/dashboards/live",    labelCode: "ADMIN_NAV_DASHBOARDS_LIVE",     label: "  └  Live Dashboard",     icon: Activity },
       { to: "/admin/users",              labelCode: "ADMIN_NAV_USERS",               label: "Users",                   icon: Users },
       { to: "/admin/roles",              labelCode: "ADMIN_NAV_ROLES",               label: "Roles & Permissions",     icon: ShieldCheck },
       { to: "/admin/complaints-config",  labelCode: "ADMIN_NAV_COMPLAINTS",          label: "Complaints",              icon: Inbox },
