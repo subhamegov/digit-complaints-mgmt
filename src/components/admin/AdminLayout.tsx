@@ -43,8 +43,17 @@ import {
   Inbox,
   HeartPulse,
   LayoutDashboard,
+  MapPin,
 } from "lucide-react";
-import { useRbac, type Permission } from "@/lib/rbac";
+import {
+  useRbac,
+  ROLE_LABEL,
+  TENANTS,
+  JURISDICTIONS,
+  type Permission,
+  type Role,
+} from "@/lib/rbac";
+import { ContextCombobox } from "@/components/pgr/ContextCombobox";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
