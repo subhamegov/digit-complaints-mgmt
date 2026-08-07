@@ -22,7 +22,9 @@ function LoginPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setRole(role);
-    navigate({ to: role === "PLATFORM_ADMIN" ? "/platform" : "/dashboard" });
+    navigate({
+      to: role === "PLATFORM_ADMIN" ? "/platform" : role === "ACCOUNT_ADMIN" ? "/admin/home" : "/dashboard",
+    });
   };
 
   return (

@@ -111,9 +111,10 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "AUDIT_LOG_VIEW",
   ],
   ACCOUNT_ADMIN: [
+    // Administrative persona — no personal complaint-resolution inbox,
+    // so PGR_TASKS_VIEW is intentionally not granted.
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",
-    "PGR_TASKS_VIEW",
     "PGR_COMPLAINT_VIEW",
     "PGR_REPORTS_VIEW",
     "PGR_SLA_VIEW",
