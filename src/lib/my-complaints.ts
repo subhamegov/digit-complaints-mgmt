@@ -506,3 +506,31 @@ export const PERSONA_FILTER_FIELDS: Record<string, ("unit" | "assignee" | "statu
   DEPT_HEAD: ["unit", "assignee", "status", "service", "locality", "sla", "date"],
 };
 
+
+/* ------------------------------------------------------------------ */
+/* Escalation filter (organisation tab, supervisory personas only)      */
+/* ------------------------------------------------------------------ */
+
+export type EscalationFilterKey = "ALL" | "ACTIVE" | "NONE" | "RESOLVED";
+
+export const ESCALATION_FILTERS: { key: EscalationFilterKey; label: string }[] = [
+  { key: "ALL", label: "All complaints" },
+  { key: "ACTIVE", label: "Actively escalated" },
+  { key: "NONE", label: "Not escalated" },
+  { key: "RESOLVED", label: "Escalation resolved" },
+];
+
+export function matchesEscalationFilter(c: Complaint, key: EscalationFilterKey): boolean {
+  switch (key) {
+    case "ALL": return true;
+    case "ACTIVE": return isActivelyEscalated(c);
+    case "NONE": return !isActivelyEscalated(c) && !(isCompleted(c) && c.slaState === "BREACHED");
+    case "RESOLVED": return isCompleted(c) && c.slaState === "BREACHED";
+  }
+}
+
+/** Escalation column value. */
+export function escalationCell(c: Complaint): { escalated: boolean; label: string } {
+  if (isActivelyEscalated(c)) return { escalated: true, label: `Escalated · ${escalationLevel(c)}` };
+  return { escalated: false, label: "Not escalated" };
+}
