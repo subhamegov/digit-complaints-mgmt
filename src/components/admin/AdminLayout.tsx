@@ -11,6 +11,7 @@
 
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
+import digitLogo from "@/assets/digit-logo.png.asset.json";
 import {
   Home,
   Building2,
