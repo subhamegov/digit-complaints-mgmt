@@ -257,10 +257,30 @@ export function AdminLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopBar onMenuClick={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          <div className="flex min-h-full flex-col">
+            <div className="flex-1">
+              <Outlet />
+            </div>
+            <AdminAttributionFooter />
+          </div>
         </main>
       </div>
     </div>
+  );
+}
+
+/** Persistent "Powered by DIGIT" attribution shown on every admin page. */
+function AdminAttributionFooter() {
+  return (
+    <footer className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-t border-border px-4 py-4 text-[12px] text-muted-foreground">
+      <span>Powered by</span>
+      <img
+        src={digitLogo.url}
+        alt="DIGIT"
+        className="h-[20px] w-auto max-w-full shrink-0"
+        loading="lazy"
+      />
+    </footer>
   );
 }
 
