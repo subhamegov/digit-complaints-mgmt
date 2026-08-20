@@ -53,6 +53,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { ADMIN_ROLE_OPTIONS as ROLE_OPTIONS, getRoleLabel } from "@/lib/admin-roles";
 import {
@@ -104,7 +112,8 @@ const EMP_TONE: Record<EmployeeStatus, string> = {
 const CTZ_TONE: Record<CitizenStatus, string> = {
   ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
   UNVERIFIED: "bg-amber-50 text-amber-700 border-amber-200",
-  DISABLED: "bg-muted text-muted-foreground border-border",
+  BLOCKED: "bg-rose-50 text-rose-700 border-rose-200",
+  LOCKED: "bg-muted text-muted-foreground border-border",
 };
 
 function Pill({ label, className }: { label: string; className: string }) {
@@ -753,10 +762,30 @@ function EmployeesTab() {
 /* Citizens                                                            */
 /* ------------------------------------------------------------------ */
 
+const BLOCK_REASONS = [
+  "Suspected account compromise",
+  "Repeated authentication abuse",
+  "Fraud or abuse investigation",
+  "Citizen-requested block",
+  "Other",
+];
+
+const BLOCK_DURATIONS = ["24 hours", "7 days", "Custom expiry", "Until manually unblocked"];
+
 function CitizensTab() {
   const [citizens, setCitizens] = useState<Citizen[]>(() => loadCitizens());
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const [blockTarget, setBlockTarget] = useState<Citizen | null>(null);
+  const [unblockTarget, setUnblockTarget] = useState<Citizen | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<Citizen | null>(null);
+
+  const [reason, setReason] = useState("");
+  const [duration, setDuration] = useState("");
+  const [customExpiry, setCustomExpiry] = useState("");
+  const [justification, setJustification] = useState("");
+  const [unblockReason, setUnblockReason] = useState("");
 
   const persist = (next: Citizen[]) => {
     setCitizens(next);
@@ -786,11 +815,78 @@ function CitizensTab() {
     toast.success(message);
   };
 
-  const setStatus = (c: Citizen, status: CitizenStatus, message: string) => {
-    persist(citizens.map((x) => (x.id === c.id ? { ...x, status } : x)));
-    audit(c, "CITIZEN_ACCOUNT_SUPPORT_ACTION", message, [
-      { field: "Account status", previous: CITIZEN_STATUS_LABEL[c.status], next: CITIZEN_STATUS_LABEL[status] },
-    ]);
+  const openBlock = (c: Citizen) => {
+    setReason("");
+    setDuration("");
+    setCustomExpiry("");
+    setJustification("");
+    setBlockTarget(c);
+  };
+
+  const justificationRequired = duration === "Until manually unblocked" || reason === "Other";
+  const blockValid =
+    !!reason &&
+    !!duration &&
+    (duration !== "Custom expiry" || !!customExpiry) &&
+    (!justificationRequired || justification.trim().length > 0);
+
+  const expiryFor = (): string | null => {
+    if (duration === "24 hours") return new Date(Date.now() + 24 * 3600e3).toISOString();
+    if (duration === "7 days") return new Date(Date.now() + 7 * 24 * 3600e3).toISOString();
+    if (duration === "Custom expiry" && customExpiry) return new Date(customExpiry).toISOString();
+    return null;
+  };
+
+  const confirmBlock = () => {
+    const c = blockTarget;
+    if (!c || !blockValid) return;
+    const expiresAt = expiryFor();
+    const sessionRevocation = "All active sessions revoked";
+    const block = {
+      blockedAt: new Date().toISOString(),
+      blockedBy: CURRENT_ADMIN,
+      reason,
+      justification: justification.trim() || undefined,
+      duration,
+      expiresAt,
+      previousStatus: c.status,
+      sessionRevocation,
+    };
+    // Authentication state only — complaints, profile and identifiers untouched.
+    persist(citizens.map((x) => (x.id === c.id ? { ...x, status: "BLOCKED" as CitizenStatus, block } : x)));
+    audit(
+      c,
+      "CITIZEN_SIGN_IN_BLOCKED",
+      "Citizen sign-in has been blocked.",
+      [{ field: "Account status", previous: CITIZEN_STATUS_LABEL[c.status], next: "Blocked" }],
+      {
+        reason,
+        ...(block.justification ? { justification: block.justification } : {}),
+        accessDuration: duration,
+        expiry: expiresAt ? formatTs(expiresAt) : "No expiry — manual unblock required",
+        sessionRevocation,
+      },
+    );
+    setBlockTarget(null);
+  };
+
+  const confirmUnblock = () => {
+    const c = unblockTarget;
+    if (!c || !unblockReason.trim()) return;
+    persist(
+      citizens.map((x) =>
+        x.id === c.id ? { ...x, status: "ACTIVE" as CitizenStatus, block: undefined } : x,
+      ),
+    );
+    audit(
+      c,
+      "CITIZEN_SIGN_IN_UNBLOCKED",
+      "Citizen sign-in has been unblocked.",
+      [{ field: "Account status", previous: "Blocked", next: "Active" }],
+      { reason: unblockReason.trim() },
+    );
+    setUnblockTarget(null);
+    setUnblockReason("");
   };
 
   const filtered = useMemo(() => {
@@ -926,16 +1022,33 @@ function CitizensTab() {
                           <RotateCcw className="mr-2 h-3.5 w-3.5" /> Resend verification
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        {c.status === "DISABLED" ? (
-                          <DropdownMenuItem onClick={() => setStatus(c, "ACTIVE", "Citizen account restored.")}>
-                            <Power className="mr-2 h-3.5 w-3.5" /> Restore account
-                          </DropdownMenuItem>
-                        ) : (
+                        <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                          Account security
+                        </DropdownMenuLabel>
+                        {c.status === "BLOCKED" ? (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setUnblockReason("");
+                                setUnblockTarget(c);
+                              }}
+                            >
+                              <Power className="mr-2 h-3.5 w-3.5" /> Unblock sign-in
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setDetailsTarget(c)}>
+                              <Eye className="mr-2 h-3.5 w-3.5" /> View block details
+                            </DropdownMenuItem>
+                          </>
+                        ) : c.status === "ACTIVE" || c.status === "UNVERIFIED" ? (
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => setStatus(c, "DISABLED", "Citizen account disabled.")}
+                            onClick={() => openBlock(c)}
                           >
-                            <Ban className="mr-2 h-3.5 w-3.5" /> Disable account
+                            <Ban className="mr-2 h-3.5 w-3.5" /> Block sign-in
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem disabled>
+                            <Ban className="mr-2 h-3.5 w-3.5" /> No security action available
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -947,6 +1060,188 @@ function CitizensTab() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Block sign-in */}
+      <Dialog open={!!blockTarget} onOpenChange={(o) => !o && setBlockTarget(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Block citizen sign-in</DialogTitle>
+            <DialogDescription>
+              Blocking sign-in prevents this citizen from authenticating into their account. Their
+              complaints, profile records and historical data will remain unchanged.
+            </DialogDescription>
+          </DialogHeader>
+          {blockTarget && (
+            <div className="space-y-3">
+              <dl className="space-y-1.5 rounded border border-border bg-surface-2 px-3 py-2.5 text-[13px]">
+                <Row label="Citizen ID" value={blockTarget.id} />
+                <Row label="Login identifier" value={blockTarget.maskedIdentifier} />
+                <Row label="Current status" value={CITIZEN_STATUS_LABEL[blockTarget.status]} />
+                <Row label="Last logged in" value={formatTs(blockTarget.lastLoggedIn)} />
+              </dl>
+
+              <div className="space-y-1.5">
+                <Label className="text-[12px]">Reason *</Label>
+                <Select value={reason} onValueChange={setReason}>
+                  <SelectTrigger className="h-8 text-[13px]">
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BLOCK_REASONS.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-[12px]">Block duration *</Label>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger className="h-8 text-[13px]">
+                    <SelectValue placeholder="Select a duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BLOCK_DURATIONS.map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {duration === "Custom expiry" && (
+                <div className="space-y-1.5">
+                  <Label className="text-[12px]">Expiry date and time *</Label>
+                  <Input
+                    type="datetime-local"
+                    value={customExpiry}
+                    onChange={(e) => setCustomExpiry(e.target.value)}
+                    className="h-8 text-[13px]"
+                  />
+                </div>
+              )}
+
+              {justificationRequired && (
+                <div className="space-y-1.5">
+                  <Label className="text-[12px]">Justification *</Label>
+                  <Textarea
+                    value={justification}
+                    onChange={(e) => setJustification(e.target.value)}
+                    rows={3}
+                    className="text-[13px]"
+                    placeholder="Record why an indefinite or non-standard block is required"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setBlockTarget(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" size="sm" disabled={!blockValid} onClick={confirmBlock}>
+              Block sign-in
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unblock sign-in */}
+      <Dialog
+        open={!!unblockTarget}
+        onOpenChange={(o) => {
+          if (!o) {
+            setUnblockTarget(null);
+            setUnblockReason("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Unblock citizen sign-in</DialogTitle>
+            <DialogDescription>
+              This will restore the citizen&apos;s ability to authenticate using their existing login
+              identifier.
+            </DialogDescription>
+          </DialogHeader>
+          {unblockTarget && (
+            <div className="space-y-3">
+              <dl className="space-y-1.5 rounded border border-border bg-surface-2 px-3 py-2.5 text-[13px]">
+                <Row label="Citizen ID" value={unblockTarget.id} />
+                <Row label="Login identifier" value={unblockTarget.maskedIdentifier} />
+              </dl>
+              <div className="space-y-1.5">
+                <Label className="text-[12px]">Reason for unblocking *</Label>
+                <Textarea
+                  value={unblockReason}
+                  onChange={(e) => setUnblockReason(e.target.value)}
+                  rows={3}
+                  className="text-[13px]"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUnblockTarget(null);
+                setUnblockReason("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" disabled={!unblockReason.trim()} onClick={confirmUnblock}>
+              Unblock sign-in
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block details */}
+      <Sheet open={!!detailsTarget} onOpenChange={(o) => !o && setDetailsTarget(null)}>
+        <SheetContent className="w-[420px] sm:max-w-[420px]">
+          <SheetHeader>
+            <SheetTitle>Block details</SheetTitle>
+            <SheetDescription>
+              Authentication block record. Citizen names and full identifiers are never shown.
+            </SheetDescription>
+          </SheetHeader>
+          {detailsTarget && (
+            <dl className="mt-4 space-y-1.5 text-[13px]">
+              <Row label="Citizen ID" value={detailsTarget.id} />
+              <Row label="Login identifier" value={detailsTarget.maskedIdentifier} />
+              <Row label="Status" value={CITIZEN_STATUS_LABEL[detailsTarget.status]} />
+              <Row label="Blocked on" value={formatTs(detailsTarget.block?.blockedAt ?? null)} />
+              <Row label="Blocked by" value={detailsTarget.block?.blockedBy ?? "—"} />
+              <Row label="Reason" value={detailsTarget.block?.reason ?? "—"} />
+              <Row label="Duration" value={detailsTarget.block?.duration ?? "—"} />
+              <Row
+                label="Expiry"
+                value={
+                  detailsTarget.block?.expiresAt
+                    ? formatTs(detailsTarget.block.expiresAt)
+                    : "No expiry — manual unblock required"
+                }
+              />
+              <Row label="Sessions" value={detailsTarget.block?.sessionRevocation ?? "—"} />
+              <Row label="Last logged in" value={formatTs(detailsTarget.lastLoggedIn)} />
+              {detailsTarget.block?.justification && (
+                <div className="pt-2">
+                  <dt className="text-[12px] text-muted-foreground">Justification</dt>
+                  <dd className="mt-1 rounded border border-border bg-surface-2 px-2.5 py-2 text-[12.5px]">
+                    {detailsTarget.block.justification}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

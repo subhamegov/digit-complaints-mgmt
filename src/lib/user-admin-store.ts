@@ -15,7 +15,19 @@
  */
 
 export type EmployeeStatus = "INVITED" | "ACTIVE" | "INACTIVE" | "ARCHIVED";
-export type CitizenStatus = "ACTIVE" | "UNVERIFIED" | "DISABLED";
+export type CitizenStatus = "ACTIVE" | "UNVERIFIED" | "BLOCKED" | "LOCKED";
+
+/** Sign-in block metadata. Never contains name, full identifier or secrets. */
+export type CitizenBlock = {
+  blockedAt: string;
+  blockedBy: string;
+  reason: string;
+  justification?: string;
+  duration: string;
+  expiresAt: string | null;
+  previousStatus: CitizenStatus;
+  sessionRevocation: string;
+};
 
 export type Employee = {
   id: string;
@@ -37,6 +49,8 @@ export type Citizen = {
   maskedIdentifier: string;
   status: CitizenStatus;
   lastLoggedIn: string | null;
+  /** Present only while sign-in is blocked. */
+  block?: CitizenBlock;
 };
 
 export type AuditUserType = "EMPLOYEE" | "CITIZEN";
@@ -63,7 +77,9 @@ export type AuditAction =
   | "AUTHENTICATION_SUPPORT_ACTION"
   | "CITIZEN_ACCOUNT_SUPPORT_ACTION"
   | "PROTECTED_DATA_ACCESS"
-  | "PERMISSION_CHANGE";
+  | "PERMISSION_CHANGE"
+  | "CITIZEN_SIGN_IN_BLOCKED"
+  | "CITIZEN_SIGN_IN_UNBLOCKED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CREATE: "Created",
@@ -88,6 +104,8 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CITIZEN_ACCOUNT_SUPPORT_ACTION: "Citizen account support action",
   PROTECTED_DATA_ACCESS: "Protected data access",
   PERMISSION_CHANGE: "Permission changed",
+  CITIZEN_SIGN_IN_BLOCKED: "Sign-in blocked",
+  CITIZEN_SIGN_IN_UNBLOCKED: "Sign-in unblocked",
 };
 
 export type AuditChange = {
@@ -243,7 +261,24 @@ export const SEED_CITIZENS: Citizen[] = [
   { id: "CTZ-100234", identifierType: "PHONE", maskedIdentifier: "••••••4321", status: "ACTIVE", lastLoggedIn: "2026-08-20T07:12:00Z" },
   { id: "CTZ-100235", identifierType: "EMAIL", maskedIdentifier: "s•••••@example.com", status: "ACTIVE", lastLoggedIn: "2026-08-19T19:48:00Z" },
   { id: "CTZ-100236", identifierType: "PHONE", maskedIdentifier: "••••••9087", status: "UNVERIFIED", lastLoggedIn: null },
-  { id: "CTZ-100237", identifierType: "EMAIL", maskedIdentifier: "m•••••@mail.example", status: "DISABLED", lastLoggedIn: "2026-06-30T10:03:00Z" },
+  {
+    id: "CTZ-100237",
+    identifierType: "EMAIL",
+    maskedIdentifier: "m•••••@mail.example",
+    status: "BLOCKED",
+    lastLoggedIn: "2026-06-30T10:03:00Z",
+    block: {
+      blockedAt: "2026-08-19T11:20:00Z",
+      blockedBy: "Harpreet Kaur (Citizen Account Support)",
+      reason: "Citizen-requested block",
+      duration: "Until manually unblocked",
+      justification: "Citizen reported a lost device and asked for sign-in to be blocked.",
+      expiresAt: null,
+      previousStatus: "ACTIVE",
+      sessionRevocation: "2 active sessions revoked",
+    },
+  },
+  { id: "CTZ-100241", identifierType: "PHONE", maskedIdentifier: "••••••3308", status: "LOCKED", lastLoggedIn: "2026-08-17T18:26:00Z" },
   { id: "CTZ-100238", identifierType: "PHONE", maskedIdentifier: "••••••1145", status: "ACTIVE", lastLoggedIn: "2026-08-18T09:30:00Z" },
   { id: "CTZ-100239", identifierType: "PHONE", maskedIdentifier: "••••••7762", status: "ACTIVE", lastLoggedIn: "2026-08-20T04:55:00Z" },
   { id: "CTZ-100240", identifierType: "EMAIL", maskedIdentifier: "a•••••@example.org", status: "UNVERIFIED", lastLoggedIn: null },
@@ -335,7 +370,7 @@ export const SEED_AUDIT: AuditEvent[] = [
 ];
 
 const KEY_EMP = "pgr.admin.employees.v1";
-const KEY_CTZ = "pgr.admin.citizens.v1";
+const KEY_CTZ = "pgr.admin.citizens.v2";
 const KEY_AUD = "pgr.admin.userAudit.v1";
 
 function load<T>(key: string, fallback: T[]): T[] {
@@ -404,5 +439,6 @@ export const EMPLOYEE_STATUS_LABEL: Record<EmployeeStatus, string> = {
 export const CITIZEN_STATUS_LABEL: Record<CitizenStatus, string> = {
   ACTIVE: "Active",
   UNVERIFIED: "Unverified",
-  DISABLED: "Disabled",
+  BLOCKED: "Blocked",
+  LOCKED: "Locked",
 };
