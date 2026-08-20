@@ -371,7 +371,7 @@ function EmployeesTab() {
     total: employees.length,
     invited: employees.filter((e) => e.status === "INVITED").length,
     active: employees.filter((e) => e.status === "ACTIVE").length,
-    inactive: employees.filter((e) => e.status === "INACTIVE").length,
+    archived: employees.filter((e) => e.status === "ARCHIVED").length,
   };
 
   return (
@@ -381,7 +381,8 @@ function EmployeesTab() {
           <StatCard label="Total" value={counts.total} />
           <StatCard label="Invited" value={counts.invited} tone="sky" />
           <StatCard label="Active" value={counts.active} tone="emerald" />
-          <StatCard label="Inactive" value={counts.inactive} tone="amber" />
+          <StatCard label="Archived" value={counts.archived} tone="amber" />
+
         </div>
         <Button onClick={openCreate} size="sm" className="gap-1.5">
           <UserPlus className="h-4 w-4" />
