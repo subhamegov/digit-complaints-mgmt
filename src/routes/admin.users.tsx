@@ -104,7 +104,8 @@ const EMP_TONE: Record<EmployeeStatus, string> = {
 const CTZ_TONE: Record<CitizenStatus, string> = {
   ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
   UNVERIFIED: "bg-amber-50 text-amber-700 border-amber-200",
-  DISABLED: "bg-muted text-muted-foreground border-border",
+  BLOCKED: "bg-rose-50 text-rose-700 border-rose-200",
+  LOCKED: "bg-muted text-muted-foreground border-border",
 };
 
 function Pill({ label, className }: { label: string; className: string }) {
