@@ -30,7 +30,7 @@ function HomePage() {
                 Dashboards → Live Dashboard for a focused, real-time view.
               </p>
               <Link
-                to="/admin/dashboards/live"
+                to="/admin/dashboards"
                 className="mt-4 inline-flex h-8 items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 text-[12px] font-medium text-foreground hover:bg-muted"
               >
                 Open Live Dashboard
