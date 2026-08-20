@@ -435,5 +435,6 @@ export const EMPLOYEE_STATUS_LABEL: Record<EmployeeStatus, string> = {
 export const CITIZEN_STATUS_LABEL: Record<CitizenStatus, string> = {
   ACTIVE: "Active",
   UNVERIFIED: "Unverified",
-  DISABLED: "Disabled",
+  BLOCKED: "Blocked",
+  LOCKED: "Locked",
 };
