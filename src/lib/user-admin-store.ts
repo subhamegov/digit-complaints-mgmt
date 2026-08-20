@@ -210,7 +210,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     designation: "Revenue Inspector",
     roleKey: "ROLE_COMPLAINT_OFFICER",
     jurisdiction: "",
-    status: "INACTIVE",
+    status: "ARCHIVED",
     lastLoggedIn: "2026-07-22T11:00:00Z",
   },
   {
