@@ -7,7 +7,6 @@ import {
   Archive,
   Link2,
   Power,
-  PowerOff,
   UserPlus,
   Mail,
   MessageSquare,
