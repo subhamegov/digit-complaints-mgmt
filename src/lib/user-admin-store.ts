@@ -15,7 +15,19 @@
  */
 
 export type EmployeeStatus = "INVITED" | "ACTIVE" | "INACTIVE" | "ARCHIVED";
-export type CitizenStatus = "ACTIVE" | "UNVERIFIED" | "DISABLED";
+export type CitizenStatus = "ACTIVE" | "UNVERIFIED" | "BLOCKED" | "LOCKED";
+
+/** Sign-in block metadata. Never contains name, full identifier or secrets. */
+export type CitizenBlock = {
+  blockedAt: string;
+  blockedBy: string;
+  reason: string;
+  justification?: string;
+  duration: string;
+  expiresAt: string | null;
+  previousStatus: CitizenStatus;
+  sessionRevocation: string;
+};
 
 export type Employee = {
   id: string;
