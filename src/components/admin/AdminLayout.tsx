@@ -260,7 +260,7 @@ function SidebarShell({
       <div className="border-t border-white/10 px-3 py-2.5 text-[11px]">
         <div className="truncate font-medium text-chrome-foreground">{userName}</div>
         <div className="truncate text-chrome-muted">
-          {t("ROLE_PLATFORM_ADMIN", "Platform Administrator")}
+          {ROLE_LABEL[role] ?? t("ROLE_PLATFORM_ADMIN", "Platform Administrator")}
         </div>
       </div>
     </>
