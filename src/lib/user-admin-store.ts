@@ -49,6 +49,8 @@ export type Citizen = {
   maskedIdentifier: string;
   status: CitizenStatus;
   lastLoggedIn: string | null;
+  /** Present only while sign-in is blocked. */
+  block?: CitizenBlock;
 };
 
 export type AuditUserType = "EMPLOYEE" | "CITIZEN";
