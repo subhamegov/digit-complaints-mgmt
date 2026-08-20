@@ -311,12 +311,13 @@ export const SEED_AUDIT: AuditEvent[] = [
     targetLabel: "Priya Nair",
     targetIdentifier: "priya.nair@gov.example",
     targetId: "EMP-2005",
-    action: "DEACTIVATE",
+    action: "ARCHIVE",
     performedBy: "Vikram Mehta (Account Administrator)",
     result: "SUCCESS",
     lastLoggedIn: "2026-07-22T11:00:00Z",
-    changes: [{ field: "Status", previous: "Active", next: "Inactive" }],
+    changes: [{ field: "Status", previous: "Active", next: "Archived" }],
     context: { reason: "Extended leave of absence" },
+
   },
   {
     eventId: "AUD-9006",
