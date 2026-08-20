@@ -210,7 +210,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     designation: "Revenue Inspector",
     roleKey: "ROLE_COMPLAINT_OFFICER",
     jurisdiction: "",
-    status: "INACTIVE",
+    status: "ARCHIVED",
     lastLoggedIn: "2026-07-22T11:00:00Z",
   },
   {
@@ -311,12 +311,13 @@ export const SEED_AUDIT: AuditEvent[] = [
     targetLabel: "Priya Nair",
     targetIdentifier: "priya.nair@gov.example",
     targetId: "EMP-2005",
-    action: "DEACTIVATE",
+    action: "ARCHIVE",
     performedBy: "Vikram Mehta (Account Administrator)",
     result: "SUCCESS",
     lastLoggedIn: "2026-07-22T11:00:00Z",
-    changes: [{ field: "Status", previous: "Active", next: "Inactive" }],
+    changes: [{ field: "Status", previous: "Active", next: "Archived" }],
     context: { reason: "Extended leave of absence" },
+
   },
   {
     eventId: "AUD-9006",
@@ -385,11 +386,13 @@ export const CURRENT_ADMIN = "Vikram Mehta (Account Administrator)";
 
 export function formatTs(iso: string | null): string {
   if (!iso) return "Never";
-  return new Date(iso).toLocaleString(undefined, {
+  return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
-  });
+    timeZone: "UTC",
+  }).format(new Date(iso));
 }
+
 
 export const EMPLOYEE_STATUS_LABEL: Record<EmployeeStatus, string> = {
   INVITED: "Invited",

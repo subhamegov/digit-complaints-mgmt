@@ -7,7 +7,6 @@ import {
   Archive,
   Link2,
   Power,
-  PowerOff,
   UserPlus,
   Mail,
   MessageSquare,
@@ -371,7 +370,7 @@ function EmployeesTab() {
     total: employees.length,
     invited: employees.filter((e) => e.status === "INVITED").length,
     active: employees.filter((e) => e.status === "ACTIVE").length,
-    inactive: employees.filter((e) => e.status === "INACTIVE").length,
+    archived: employees.filter((e) => e.status === "ARCHIVED").length,
   };
 
   return (
@@ -381,7 +380,8 @@ function EmployeesTab() {
           <StatCard label="Total" value={counts.total} />
           <StatCard label="Invited" value={counts.invited} tone="sky" />
           <StatCard label="Active" value={counts.active} tone="emerald" />
-          <StatCard label="Inactive" value={counts.inactive} tone="amber" />
+          <StatCard label="Archived" value={counts.archived} tone="amber" />
+
         </div>
         <Button onClick={openCreate} size="sm" className="gap-1.5">
           <UserPlus className="h-4 w-4" />
@@ -555,35 +555,21 @@ function EmployeesTab() {
                             <Power className="mr-2 h-3.5 w-3.5" /> Reactivate
                           </DropdownMenuItem>
                         )}
-                        {e.status === "ACTIVE" && (
-                          <DropdownMenuItem
-                            onClick={() =>
-                              auditedUpdate(
-                                e,
-                                { status: "INACTIVE" },
-                                "DEACTIVATE",
-                                [{ field: "Status", previous: "Active", next: "Inactive" }],
-                                "Employee deactivated.",
-                              )
-                            }
-                          >
-                            <PowerOff className="mr-2 h-3.5 w-3.5" /> Deactivate
-                          </DropdownMenuItem>
-                        )}
                         {e.status === "ARCHIVED" ? (
                           <DropdownMenuItem
                             onClick={() =>
                               auditedUpdate(
                                 e,
-                                { status: "INACTIVE" },
+                                { status: "ACTIVE" },
                                 "RESTORE",
-                                [{ field: "Status", previous: "Archived", next: "Inactive" }],
+                                [{ field: "Status", previous: "Archived", next: "Active" }],
                                 "Employee restored.",
                               )
                             }
                           >
                             <RotateCcw className="mr-2 h-3.5 w-3.5" /> Restore
                           </DropdownMenuItem>
+
                         ) : (
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
