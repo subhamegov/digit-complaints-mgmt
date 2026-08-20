@@ -77,7 +77,9 @@ export type AuditAction =
   | "AUTHENTICATION_SUPPORT_ACTION"
   | "CITIZEN_ACCOUNT_SUPPORT_ACTION"
   | "PROTECTED_DATA_ACCESS"
-  | "PERMISSION_CHANGE";
+  | "PERMISSION_CHANGE"
+  | "CITIZEN_SIGN_IN_BLOCKED"
+  | "CITIZEN_SIGN_IN_UNBLOCKED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CREATE: "Created",
@@ -102,6 +104,8 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CITIZEN_ACCOUNT_SUPPORT_ACTION: "Citizen account support action",
   PROTECTED_DATA_ACCESS: "Protected data access",
   PERMISSION_CHANGE: "Permission changed",
+  CITIZEN_SIGN_IN_BLOCKED: "Sign-in blocked",
+  CITIZEN_SIGN_IN_UNBLOCKED: "Sign-in unblocked",
 };
 
 export type AuditChange = {
@@ -366,7 +370,7 @@ export const SEED_AUDIT: AuditEvent[] = [
 ];
 
 const KEY_EMP = "pgr.admin.employees.v1";
-const KEY_CTZ = "pgr.admin.citizens.v1";
+const KEY_CTZ = "pgr.admin.citizens.v2";
 const KEY_AUD = "pgr.admin.userAudit.v1";
 
 function load<T>(key: string, fallback: T[]): T[] {
