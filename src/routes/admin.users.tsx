@@ -387,8 +387,8 @@ function EmployeesTab() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label="Total" value={counts.total} />
-          <StatCard label="Invited" value={counts.invited} tone="sky" />
           <StatCard label="Active" value={counts.active} tone="emerald" />
+          <StatCard label="Invited" value={counts.invited} tone="sky" />
           <StatCard label="Archived" value={counts.archived} tone="amber" />
 
         </div>
