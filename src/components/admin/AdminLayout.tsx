@@ -320,6 +320,9 @@ function AdminAttributionFooter() {
 }
 
 function AdminTopBar({ onMenuClick }: { onMenuClick: () => void }) {
+  const { role } = useRbac();
+  const headerTitle =
+    role === "ACCOUNT_ADMIN" ? "Account Administration" : "Platform Administration";
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-4">
       <button
@@ -332,7 +335,7 @@ function AdminTopBar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex items-center gap-2">
         <div className="leading-tight">
           <div className="text-[12px] font-semibold text-foreground">
-            {t("ADMIN_HEADER_TITLE", "Platform Administration")}
+            {t("ADMIN_HEADER_TITLE", headerTitle)}
           </div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
             {t("ADMIN_HEADER_SUBTITLE", "Admin Console")}
