@@ -555,35 +555,21 @@ function EmployeesTab() {
                             <Power className="mr-2 h-3.5 w-3.5" /> Reactivate
                           </DropdownMenuItem>
                         )}
-                        {e.status === "ACTIVE" && (
-                          <DropdownMenuItem
-                            onClick={() =>
-                              auditedUpdate(
-                                e,
-                                { status: "INACTIVE" },
-                                "DEACTIVATE",
-                                [{ field: "Status", previous: "Active", next: "Inactive" }],
-                                "Employee deactivated.",
-                              )
-                            }
-                          >
-                            <PowerOff className="mr-2 h-3.5 w-3.5" /> Deactivate
-                          </DropdownMenuItem>
-                        )}
                         {e.status === "ARCHIVED" ? (
                           <DropdownMenuItem
                             onClick={() =>
                               auditedUpdate(
                                 e,
-                                { status: "INACTIVE" },
+                                { status: "ACTIVE" },
                                 "RESTORE",
-                                [{ field: "Status", previous: "Archived", next: "Inactive" }],
+                                [{ field: "Status", previous: "Archived", next: "Active" }],
                                 "Employee restored.",
                               )
                             }
                           >
                             <RotateCcw className="mr-2 h-3.5 w-3.5" /> Restore
                           </DropdownMenuItem>
+
                         ) : (
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
