@@ -386,11 +386,13 @@ export const CURRENT_ADMIN = "Vikram Mehta (Account Administrator)";
 
 export function formatTs(iso: string | null): string {
   if (!iso) return "Never";
-  return new Date(iso).toLocaleString(undefined, {
+  return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
-  });
+    timeZone: "UTC",
+  }).format(new Date(iso));
 }
+
 
 export const EMPLOYEE_STATUS_LABEL: Record<EmployeeStatus, string> = {
   INVITED: "Invited",
