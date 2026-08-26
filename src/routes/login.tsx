@@ -164,16 +164,36 @@ function LoginPage() {
               </Field>
               <Field label={t("COMMON_TENANT")}>
                 <select value={tenant} onChange={(e) => setTenant(e.target.value)} className={inputCls} style={inputStyle}>
-                  <option value="acc.makueni.cg">Makueni County Government, Kenya</option>
-                  <option value="acc.bomet.cg">Bomet County Government, Kenya</option>
-                  <option value="acc.ethekwini.mm">eThekwini Metropolitan Municipality, South Africa</option>
-                  <option value="acc.diredawa.ca">Dire Dawa City Administration, Ethiopia</option>
-                  <option value="acc.enugu.sg">Enugu State Government, Nigeria</option>
-                  <option value="acc.maputo.mc">Maputo Municipal Council, Mozambique</option>
-                  <option value="acc.banyuwangi.rg">Banyuwangi Regency Government, Indonesia</option>
-                  <option value="acc.amritsar.mc">Amritsar Municipal Corporation, India</option>
+                  {ACCOUNTS.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
                 </select>
               </Field>
+
+              {selectedAccount?.hasCustomLogin && selectedAccount.customLoginUrl && (
+                <div
+                  className="rounded-md px-3 py-3"
+                  style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}
+                >
+                  <div className="flex items-center gap-1.5" style={{ color: "#2D4FC4", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Organisation sign-in
+                  </div>
+                  <p style={{ marginTop: 6, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
+                    Your administrator has configured a separate sign-in page for this organisation.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate({ to: selectedAccount.customLoginUrl! })}
+                    className="mt-2.5 inline-flex items-center gap-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+                    style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 600 }}
+                  >
+                    Go to organisation sign-in
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
 
               <Field
                 label={
