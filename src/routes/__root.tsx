@@ -113,6 +113,7 @@ function AppLayout() {
   const { role } = useRbac();
   const isChromeless =
     pathname === "/login" ||
+    pathname.endsWith("/login") ||
     pathname === "/" ||
     pathname === "/platform" ||
     pathname.startsWith("/admin");

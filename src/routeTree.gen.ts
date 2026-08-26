@@ -55,6 +55,7 @@ import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
+import { Route as OrgLoginRouteImport } from './routes/$org.login'
 import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
 import { Route as AdminDataDictionaryIndexRouteImport } from './routes/admin.data-dictionary.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
@@ -301,6 +302,11 @@ const AdminAccountsRoute = AdminAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => AdminRoute,
 } as any)
+const OrgLoginRoute = OrgLoginRouteImport.update({
+  id: '/$org/login',
+  path: '/$org/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminWorkflowConfigIndexRoute =
   AdminWorkflowConfigIndexRouteImport.update({
     id: '/',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
@@ -447,6 +454,7 @@ export interface FileRoutesByTo {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
@@ -507,6 +515,7 @@ export interface FileRoutesById {
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
+  '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/$org/login'
     | '/admin/accounts'
     | '/admin/audit-log'
     | '/admin/authentication'
@@ -631,6 +641,7 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/$org/login'
     | '/admin/accounts'
     | '/admin/audit-log'
     | '/admin/authentication'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/sla'
     | '/tasks'
     | '/users'
+    | '/$org/login'
     | '/admin/accounts'
     | '/admin/audit-log'
     | '/admin/authentication'
@@ -752,6 +764,7 @@ export interface RootRouteChildren {
   SlaRoute: typeof SlaRoute
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
+  OrgLoginRoute: typeof OrgLoginRoute
   ComplaintsNewRoute: typeof ComplaintsNewRoute
   ConfigComplaintTypesRoute: typeof ConfigComplaintTypesRoute
   ConfigWorkflowRoute: typeof ConfigWorkflowRoute
@@ -1083,6 +1096,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAccountsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/$org/login': {
+      id: '/$org/login'
+      path: '/$org/login'
+      fullPath: '/$org/login'
+      preLoaderRoute: typeof OrgLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/workflow-config/': {
       id: '/admin/workflow-config/'
       path: '/'
@@ -1302,6 +1322,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlaRoute: SlaRoute,
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
+  OrgLoginRoute: OrgLoginRoute,
   ComplaintsNewRoute: ComplaintsNewRoute,
   ConfigComplaintTypesRoute: ConfigComplaintTypesRoute,
   ConfigWorkflowRoute: ConfigWorkflowRoute,
