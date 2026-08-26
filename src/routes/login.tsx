@@ -184,7 +184,7 @@ function LoginPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => navigate({ to: selectedAccount.customLoginUrl! })}
+                    onClick={() => navigate({ to: "/$org/login", params: { org: selectedAccount.customLoginUrl!.split("/")[1] } })}
                     className="mt-2.5 inline-flex items-center gap-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
                     style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 600 }}
                   >
