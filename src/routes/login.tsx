@@ -112,9 +112,12 @@ function LoginPage() {
 
         {/* Form column */}
         <div
-          className="flex items-center justify-center px-5 py-10 sm:p-10"
+          className="flex flex-col items-center justify-center px-5 py-10 sm:p-10"
           style={{ background: "#F5F7FF", color: "#17191F" }}
         >
+          <div className="mb-3 flex w-full justify-end" style={{ maxWidth: 400 }}>
+            <LanguagePicker value={language} onChange={setLanguage} />
+          </div>
           <form
             onSubmit={submit}
             className="w-full"
