@@ -20,6 +20,8 @@ function LoginPage() {
   const [password, setPassword] = useState("••••••••");
   const [role, setLocalRole] = useState<Role>(currentRole);
   const [tenant, setTenant] = useState("acc.makueni.cg");
+  const [language, setLanguage] = useState<LanguageCode>("en");
+  const selectedAccount = ACCOUNTS.find((a) => a.value === tenant);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
