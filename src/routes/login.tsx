@@ -1,12 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ROLE_LABEL, useRbac, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { ShieldCheck, ArrowUpRight } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
-import { LanguagePicker } from "@/components/LanguagePicker";
-import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
-import loginBg from "@/assets/login-crowd.jpg";
+import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
+
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In — DIGIT Complaint Management" }] }),

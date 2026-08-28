@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SlaRouteImport } from './routes/sla'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as LoginRouteImport } from './routes/login'
@@ -85,6 +86,11 @@ const TasksRoute = TasksRouteImport.update({
 const SlaRoute = SlaRouteImport.update({
   id: '/sla',
   path: '/sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -401,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
+  '/signup': typeof SignupRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -465,6 +472,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
+  '/signup': typeof SignupRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -528,6 +536,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
+  '/signup': typeof SignupRoute
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -594,6 +603,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/platform'
     | '/reports'
+    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -658,6 +668,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/platform'
     | '/reports'
+    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -720,6 +731,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/platform'
     | '/reports'
+    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -785,6 +797,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PlatformRoute: typeof PlatformRoute
   ReportsRoute: typeof ReportsRoute
+  SignupRoute: typeof SignupRoute
   SlaRoute: typeof SlaRoute
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
@@ -819,6 +832,13 @@ declare module '@tanstack/react-router' {
       path: '/sla'
       fullPath: '/sla'
       preLoaderRoute: typeof SlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -1359,6 +1379,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PlatformRoute: PlatformRoute,
   ReportsRoute: ReportsRoute,
+  SignupRoute: SignupRoute,
   SlaRoute: SlaRoute,
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
