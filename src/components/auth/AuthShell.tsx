@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
 import loginBg from "@/assets/login-crowd.jpg";
 import { LanguagePicker } from "@/components/LanguagePicker";
@@ -11,6 +12,62 @@ import type { LanguageCode } from "@/lib/accounts";
 const AUTH_HEADLINE = "Manage complaints from intake to closure.";
 const AUTH_NARRATIVE =
   "Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities.";
+
+/** Rotating strap-lines shown beneath the narrative on /login and /signup. */
+const AUTH_ROTATING: { title: string; quote: string }[] = [
+  {
+    title: "Governance that learns",
+    quote:
+      "Connecting citizen voices to responsive institutions and efficient services through an experience that feels natural.",
+  },
+  {
+    title: "Service you can track",
+    quote:
+      "Every complaint carries a clear owner, a service timeline, and a record of what was done — visible end to end.",
+  },
+  {
+    title: "Trust, built daily",
+    quote:
+      "Turning everyday civic signals into faster resolution and steady confidence in public institutions.",
+  },
+];
+
+function RotatingNarrative() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const fadeOut = window.setTimeout(() => setVisible(false), 5200);
+    const advance = window.setTimeout(() => {
+      setIndex((i) => (i + 1) % AUTH_ROTATING.length);
+      setVisible(true);
+    }, 6000);
+    return () => {
+      window.clearTimeout(fadeOut);
+      window.clearTimeout(advance);
+    };
+  }, [index]);
+
+  const item = AUTH_ROTATING[index]!;
+  return (
+    <div
+      aria-live="polite"
+      style={{
+        marginTop: 20,
+        minHeight: 116,
+        maxWidth: 360,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(6px)",
+        transition: "opacity 800ms ease, transform 800ms ease",
+      }}
+    >
+      <div style={{ color: "#FFFFFF", fontSize: 15, fontWeight: 600 }}>{item.title}</div>
+      <p style={{ marginTop: 6, color: "rgba(255,255,255,0.78)", fontSize: 15, lineHeight: 1.6, fontStyle: "italic" }}>
+        “{item.quote}”
+      </p>
+    </div>
+  );
+}
 
 export function AuthShell({
   language,
@@ -83,6 +140,7 @@ export function AuthShell({
             <p style={{ marginTop: 16, color: "rgba(255,255,255,0.86)", fontSize: 16, lineHeight: 1.6, maxWidth: 360 }}>
               {narrative}
             </p>
+            <RotatingNarrative />
             <div style={{ marginTop: 24, color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
               © 2026 eGovernments Foundation · DIGIT 2.9
             </div>
