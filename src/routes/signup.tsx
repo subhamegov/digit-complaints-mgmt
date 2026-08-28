@@ -28,6 +28,9 @@ import {
 } from "@/lib/org-setup";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    flow: search.flow === "approval" ? ("approval" as const) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Set Up Your Organisation — DIGIT Complaint Management" },
