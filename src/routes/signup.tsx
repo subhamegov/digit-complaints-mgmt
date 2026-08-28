@@ -938,8 +938,9 @@ function StepUrls({
       </div>
 
       <div className="mt-6">
-        <PrimaryButton onClick={onFinish}>Continue to account setup</PrimaryButton>
+        <PrimaryButton onClick={onFinish}>Create account</PrimaryButton>
       </div>
+
       <button
         type="button"
         onClick={onBack}
