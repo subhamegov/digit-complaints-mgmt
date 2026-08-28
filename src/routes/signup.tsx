@@ -103,7 +103,7 @@ function SignupPage() {
               <input
                 value={organisationName}
                 onChange={(e) => setOrganisationName(e.target.value)}
-                placeholder="Organisation name"
+                placeholder="Account name"
                 autoComplete="organization"
                 className={authInputCls}
                 style={authInputStyle}
