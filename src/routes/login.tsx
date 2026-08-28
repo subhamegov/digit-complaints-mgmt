@@ -180,5 +180,3 @@ function LoginPage() {
 const inputCls = authInputCls;
 const inputStyle = authInputStyle;
 const Field = AuthField;
-
-}
