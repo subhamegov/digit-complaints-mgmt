@@ -1,12 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ROLE_LABEL, useRbac, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { ShieldCheck, ArrowUpRight } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
-import { LanguagePicker } from "@/components/LanguagePicker";
-import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
-import loginBg from "@/assets/login-crowd.jpg";
+import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
+
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In — DIGIT Complaint Management" }] }),
@@ -32,94 +31,15 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ background: "#F5F7FF" }}>
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[45fr_55fr] xl:grid-cols-2">
-        {/* Identity / media column */}
-        <div
-          className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%), url(${loginBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* Brand block top-left */}
-          <div style={{ position: "absolute", top: 28, left: 28, right: 28 }}>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open DIGIT Complaint Management landing page in a new tab"
-              className="inline-block transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40 rounded-md px-2.5 py-1.5"
-              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
-            >
-              <img
-                src={eGovLogoAsset.url}
-                alt="eGov Foundation"
-                style={{ height: 36, width: "auto", display: "block" }}
-              />
-            </a>
+    <AuthShell
+      headline="Manage complaints from intake to closure."
+      narrative="Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities."
+      language={language}
+      onLanguageChange={setLanguage}
+    >
+      <form
+        onSubmit={submit}
 
-            <div style={{ marginTop: 18 }}>
-              <div style={{ color: "#FFFFFF", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
-                DIGIT Complaint Management
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  color: "rgba(255,255,255,0.76)",
-                  fontSize: 14,
-                  fontWeight: 400,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Digital Infrastructure for Public Services
-              </div>
-            </div>
-          </div>
-
-          {/* Narrative bottom-left */}
-          <div />
-          <div style={{ padding: "0 28px 28px 28px", maxWidth: 360 + 56 }}>
-            <h1
-              style={{
-                color: "#FFFFFF",
-                fontSize: "clamp(34px,4vw,48px)",
-                fontWeight: 600,
-                lineHeight: 1.1,
-                maxWidth: 360,
-              }}
-            >
-              Manage complaints from intake to closure.
-            </h1>
-            <p
-              style={{
-                marginTop: 16,
-                color: "rgba(255,255,255,0.86)",
-                fontSize: 16,
-                lineHeight: 1.6,
-                maxWidth: 360,
-              }}
-            >
-              Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities.
-            </p>
-            <div style={{ marginTop: 24, color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
-              © 2026 eGovernments Foundation · DIGIT 2.9
-            </div>
-          </div>
-        </div>
-
-        {/* Form column */}
-        <div
-          className="flex flex-col items-center justify-center px-5 py-10 sm:p-10"
-          style={{ background: "#F5F7FF", color: "#17191F" }}
-        >
-          <div className="mb-3 flex w-full justify-end" style={{ maxWidth: 400 }}>
-            <LanguagePicker value={language} onChange={setLanguage} />
-          </div>
-          <form
-            onSubmit={submit}
             className="w-full"
             style={{
               maxWidth: 400,
@@ -232,55 +152,31 @@ function LoginPage() {
               style={{
                 marginTop: 16,
                 color: "#6F7684",
+                fontSize: 13,
+                textAlign: "center",
+              }}
+            >
+              New to the platform?{" "}
+              <Link to="/signup" style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
+                Create an account
+              </Link>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                color: "#6F7684",
                 fontSize: 12,
                 textAlign: "center",
               }}
             >
               Use the role selector to demo CSR, GRO, Field Employee, Department Head, and Admin views.
             </div>
-          </form>
-        </div>
-      </div>
-
-      <style>{`
-        .login-input::placeholder { color: #8A90A2; }
-        .login-input:focus {
-          border-color: #355BE0 !important;
-          box-shadow: 0 0 0 3px rgba(53,91,224,0.16) !important;
-        }
-      `}</style>
-    </div>
+      </form>
+    </AuthShell>
   );
 }
 
-const inputCls = "login-input w-full outline-none";
-
-const inputStyle: React.CSSProperties = {
-  height: 44,
-  background: "#FFFFFF",
-  border: "1px solid #CBD5F2",
-  borderRadius: 8,
-  color: "#17191F",
-  fontSize: 14,
-  padding: "0 12px",
-};
-
-function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span
-        className="mb-1.5 block"
-        style={{
-          color: "#5E6675",
-          fontSize: 12,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
+const inputCls = authInputCls;
+const inputStyle = authInputStyle;
+const Field = AuthField;

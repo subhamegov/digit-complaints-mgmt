@@ -114,9 +114,11 @@ function AppLayout() {
   const isChromeless =
     pathname === "/login" ||
     pathname.endsWith("/login") ||
+    pathname === "/signup" ||
     pathname === "/" ||
     pathname === "/platform" ||
     pathname.startsWith("/admin");
+
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
