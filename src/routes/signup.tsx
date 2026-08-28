@@ -5,7 +5,7 @@ import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
-import { submitAccountRequest as submitApprovalRequest } from "@/lib/account-requests";
+import { submitAccountRequest } from "@/lib/account-requests";
 import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
 import {
