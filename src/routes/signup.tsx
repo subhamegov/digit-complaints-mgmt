@@ -99,7 +99,7 @@ function SignupPage() {
           </div>
 
           <div>
-            <AuthField label="Organisation name">
+            <AuthField label="ACCOUNT NAME">
               <input
                 value={organisationName}
                 onChange={(e) => setOrganisationName(e.target.value)}
