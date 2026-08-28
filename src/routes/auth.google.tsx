@@ -29,7 +29,7 @@ function GoogleAuthPage() {
   const proceed = () => {
     const acct = MOCK_ACCOUNTS.find((a) => a.email === selected)!;
     setPrototypeIdentity({ ...acct, method: "google" });
-    navigate({ to: "/signup" });
+    navigate({ to: "/signup", search: {} });
   };
 
   return (
@@ -100,7 +100,7 @@ function GoogleAuthPage() {
         </button>
         <button
           type="button"
-          onClick={() => navigate({ to: "/signup" })}
+          onClick={() => navigate({ to: "/signup", search: {} })}
           className="mt-2.5 w-full hover:bg-[#F5F7FF] focus:outline-none focus:ring-2"
           style={{
             height: 46,

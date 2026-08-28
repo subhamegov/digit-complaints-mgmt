@@ -155,7 +155,7 @@ function LoginPage() {
               }}
             >
               New to the platform?{" "}
-              <Link to="/signup" style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
+              <Link to="/signup" search={{}} style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
                 Create an account
               </Link>
             </div>
