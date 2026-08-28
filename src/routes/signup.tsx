@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { CheckCircle2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, MailCheck } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
+import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -16,11 +17,7 @@ export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
-const RULES = [
-  { id: "len", label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-  { id: "case", label: "Upper and lower case letters", test: (v: string) => /[a-z]/.test(v) && /[A-Z]/.test(v) },
-  { id: "num", label: "At least one number", test: (v: string) => /\d/.test(v) },
-];
+const DRAFT_KEY = "digit.prototype.signup.draft";
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -29,46 +26,135 @@ function SignupPage() {
   const [lastName, setLastName] = useState("");
   const [organisationName, setOrganisationName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [terms, setTerms] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [stage, setStage] = useState<"form" | "check-email">("form");
+  const [authMethod, setAuthMethod] = useState<"google" | "email" | null>(null);
 
-  const passwordValid = password.length > 0 && RULES.every((r) => r.test(password));
-  const formValid =
-    firstName.trim() !== "" &&
-    lastName.trim() !== "" &&
-    organisationName.trim() !== "" &&
-    /\S+@\S+\.\S+/.test(email) &&
-    passwordValid &&
-    terms;
+  // Restore prototype identity (e.g. returning from the simulated Google step).
+  useEffect(() => {
+    const identity = getPrototypeIdentity();
+    if (identity) {
+      setFirstName(identity.firstName);
+      setLastName(identity.lastName);
+      setEmail(identity.email);
+      setAuthMethod(identity.method);
+    }
+    const raw = typeof window !== "undefined" ? window.sessionStorage.getItem(DRAFT_KEY) : null;
+    if (raw) {
+      try {
+        const d = JSON.parse(raw) as { organisationName?: string; terms?: boolean; marketing?: boolean };
+        if (d.organisationName) setOrganisationName(d.organisationName);
+        if (d.terms) setTerms(true);
+        if (d.marketing) setMarketing(true);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    if (!formValid) return;
-    navigate({ to: "/login" });
+  const authenticated = authMethod !== null;
+  const emailValid = /\S+@\S+\.\S+/.test(email);
+  const identityReady = firstName.trim() !== "" && lastName.trim() !== "" && emailValid && terms;
+  const orgMissing = organisationName.trim() === "";
+  const canContinue = authenticated && !orgMissing && terms;
+
+  const saveDraft = () => {
+    if (typeof window === "undefined") return;
+    window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ organisationName, terms, marketing }));
   };
 
+  const submitEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    if (authenticated) {
+      if (!canContinue) return;
+      if (typeof window !== "undefined") window.sessionStorage.removeItem(DRAFT_KEY);
+      navigate({ to: "/setup/organisation" });
+      return;
+    }
+    if (!identityReady || orgMissing) return;
+    setStage("check-email");
+  };
+
+  const simulateVerification = () => {
+    setPrototypeIdentity({ firstName, lastName, email, method: "email" });
+    setAuthMethod("email");
+    setStage("form");
+    setSubmitted(false);
+  };
+
+  const useDifferentEmail = () => {
+    clearPrototypeIdentity();
+    setAuthMethod(null);
+    setStage("form");
+  };
+
+  const startGoogle = () => {
+    saveDraft();
+    navigate({ to: "/auth/google" });
+  };
+
+  const cardStyle: React.CSSProperties = {
+    maxWidth: 460,
+    background: "rgba(255,255,255,0.94)",
+    border: "1px solid #DCE4FF",
+    borderRadius: 16,
+    padding: 32,
+    boxShadow: "0 12px 36px rgba(32,55,140,0.08)",
+  };
+
+  if (stage === "check-email") {
+    return (
+      <AuthShell language={language} onLanguageChange={setLanguage} cardMaxWidth={460}>
+        <div className="w-full" style={cardStyle}>
+          <span
+            className="flex h-11 w-11 items-center justify-center rounded-full"
+            style={{ background: "#EEF2FF", color: "#2D4FC4" }}
+          >
+            <MailCheck className="h-5 w-5" />
+          </span>
+          <h1 style={{ marginTop: 16, color: "#17191F", fontSize: 28, fontWeight: 600 }}>Check your email</h1>
+          <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
+            We sent a sign-in link to <strong style={{ color: "#17191F" }}>{email}</strong>.
+          </p>
+          <p style={{ marginTop: 6, color: "#6F7684", fontSize: 13, lineHeight: 1.6 }}>
+            Open the link in the email to verify your address and continue.
+          </p>
+
+          <button
+            type="button"
+            onClick={simulateVerification}
+            className="mt-6 w-full focus:outline-none focus:ring-2"
+            style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+          >
+            Simulate email verification
+          </button>
+          <button
+            type="button"
+            onClick={useDifferentEmail}
+            className="mt-2.5 w-full hover:bg-[#F5F7FF] focus:outline-none focus:ring-2"
+            style={{
+              height: 46,
+              background: "#FFFFFF",
+              border: "1px solid #CBD5F2",
+              borderRadius: 8,
+              color: "#17191F",
+              fontWeight: 500,
+              fontSize: 14,
+            }}
+          >
+            Use a different email
+          </button>
+        </div>
+      </AuthShell>
+    );
+  }
+
   return (
-    <AuthShell
-      language={language}
-      onLanguageChange={setLanguage}
-      cardMaxWidth={460}
-    >
-      <form
-        onSubmit={submit}
-        className="w-full"
-        style={{
-          maxWidth: 460,
-          background: "rgba(255,255,255,0.94)",
-          border: "1px solid #DCE4FF",
-          borderRadius: 16,
-          padding: 32,
-          boxShadow: "0 12px 36px rgba(32,55,140,0.08)",
-        }}
-      >
+    <AuthShell language={language} onLanguageChange={setLanguage} cardMaxWidth={460}>
+      <form onSubmit={submitEmail} className="w-full" style={cardStyle}>
         <h1 style={{ color: "#17191F", fontSize: 32, fontWeight: 600, lineHeight: 1.15 }}>Sign up for free</h1>
         <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
           Create your account to start setting up DIGIT Complaint Management.
@@ -106,80 +192,47 @@ function SignupPage() {
                 placeholder="Account name"
                 autoComplete="organization"
                 className={authInputCls}
-                style={authInputStyle}
+                style={{
+                  ...authInputStyle,
+                  ...(authenticated && orgMissing ? { borderColor: "#2D4FC4", boxShadow: "0 0 0 3px rgba(45,79,196,0.12)" } : {}),
+                }}
               />
             </AuthField>
             <p style={{ marginTop: 6, color: "#8A90A2", fontSize: 12, lineHeight: 1.5 }}>
-              Enter the name of your account, it could be a government organisation, agency, department, parastatal body, or institution you are
-              setting up.
+              {authenticated
+                ? "Tell us which organisation you are setting up."
+                : "Enter the name of your account, it could be a government organisation, agency, department, parastatal body, or institution you are setting up."}
             </p>
+            {submitted && orgMissing && (
+              <p style={{ marginTop: 4, color: "#B42318", fontSize: 12 }}>Organisation name is required to continue.</p>
+            )}
           </div>
 
           <AuthField label="Email address">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              autoComplete="email"
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
-
-          <AuthField label="Password">
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                autoComplete="new-password"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                autoComplete="email"
+                readOnly={authMethod === "google"}
                 className={authInputCls}
-                style={{ ...authInputStyle, paddingRight: 44 }}
+                style={{
+                  ...authInputStyle,
+                  ...(authMethod === "google" ? { background: "#F4F6FB", color: "#5E6675", paddingRight: 92 } : {}),
+                }}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
-                style={{ color: "#5E6675" }}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </AuthField>
-
-          {password.length > 0 && (
-            <div
-              className="rounded-md px-3 py-2.5"
-              style={{
-                background: passwordValid ? "#ECFDF3" : "#FFF6ED",
-                border: `1px solid ${passwordValid ? "#BBF0CE" : "#FBD9B5"}`,
-              }}
-            >
-              <div
-                className="flex items-center gap-1.5"
-                style={{ color: passwordValid ? "#12703A" : "#9A5B12", fontSize: 13, fontWeight: 600 }}
-              >
-                {passwordValid ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                {passwordValid ? "Password meets requirements" : "Password does not meet requirements"}
-              </div>
-              {!passwordValid && (
-                <ul className="mt-1.5 space-y-1" style={{ color: "#6F7684", fontSize: 12 }}>
-                  {RULES.map((r) => (
-                    <li key={r.id} className="flex items-center gap-1.5">
-                      <span
-                        className="inline-block h-1.5 w-1.5 rounded-full"
-                        style={{ background: r.test(password) ? "#16A34A" : "#C7CCD8" }}
-                      />
-                      {r.label}
-                    </li>
-                  ))}
-                </ul>
+              {authMethod === "google" && (
+                <span
+                  className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5"
+                  style={{ background: "#ECFDF3", color: "#12703A", fontSize: 11, fontWeight: 600 }}
+                >
+                  <CheckCircle2 className="h-3 w-3" /> Verified
+                </span>
               )}
             </div>
-          )}
+          </AuthField>
 
           <label className="flex cursor-pointer items-start gap-2.5" style={{ color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
             <input
@@ -214,7 +267,24 @@ function SignupPage() {
           </label>
         </div>
 
-        {submitted && !formValid && (
+        {authenticated && (
+          <div
+            className="mt-5 flex items-start gap-2.5 rounded-md px-3 py-2.5"
+            style={{ background: "#ECFDF3", border: "1px solid #BBF0CE" }}
+          >
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#12703A" }} />
+            <div>
+              <div style={{ color: "#12703A", fontSize: 13, fontWeight: 600 }}>Authentication successful</div>
+              <div style={{ color: "#3F6B4F", fontSize: 12.5, lineHeight: 1.5 }}>
+                {authMethod === "google"
+                  ? "Your Google account has been verified. Add your organisation name to continue."
+                  : "Your identity has been verified. Complete your organisation details to continue."}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {submitted && !authenticated && !identityReady && (
           <div style={{ marginTop: 14, color: "#B42318", fontSize: 13 }}>
             Please complete all required fields and accept the terms to continue.
           </div>
@@ -222,19 +292,19 @@ function SignupPage() {
 
         <button
           type="submit"
-          disabled={!terms}
+          disabled={authenticated ? !canContinue : false}
           className="mt-6 w-full transition-colors focus:outline-none focus:ring-2"
           style={{
             height: 46,
-            background: terms ? "#2D4FC4" : "#AFBBE4",
+            background: authenticated && !canContinue ? "#AFBBE4" : "#2D4FC4",
             color: "#FFFFFF",
             borderRadius: 8,
             fontWeight: 500,
             fontSize: 14,
-            cursor: terms ? "pointer" : "not-allowed",
+            cursor: authenticated && !canContinue ? "not-allowed" : "pointer",
           }}
         >
-          Continue
+          {authenticated ? "Continue" : "Continue with email"}
         </button>
 
         <div style={{ marginTop: 14, textAlign: "center", color: "#6F7684", fontSize: 13 }}>
@@ -244,28 +314,33 @@ function SignupPage() {
           </Link>
         </div>
 
-        <div className="my-5 flex items-center gap-3">
-          <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
-          <span style={{ color: "#8A90A2", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em" }}>OR</span>
-          <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
-        </div>
+        {!authenticated && (
+          <>
+            <div className="my-5 flex items-center gap-3">
+              <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
+              <span style={{ color: "#8A90A2", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em" }}>OR</span>
+              <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
+            </div>
 
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
-          style={{
-            height: 46,
-            background: "#FFFFFF",
-            border: "1px solid #CBD5F2",
-            borderRadius: 8,
-            color: "#17191F",
-            fontWeight: 500,
-            fontSize: 14,
-          }}
-        >
-          <GoogleIcon />
-          Sign up with Google
-        </button>
+            <button
+              type="button"
+              onClick={startGoogle}
+              className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+              style={{
+                height: 46,
+                background: "#FFFFFF",
+                border: "1px solid #CBD5F2",
+                borderRadius: 8,
+                color: "#17191F",
+                fontWeight: 500,
+                fontSize: 14,
+              }}
+            >
+              <GoogleIcon />
+              Sign up with Google
+            </button>
+          </>
+        )}
       </form>
     </AuthShell>
   );

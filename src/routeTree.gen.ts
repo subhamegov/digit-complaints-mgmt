@@ -22,12 +22,14 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
+import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
 import { Route as ConfigWorkflowRouteImport } from './routes/config.workflow'
 import { Route as ConfigComplaintTypesRouteImport } from './routes/config.complaint-types'
 import { Route as ComplaintsNewRouteImport } from './routes/complaints.new'
+import { Route as AuthGoogleRouteImport } from './routes/auth.google'
 import { Route as AdminWorkflowConfigRouteImport } from './routes/admin.workflow-config'
 import { Route as AdminValidationRulesRouteImport } from './routes/admin.validation-rules'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -138,6 +140,11 @@ const InboxIndexRoute = InboxIndexRouteImport.update({
   path: '/inbox/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
+  id: '/setup/organisation',
+  path: '/setup/organisation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
   id: '/legal/terms',
   path: '/legal/terms',
@@ -166,6 +173,11 @@ const ConfigComplaintTypesRoute = ConfigComplaintTypesRouteImport.update({
 const ComplaintsNewRoute = ComplaintsNewRouteImport.update({
   id: '/complaints/new',
   path: '/complaints/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthGoogleRoute = AuthGoogleRouteImport.update({
+  id: '/auth/google',
+  path: '/auth/google',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWorkflowConfigRoute = AdminWorkflowConfigRouteImport.update({
@@ -442,12 +454,14 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -505,12 +519,14 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -571,12 +587,14 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -638,12 +656,14 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -701,12 +721,14 @@ export interface FileRouteTypes {
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -766,12 +788,14 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -802,12 +826,14 @@ export interface RootRouteChildren {
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
   OrgLoginRoute: typeof OrgLoginRoute
+  AuthGoogleRoute: typeof AuthGoogleRoute
   ComplaintsNewRoute: typeof ComplaintsNewRoute
   ConfigComplaintTypesRoute: typeof ConfigComplaintTypesRoute
   ConfigWorkflowRoute: typeof ConfigWorkflowRoute
   InboxIdRoute: typeof InboxIdRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  SetupOrganisationRoute: typeof SetupOrganisationRoute
   InboxIndexRoute: typeof InboxIndexRoute
 }
 
@@ -904,6 +930,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InboxIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/setup/organisation': {
+      id: '/setup/organisation'
+      path: '/setup/organisation'
+      fullPath: '/setup/organisation'
+      preLoaderRoute: typeof SetupOrganisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/terms': {
       id: '/legal/terms'
       path: '/legal/terms'
@@ -944,6 +977,13 @@ declare module '@tanstack/react-router' {
       path: '/complaints/new'
       fullPath: '/complaints/new'
       preLoaderRoute: typeof ComplaintsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/google': {
+      id: '/auth/google'
+      path: '/auth/google'
+      fullPath: '/auth/google'
+      preLoaderRoute: typeof AuthGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/workflow-config': {
@@ -1384,12 +1424,14 @@ const rootRouteChildren: RootRouteChildren = {
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
   OrgLoginRoute: OrgLoginRoute,
+  AuthGoogleRoute: AuthGoogleRoute,
   ComplaintsNewRoute: ComplaintsNewRoute,
   ConfigComplaintTypesRoute: ConfigComplaintTypesRoute,
   ConfigWorkflowRoute: ConfigWorkflowRoute,
   InboxIdRoute: InboxIdRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  SetupOrganisationRoute: SetupOrganisationRoute,
   InboxIndexRoute: InboxIndexRoute,
 }
 export const routeTree = rootRouteImport
