@@ -526,7 +526,7 @@ function SignupPage() {
             onBack={() => setStep(1)}
             onFinish={() => {
               if (approvalFlow) {
-                submitApprovalRequest({
+                submitAccountRequest({
                   organisationName,
                   organisationCode,
                   country: COUNTRIES.find((c) => c.code === baseCountry)?.label ?? baseCountry,
