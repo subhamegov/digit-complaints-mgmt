@@ -538,7 +538,7 @@ function SignupPage() {
                   employeeUrl: urls.employeeUrl,
                   citizenUrl: urls.citizenUrl,
                 });
-                navigate({ to: "/signup/pending-approval" });
+                navigate({ to: "/signup/pending-approval", search: {} });
                 return;
               }
 
