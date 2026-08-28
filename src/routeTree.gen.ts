@@ -22,6 +22,7 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
+import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
@@ -137,6 +138,11 @@ const IndexRoute = IndexRouteImport.update({
 const InboxIndexRoute = InboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
+  id: '/setup/organisation',
+  path: '/setup/organisation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
@@ -455,6 +461,7 @@ export interface FileRoutesByFullPath {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -519,6 +526,7 @@ export interface FileRoutesByTo {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -586,6 +594,7 @@ export interface FileRoutesById {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/setup/organisation': typeof SetupOrganisationRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -654,6 +663,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -718,6 +728,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -784,6 +795,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/setup/organisation'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -821,6 +833,7 @@ export interface RootRouteChildren {
   InboxIdRoute: typeof InboxIdRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  SetupOrganisationRoute: typeof SetupOrganisationRoute
   InboxIndexRoute: typeof InboxIndexRoute
 }
 
@@ -915,6 +928,13 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox/'
       preLoaderRoute: typeof InboxIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup/organisation': {
+      id: '/setup/organisation'
+      path: '/setup/organisation'
+      fullPath: '/setup/organisation'
+      preLoaderRoute: typeof SetupOrganisationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legal/terms': {
@@ -1411,6 +1431,7 @@ const rootRouteChildren: RootRouteChildren = {
   InboxIdRoute: InboxIdRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  SetupOrganisationRoute: SetupOrganisationRoute,
   InboxIndexRoute: InboxIndexRoute,
 }
 export const routeTree = rootRouteImport
