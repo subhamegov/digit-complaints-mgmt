@@ -27,6 +27,7 @@ function SignupPage() {
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [organisationName, setOrganisationName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +37,12 @@ function SignupPage() {
 
   const passwordValid = password.length > 0 && RULES.every((r) => r.test(password));
   const formValid =
-    firstName.trim() !== "" && lastName.trim() !== "" && /\S+@\S+\.\S+/.test(email) && passwordValid && terms;
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    organisationName.trim() !== "" &&
+    /\S+@\S+\.\S+/.test(email) &&
+    passwordValid &&
+    terms;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +53,6 @@ function SignupPage() {
 
   return (
     <AuthShell
-      headline="Start managing complaints in minutes."
-      narrative="Create an account to configure complaint types, route work to the right teams, and track service timelines from intake to closure."
       language={language}
       onLanguageChange={setLanguage}
       cardMaxWidth={460}
@@ -92,6 +96,23 @@ function SignupPage() {
                 style={authInputStyle}
               />
             </AuthField>
+          </div>
+
+          <div>
+            <AuthField label="Organisation name">
+              <input
+                value={organisationName}
+                onChange={(e) => setOrganisationName(e.target.value)}
+                placeholder="Organisation name"
+                autoComplete="organization"
+                className={authInputCls}
+                style={authInputStyle}
+              />
+            </AuthField>
+            <p style={{ marginTop: 6, color: "#8A90A2", fontSize: 12, lineHeight: 1.5 }}>
+              Enter the name of the government organisation, agency, department, parastatal body, or institution you are
+              setting up.
+            </p>
           </div>
 
           <AuthField label="Email address">

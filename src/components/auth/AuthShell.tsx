@@ -7,21 +7,24 @@ import type { LanguageCode } from "@/lib/accounts";
  * Shared authentication shell used by /login and /signup.
  * Left: brand / narrative media column. Right: the auth card slot.
  */
+/** Shared product messaging — identical on /login and /signup. */
+const AUTH_HEADLINE = "Manage complaints from intake to closure.";
+const AUTH_NARRATIVE =
+  "Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities.";
+
 export function AuthShell({
-  headline,
-  narrative,
   language,
   onLanguageChange,
   cardMaxWidth = 400,
   children,
 }: {
-  headline: string;
-  narrative: string;
   language: LanguageCode;
   onLanguageChange: (code: LanguageCode) => void;
   cardMaxWidth?: number;
   children: React.ReactNode;
 }) {
+  const headline = AUTH_HEADLINE;
+  const narrative = AUTH_NARRATIVE;
   return (
     <div className="min-h-screen w-full" style={{ background: "#F5F7FF" }}>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[45fr_55fr] xl:grid-cols-2">
