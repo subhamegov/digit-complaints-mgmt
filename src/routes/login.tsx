@@ -31,93 +31,14 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ background: "#F5F7FF" }}>
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[45fr_55fr] xl:grid-cols-2">
-        {/* Identity / media column */}
-        <div
-          className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%), url(${loginBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* Brand block top-left */}
-          <div style={{ position: "absolute", top: 28, left: 28, right: 28 }}>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open DIGIT Complaint Management landing page in a new tab"
-              className="inline-block transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40 rounded-md px-2.5 py-1.5"
-              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
-            >
-              <img
-                src={eGovLogoAsset.url}
-                alt="eGov Foundation"
-                style={{ height: 36, width: "auto", display: "block" }}
-              />
-            </a>
+    <AuthShell
+      headline="Manage complaints from intake to closure."
+      narrative="Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities."
+      language={language}
+      onLanguageChange={setLanguage}
+    >
+      <form
 
-            <div style={{ marginTop: 18 }}>
-              <div style={{ color: "#FFFFFF", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
-                DIGIT Complaint Management
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  color: "rgba(255,255,255,0.76)",
-                  fontSize: 14,
-                  fontWeight: 400,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Digital Infrastructure for Public Services
-              </div>
-            </div>
-          </div>
-
-          {/* Narrative bottom-left */}
-          <div />
-          <div style={{ padding: "0 28px 28px 28px", maxWidth: 360 + 56 }}>
-            <h1
-              style={{
-                color: "#FFFFFF",
-                fontSize: "clamp(34px,4vw,48px)",
-                fontWeight: 600,
-                lineHeight: 1.1,
-                maxWidth: 360,
-              }}
-            >
-              Manage complaints from intake to closure.
-            </h1>
-            <p
-              style={{
-                marginTop: 16,
-                color: "rgba(255,255,255,0.86)",
-                fontSize: 16,
-                lineHeight: 1.6,
-                maxWidth: 360,
-              }}
-            >
-              Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities.
-            </p>
-            <div style={{ marginTop: 24, color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
-              © 2026 eGovernments Foundation · DIGIT 2.9
-            </div>
-          </div>
-        </div>
-
-        {/* Form column */}
-        <div
-          className="flex flex-col items-center justify-center px-5 py-10 sm:p-10"
-          style={{ background: "#F5F7FF", color: "#17191F" }}
-        >
-          <div className="mb-3 flex w-full justify-end" style={{ maxWidth: 400 }}>
-            <LanguagePicker value={language} onChange={setLanguage} />
-          </div>
-          <form
             onSubmit={submit}
             className="w-full"
             style={{
