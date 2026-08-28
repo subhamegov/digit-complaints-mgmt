@@ -98,6 +98,23 @@ function SignupPage() {
             </AuthField>
           </div>
 
+          <div>
+            <AuthField label="Organisation name">
+              <input
+                value={organisationName}
+                onChange={(e) => setOrganisationName(e.target.value)}
+                placeholder="Organisation name"
+                autoComplete="organization"
+                className={authInputCls}
+                style={authInputStyle}
+              />
+            </AuthField>
+            <p style={{ marginTop: 6, color: "#8A90A2", fontSize: 12, lineHeight: 1.5 }}>
+              Enter the name of the government organisation, agency, department, parastatal body, or institution you are
+              setting up.
+            </p>
+          </div>
+
           <AuthField label="Email address">
             <input
               type="email"
