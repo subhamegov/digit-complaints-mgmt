@@ -429,11 +429,25 @@ function SignupPage() {
             }}
             onBack={() => setStep(1)}
             onFinish={() => {
-              if (typeof window !== "undefined") window.sessionStorage.removeItem(DRAFT_KEY);
-              navigate({ to: "/admin/home" });
+              if (typeof window !== "undefined") {
+                window.sessionStorage.removeItem(DRAFT_KEY);
+                window.sessionStorage.setItem(
+                  PROVISIONING_KEY,
+                  JSON.stringify({
+                    email,
+                    organisationName,
+                    organisationCode,
+                    baseCountry: COUNTRIES.find((c) => c.code === baseCountry)?.label ?? baseCountry,
+                    employeeUrl: undefined,
+                    citizenUrl: undefined,
+                  }),
+                );
+              }
+              navigate({ to: "/signup/provisioning" });
             }}
           />
         )}
+
       </div>
     </AuthShell>
   );
