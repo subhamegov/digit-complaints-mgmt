@@ -38,8 +38,8 @@ function LoginPage() {
       onLanguageChange={setLanguage}
     >
       <form
+        onSubmit={submit}
 
-            onSubmit={submit}
             className="w-full"
             style={{
               maxWidth: 400,
