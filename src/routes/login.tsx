@@ -168,7 +168,7 @@ function LoginPage() {
                 textAlign: "center",
               }}
             >
-              Use the role selector to demo CSR, GRO, Field Employee, Department Head, and Admin views.
+              Use the role selector to experience the lives of a resolver, an agent, or a government manager.
             </div>
       </form>
     </AuthShell>
