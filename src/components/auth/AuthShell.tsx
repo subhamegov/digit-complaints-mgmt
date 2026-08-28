@@ -140,6 +140,7 @@ export function AuthShell({
             <p style={{ marginTop: 16, color: "rgba(255,255,255,0.86)", fontSize: 16, lineHeight: 1.6, maxWidth: 360 }}>
               {narrative}
             </p>
+            <RotatingNarrative />
             <div style={{ marginTop: 24, color: "rgba(255,255,255,0.6)", fontSize: 11 }}>
               © 2026 eGovernments Foundation · DIGIT 2.9
             </div>
