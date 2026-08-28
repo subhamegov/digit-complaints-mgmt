@@ -125,6 +125,8 @@ const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto"
 
 function SignupPage() {
   const navigate = useNavigate();
+  const { flow } = Route.useSearch();
+  const approvalFlow = flow === "approval";
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
