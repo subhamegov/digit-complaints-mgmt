@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Copy, ExternalLink, MailCheck } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
+import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
 import {
   BASE_DOMAIN,
@@ -137,6 +138,7 @@ function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const [stage, setStage] = useState<"form" | "check-email">("form");
   const [authMethod, setAuthMethod] = useState<"google" | "email" | null>(null);
+  const [accountState, setAccountState] = useState<NonActiveAccountStatus | null>(null);
 
   // Step 2 — preferences
   const [baseCountry, setBaseCountry] = useState("");
@@ -159,6 +161,8 @@ function SignupPage() {
       setLastName(identity.lastName);
       setEmail(identity.email);
       setAuthMethod(identity.method);
+      const existing = nonActiveAccountStatus(identity.email);
+      if (existing) setAccountState(existing);
     }
     const raw = typeof window !== "undefined" ? window.sessionStorage.getItem(DRAFT_KEY) : null;
     if (raw) {
