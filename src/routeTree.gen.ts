@@ -21,6 +21,8 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
 import { Route as ConfigWorkflowRouteImport } from './routes/config.workflow'
 import { Route as ConfigComplaintTypesRouteImport } from './routes/config.complaint-types'
@@ -128,6 +130,16 @@ const IndexRoute = IndexRouteImport.update({
 const InboxIndexRoute = InboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InboxIdRoute = InboxIdRouteImport.update({
@@ -427,6 +439,8 @@ export interface FileRoutesByFullPath {
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -487,6 +501,8 @@ export interface FileRoutesByTo {
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -550,6 +566,8 @@ export interface FileRoutesById {
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
   '/inbox/$id': typeof InboxIdRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -614,6 +632,8 @@ export interface FileRouteTypes {
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -674,6 +694,8 @@ export interface FileRouteTypes {
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -736,6 +758,8 @@ export interface FileRouteTypes {
     | '/config/complaint-types'
     | '/config/workflow'
     | '/inbox/$id'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -769,6 +793,8 @@ export interface RootRouteChildren {
   ConfigComplaintTypesRoute: typeof ConfigComplaintTypesRoute
   ConfigWorkflowRoute: typeof ConfigWorkflowRoute
   InboxIdRoute: typeof InboxIdRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTermsRoute: typeof LegalTermsRoute
   InboxIndexRoute: typeof InboxIndexRoute
 }
 
@@ -856,6 +882,20 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox/'
       preLoaderRoute: typeof InboxIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inbox/$id': {
@@ -1327,6 +1367,8 @@ const rootRouteChildren: RootRouteChildren = {
   ConfigComplaintTypesRoute: ConfigComplaintTypesRoute,
   ConfigWorkflowRoute: ConfigWorkflowRoute,
   InboxIdRoute: InboxIdRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTermsRoute: LegalTermsRoute,
   InboxIndexRoute: InboxIndexRoute,
 }
 export const routeTree = rootRouteImport
