@@ -556,7 +556,7 @@ function SignupPage() {
                   }),
                 );
               }
-              navigate({ to: "/signup/provisioning" });
+              navigate({ to: "/signup/provisioning", search: {} });
             }}
           />
         )}
