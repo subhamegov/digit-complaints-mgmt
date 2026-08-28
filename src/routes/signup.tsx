@@ -110,7 +110,7 @@ function SignupPage() {
               />
             </AuthField>
             <p style={{ marginTop: 6, color: "#8A90A2", fontSize: 12, lineHeight: 1.5 }}>
-              Enter the name of the government organisation, agency, department, parastatal body, or institution you are
+              Enter the name of your account, it could be a government organisation, agency, department, parastatal body, or institution you are
               setting up.
             </p>
           </div>
