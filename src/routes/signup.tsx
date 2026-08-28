@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
@@ -29,9 +29,6 @@ import {
 } from "@/lib/org-setup";
 
 export const Route = createFileRoute("/signup")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    flow: search.flow === "approval" ? ("approval" as const) : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Set Up Your Organisation — DIGIT Complaint Management" },
@@ -126,8 +123,8 @@ const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto"
 
 function SignupPage() {
   const navigate = useNavigate();
-  const { flow } = Route.useSearch();
-  const approvalFlow = flow === "approval";
+  const search = useRouterState({ select: (state) => state.location.search });
+  const approvalFlow = new URLSearchParams(search).get("flow") === "approval";
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
