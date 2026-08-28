@@ -28,6 +28,7 @@ import { Route as InboxIdRouteImport } from './routes/inbox.$id'
 import { Route as ConfigWorkflowRouteImport } from './routes/config.workflow'
 import { Route as ConfigComplaintTypesRouteImport } from './routes/config.complaint-types'
 import { Route as ComplaintsNewRouteImport } from './routes/complaints.new'
+import { Route as AuthGoogleRouteImport } from './routes/auth.google'
 import { Route as AdminWorkflowConfigRouteImport } from './routes/admin.workflow-config'
 import { Route as AdminValidationRulesRouteImport } from './routes/admin.validation-rules'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -166,6 +167,11 @@ const ConfigComplaintTypesRoute = ConfigComplaintTypesRouteImport.update({
 const ComplaintsNewRoute = ComplaintsNewRouteImport.update({
   id: '/complaints/new',
   path: '/complaints/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthGoogleRoute = AuthGoogleRouteImport.update({
+  id: '/auth/google',
+  path: '/auth/google',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWorkflowConfigRoute = AdminWorkflowConfigRouteImport.update({
@@ -442,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -505,6 +512,7 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -571,6 +579,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
   '/config/complaint-types': typeof ConfigComplaintTypesRoute
   '/config/workflow': typeof ConfigWorkflowRoute
@@ -638,6 +647,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
@@ -701,6 +711,7 @@ export interface FileRouteTypes {
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
@@ -766,6 +777,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/google'
     | '/complaints/new'
     | '/config/complaint-types'
     | '/config/workflow'
@@ -802,6 +814,7 @@ export interface RootRouteChildren {
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
   OrgLoginRoute: typeof OrgLoginRoute
+  AuthGoogleRoute: typeof AuthGoogleRoute
   ComplaintsNewRoute: typeof ComplaintsNewRoute
   ConfigComplaintTypesRoute: typeof ConfigComplaintTypesRoute
   ConfigWorkflowRoute: typeof ConfigWorkflowRoute
@@ -944,6 +957,13 @@ declare module '@tanstack/react-router' {
       path: '/complaints/new'
       fullPath: '/complaints/new'
       preLoaderRoute: typeof ComplaintsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/google': {
+      id: '/auth/google'
+      path: '/auth/google'
+      fullPath: '/auth/google'
+      preLoaderRoute: typeof AuthGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/workflow-config': {
@@ -1384,6 +1404,7 @@ const rootRouteChildren: RootRouteChildren = {
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
   OrgLoginRoute: OrgLoginRoute,
+  AuthGoogleRoute: AuthGoogleRoute,
   ComplaintsNewRoute: ComplaintsNewRoute,
   ConfigComplaintTypesRoute: ConfigComplaintTypesRoute,
   ConfigWorkflowRoute: ConfigWorkflowRoute,
