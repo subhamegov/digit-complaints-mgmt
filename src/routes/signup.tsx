@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
+import { submitAccountRequest } from "@/lib/account-requests";
 import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
 import {
@@ -122,6 +123,8 @@ const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto"
 
 function SignupPage() {
   const navigate = useNavigate();
+  const search = useRouterState({ select: (state) => state.location.search });
+  const approvalFlow = new URLSearchParams(search).get("flow") === "approval";
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
@@ -519,6 +522,23 @@ function SignupPage() {
             }}
             onBack={() => setStep(1)}
             onFinish={() => {
+              if (approvalFlow) {
+                submitAccountRequest({
+                  organisationName,
+                  organisationCode,
+                  country: COUNTRIES.find((c) => c.code === baseCountry)?.label ?? baseCountry,
+                  requesterName: `${firstName} ${lastName}`.trim(),
+                  requesterEmail: email,
+                  languages: languages.map((code) => SETUP_LANGUAGES.find((item) => item.code === code)?.label ?? code).join(", "),
+                  timezone,
+                  financialYear: FINANCIAL_YEARS.find((item) => item.value === financialYearStart)?.label ?? financialYearStart,
+                  employeeUrl: urls.employeeUrl,
+                  citizenUrl: urls.citizenUrl,
+                });
+                navigate({ to: "/signup/pending-approval", search: {} });
+                return;
+              }
+
               if (typeof window !== "undefined") {
                 window.sessionStorage.removeItem(DRAFT_KEY);
                 window.sessionStorage.setItem(
@@ -533,7 +553,7 @@ function SignupPage() {
                   }),
                 );
               }
-              navigate({ to: "/signup/provisioning" });
+              navigate({ to: "/signup/provisioning", search: {} });
             }}
           />
         )}

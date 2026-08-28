@@ -19,7 +19,7 @@ function PrivacyPage() {
       <p className="mt-3 text-sm text-muted-foreground">
         Placeholder document. The final privacy notice for DIGIT Complaint Management will be published here.
       </p>
-      <Link to="/signup" className="mt-6 inline-block text-sm font-medium text-primary hover:underline">
+      <Link to="/signup" search={{}} className="mt-6 inline-block text-sm font-medium text-primary hover:underline">
         Back to sign up
       </Link>
     </div>
