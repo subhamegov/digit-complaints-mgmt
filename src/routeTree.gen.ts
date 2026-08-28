@@ -23,6 +23,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
 import { Route as SignupProvisioningRouteImport } from './routes/signup.provisioning'
+import { Route as SignupPendingApprovalRouteImport } from './routes/signup.pending-approval'
 import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
@@ -144,6 +145,11 @@ const InboxIndexRoute = InboxIndexRouteImport.update({
 const SignupProvisioningRoute = SignupProvisioningRouteImport.update({
   id: '/provisioning',
   path: '/provisioning',
+  getParentRoute: () => SignupRoute,
+} as any)
+const SignupPendingApprovalRoute = SignupPendingApprovalRouteImport.update({
+  id: '/pending-approval',
+  path: '/pending-approval',
   getParentRoute: () => SignupRoute,
 } as any)
 const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
@@ -468,6 +474,7 @@ export interface FileRoutesByFullPath {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
@@ -534,6 +541,7 @@ export interface FileRoutesByTo {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
@@ -603,6 +611,7 @@ export interface FileRoutesById {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
@@ -673,6 +682,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
@@ -739,6 +749,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
@@ -807,6 +818,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
@@ -947,6 +959,13 @@ declare module '@tanstack/react-router' {
       path: '/provisioning'
       fullPath: '/signup/provisioning'
       preLoaderRoute: typeof SignupProvisioningRouteImport
+      parentRoute: typeof SignupRoute
+    }
+    '/signup/pending-approval': {
+      id: '/signup/pending-approval'
+      path: '/pending-approval'
+      fullPath: '/signup/pending-approval'
+      preLoaderRoute: typeof SignupPendingApprovalRouteImport
       parentRoute: typeof SignupRoute
     }
     '/setup/organisation': {
@@ -1430,10 +1449,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface SignupRouteChildren {
+  SignupPendingApprovalRoute: typeof SignupPendingApprovalRoute
   SignupProvisioningRoute: typeof SignupProvisioningRoute
 }
 
 const SignupRouteChildren: SignupRouteChildren = {
+  SignupPendingApprovalRoute: SignupPendingApprovalRoute,
   SignupProvisioningRoute: SignupProvisioningRoute,
 }
 
