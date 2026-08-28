@@ -4,6 +4,8 @@ import { AlertCircle, ArrowLeft, Check, CheckCircle2, Copy, ExternalLink, MailCh
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
+import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
+
 import {
   BASE_DOMAIN,
   COUNTRIES,
