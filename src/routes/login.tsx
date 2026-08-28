@@ -32,8 +32,6 @@ function LoginPage() {
 
   return (
     <AuthShell
-      headline="Manage complaints from intake to closure."
-      narrative="Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities."
       language={language}
       onLanguageChange={setLanguage}
     >

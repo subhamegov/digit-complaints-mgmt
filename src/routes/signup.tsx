@@ -47,8 +47,6 @@ function SignupPage() {
 
   return (
     <AuthShell
-      headline="Start managing complaints in minutes."
-      narrative="Create an account to configure complaint types, route work to the right teams, and track service timelines from intake to closure."
       language={language}
       onLanguageChange={setLanguage}
       cardMaxWidth={460}
