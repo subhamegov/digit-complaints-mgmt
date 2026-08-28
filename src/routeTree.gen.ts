@@ -25,6 +25,7 @@ import { Route as InboxIndexRouteImport } from './routes/inbox.index'
 import { Route as SignupProvisioningRouteImport } from './routes/signup.provisioning'
 import { Route as SignupPendingApprovalRouteImport } from './routes/signup.pending-approval'
 import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
+import { Route as PlatformAdminAccountRequestsRouteImport } from './routes/platform-admin.account-requests'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
@@ -157,6 +158,12 @@ const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
   path: '/setup/organisation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformAdminAccountRequestsRoute =
+  PlatformAdminAccountRequestsRouteImport.update({
+    id: '/platform-admin/account-requests',
+    path: '/platform-admin/account-requests',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
   id: '/legal/terms',
   path: '/legal/terms',
@@ -473,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
@@ -540,6 +548,7 @@ export interface FileRoutesByTo {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
@@ -610,6 +619,7 @@ export interface FileRoutesById {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
@@ -681,6 +691,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
     | '/signup/provisioning'
@@ -748,6 +759,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
     | '/signup/provisioning'
@@ -817,6 +829,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
     | '/signup/provisioning'
@@ -857,6 +870,7 @@ export interface RootRouteChildren {
   InboxIdRoute: typeof InboxIdRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  PlatformAdminAccountRequestsRoute: typeof PlatformAdminAccountRequestsRoute
   SetupOrganisationRoute: typeof SetupOrganisationRoute
   InboxIndexRoute: typeof InboxIndexRoute
 }
@@ -973,6 +987,13 @@ declare module '@tanstack/react-router' {
       path: '/setup/organisation'
       fullPath: '/setup/organisation'
       preLoaderRoute: typeof SetupOrganisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform-admin/account-requests': {
+      id: '/platform-admin/account-requests'
+      path: '/platform-admin/account-requests'
+      fullPath: '/platform-admin/account-requests'
+      preLoaderRoute: typeof PlatformAdminAccountRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legal/terms': {
@@ -1482,6 +1503,7 @@ const rootRouteChildren: RootRouteChildren = {
   InboxIdRoute: InboxIdRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  PlatformAdminAccountRequestsRoute: PlatformAdminAccountRequestsRoute,
   SetupOrganisationRoute: SetupOrganisationRoute,
   InboxIndexRoute: InboxIndexRoute,
 }
