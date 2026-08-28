@@ -115,6 +115,8 @@ function AppLayout() {
     pathname === "/login" ||
     pathname.endsWith("/login") ||
     pathname === "/signup" ||
+    pathname === "/signup/provisioning" ||
+
     pathname === "/auth/google" ||
     pathname === "/setup/organisation" ||
     pathname === "/" ||

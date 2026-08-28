@@ -22,6 +22,7 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
+import { Route as SignupProvisioningRouteImport } from './routes/signup.provisioning'
 import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
@@ -139,6 +140,11 @@ const InboxIndexRoute = InboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SignupProvisioningRoute = SignupProvisioningRouteImport.update({
+  id: '/provisioning',
+  path: '/provisioning',
+  getParentRoute: () => SignupRoute,
 } as any)
 const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
   id: '/setup/organisation',
@@ -419,7 +425,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -462,6 +468,7 @@ export interface FileRoutesByFullPath {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -486,7 +493,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -527,6 +534,7 @@ export interface FileRoutesByTo {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -552,7 +560,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -595,6 +603,7 @@ export interface FileRoutesById {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
@@ -664,6 +673,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/provisioning'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -729,6 +739,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/provisioning'
     | '/inbox'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -796,6 +807,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/setup/organisation'
+    | '/signup/provisioning'
     | '/inbox/'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
@@ -821,7 +833,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PlatformRoute: typeof PlatformRoute
   ReportsRoute: typeof ReportsRoute
-  SignupRoute: typeof SignupRoute
+  SignupRoute: typeof SignupRouteWithChildren
   SlaRoute: typeof SlaRoute
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
@@ -929,6 +941,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inbox/'
       preLoaderRoute: typeof InboxIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/signup/provisioning': {
+      id: '/signup/provisioning'
+      path: '/provisioning'
+      fullPath: '/signup/provisioning'
+      preLoaderRoute: typeof SignupProvisioningRouteImport
+      parentRoute: typeof SignupRoute
     }
     '/setup/organisation': {
       id: '/setup/organisation'
@@ -1410,6 +1429,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface SignupRouteChildren {
+  SignupProvisioningRoute: typeof SignupProvisioningRoute
+}
+
+const SignupRouteChildren: SignupRouteChildren = {
+  SignupProvisioningRoute: SignupProvisioningRoute,
+}
+
+const SignupRouteWithChildren =
+  SignupRoute._addFileChildren(SignupRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -1419,7 +1449,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PlatformRoute: PlatformRoute,
   ReportsRoute: ReportsRoute,
-  SignupRoute: SignupRoute,
+  SignupRoute: SignupRouteWithChildren,
   SlaRoute: SlaRoute,
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
