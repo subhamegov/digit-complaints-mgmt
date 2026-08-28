@@ -10,6 +10,7 @@ import {
   REQUEST_STATUS_LABEL,
   type AccountRequest,
 } from "@/lib/account-requests";
+import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
 
 export const Route = createFileRoute("/platform-admin/account-requests")({
   head: () => ({
