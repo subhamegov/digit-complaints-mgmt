@@ -27,6 +27,7 @@ function SignupPage() {
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [organisationName, setOrganisationName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +37,12 @@ function SignupPage() {
 
   const passwordValid = password.length > 0 && RULES.every((r) => r.test(password));
   const formValid =
-    firstName.trim() !== "" && lastName.trim() !== "" && /\S+@\S+\.\S+/.test(email) && passwordValid && terms;
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    organisationName.trim() !== "" &&
+    /\S+@\S+\.\S+/.test(email) &&
+    passwordValid &&
+    terms;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
