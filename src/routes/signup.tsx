@@ -524,6 +524,23 @@ function SignupPage() {
             }}
             onBack={() => setStep(1)}
             onFinish={() => {
+              if (approvalFlow) {
+                submitApprovalRequest({
+                  organisationName,
+                  organisationCode,
+                  country: COUNTRIES.find((c) => c.code === baseCountry)?.label ?? baseCountry,
+                  requesterName: `${firstName} ${lastName}`.trim(),
+                  requesterEmail: email,
+                  languages: languages.map((code) => SETUP_LANGUAGES.find((item) => item.code === code)?.label ?? code).join(", "),
+                  timezone,
+                  financialYear: FINANCIAL_YEARS.find((item) => item.value === financialYearStart)?.label ?? financialYearStart,
+                  employeeUrl: urls.employeeUrl,
+                  citizenUrl: urls.citizenUrl,
+                });
+                navigate({ to: "/signup/pending-approval" });
+                return;
+              }
+
               if (typeof window !== "undefined") {
                 window.sessionStorage.removeItem(DRAFT_KEY);
                 window.sessionStorage.setItem(
