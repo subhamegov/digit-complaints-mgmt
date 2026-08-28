@@ -152,55 +152,33 @@ function LoginPage() {
               style={{
                 marginTop: 16,
                 color: "#6F7684",
+                fontSize: 13,
+                textAlign: "center",
+              }}
+            >
+              New to the platform?{" "}
+              <Link to="/signup" style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
+                Create an account
+              </Link>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                color: "#6F7684",
                 fontSize: 12,
                 textAlign: "center",
               }}
             >
               Use the role selector to demo CSR, GRO, Field Employee, Department Head, and Admin views.
             </div>
-          </form>
-        </div>
-      </div>
-
-      <style>{`
-        .login-input::placeholder { color: #8A90A2; }
-        .login-input:focus {
-          border-color: #355BE0 !important;
-          box-shadow: 0 0 0 3px rgba(53,91,224,0.16) !important;
-        }
-      `}</style>
-    </div>
+      </form>
+    </AuthShell>
   );
 }
 
-const inputCls = "login-input w-full outline-none";
+const inputCls = authInputCls;
+const inputStyle = authInputStyle;
+const Field = AuthField;
 
-const inputStyle: React.CSSProperties = {
-  height: 44,
-  background: "#FFFFFF",
-  border: "1px solid #CBD5F2",
-  borderRadius: 8,
-  color: "#17191F",
-  fontSize: 14,
-  padding: "0 12px",
-};
-
-function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span
-        className="mb-1.5 block"
-        style={{
-          color: "#5E6675",
-          fontSize: 12,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-        }}
-      >
-        {label}
-      </span>
-      {children}
-    </label>
-  );
 }
