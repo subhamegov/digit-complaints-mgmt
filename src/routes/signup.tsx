@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Copy, ExternalLink, MailCheck } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
+import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
 import {
   BASE_DOMAIN,
@@ -137,6 +138,7 @@ function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const [stage, setStage] = useState<"form" | "check-email">("form");
   const [authMethod, setAuthMethod] = useState<"google" | "email" | null>(null);
+  const [accountState, setAccountState] = useState<NonActiveAccountStatus | null>(null);
 
   // Step 2 — preferences
   const [baseCountry, setBaseCountry] = useState("");
@@ -159,6 +161,8 @@ function SignupPage() {
       setLastName(identity.lastName);
       setEmail(identity.email);
       setAuthMethod(identity.method);
+      const existing = nonActiveAccountStatus(identity.email);
+      if (existing) setAccountState(existing);
     }
     const raw = typeof window !== "undefined" ? window.sessionStorage.getItem(DRAFT_KEY) : null;
     if (raw) {
@@ -299,6 +303,11 @@ function SignupPage() {
   const submitStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    const existing = emailValid ? nonActiveAccountStatus(email) : null;
+    if (existing) {
+      setAccountState(existing);
+      return;
+    }
     if (authenticated) {
       if (!step1Valid) return;
       saveDraft();
@@ -320,6 +329,9 @@ function SignupPage() {
   const useDifferentEmail = () => {
     clearPrototypeIdentity();
     setAuthMethod(null);
+    setAccountState(null);
+    setEmail("");
+    setSubmitted(false);
     setStage("form");
   };
 
@@ -327,6 +339,81 @@ function SignupPage() {
     saveDraft();
     navigate({ to: "/auth/google" });
   };
+
+  if (accountState) {
+    const copy = ACCOUNT_STATE_COPY[accountState];
+    const accent = copy.tone === "caution" ? "#8A5A00" : "#2D4FC4";
+    const accentBg = copy.tone === "caution" ? "#FDF6E7" : "#EEF2FF";
+    const accentBorder = copy.tone === "caution" ? "#F0DFB8" : "#DCE4FF";
+    return (
+      <AuthShell language={language} onLanguageChange={setLanguage} cardMaxWidth={460}>
+        <div className="w-full" style={cardStyle}>
+          <span className="flex h-11 w-11 items-center justify-center rounded-full" style={{ background: accentBg, color: accent }}>
+            {copy.tone === "caution" ? <ShieldAlert className="h-5 w-5" /> : <Clock3 className="h-5 w-5" />}
+          </span>
+          <h1 style={{ marginTop: 16, color: "#17191F", fontSize: 24, fontWeight: 600, lineHeight: 1.25 }}>{copy.heading}</h1>
+          <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>{copy.body}</p>
+          <p style={{ marginTop: 6, color: "#6F7684", fontSize: 13, lineHeight: 1.6 }}>
+            Email: <strong style={{ color: "#17191F" }}>{email}</strong>
+          </p>
+
+          {copy.status && (
+            <div
+              className="mt-5 flex items-center justify-between gap-3 rounded-md px-3 py-2.5"
+              style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
+            >
+              <div>
+                <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>{copy.status.label}</div>
+                <div style={{ color: "#6F7684", fontSize: 12.5 }}>{copy.status.note}</div>
+              </div>
+              <span className="shrink-0 rounded-full px-2.5 py-1" style={{ background: "#E7EDFF", color: "#2D4FC4", fontSize: 12, fontWeight: 600 }}>
+                {copy.status.value}
+              </span>
+            </div>
+          )}
+
+          <div className="mt-6">
+            {copy.primary.to ? (
+              <Link
+                to={copy.primary.to}
+                className="flex w-full items-center justify-center"
+                style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+              >
+                {copy.primary.label}
+              </Link>
+            ) : (
+              <a
+                href="mailto:support@digit.org"
+                className="flex w-full items-center justify-center"
+                style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+              >
+                {copy.primary.label}
+              </a>
+            )}
+          </div>
+
+          {copy.secondary.to ? (
+            <Link
+              to={copy.secondary.to}
+              className="mt-2.5 flex w-full items-center justify-center hover:bg-[#F5F7FF]"
+              style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+            >
+              {copy.secondary.label}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={useDifferentEmail}
+              className="mt-2.5 w-full hover:bg-[#F5F7FF] focus:outline-none focus:ring-2"
+              style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+            >
+              {copy.secondary.label}
+            </button>
+          )}
+        </div>
+      </AuthShell>
+    );
+  }
 
   if (stage === "check-email") {
     return (
@@ -357,6 +444,7 @@ function SignupPage() {
       </AuthShell>
     );
   }
+
 
   return (
     <AuthShell language={language} onLanguageChange={setLanguage} cardMaxWidth={460}>
