@@ -695,7 +695,9 @@ function StepAccount(p: any) {
               )}
             </div>
           )}
-        </div>
+            </div>
+          </>
+        )}
 
         <label className="flex cursor-pointer items-start gap-2.5" style={{ color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
           <input
