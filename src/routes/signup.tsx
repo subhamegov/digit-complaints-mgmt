@@ -31,13 +31,13 @@ import {
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Set Up Your Organisation — DIGIT Complaint Management" },
+      { title: "Set Up Your Account — DIGIT Complaint Management" },
       {
         name: "description",
-        content: "Create your organisation account, set your preferences, and get your employee and citizen access URLs.",
+        content: "Create your account, set your preferences, and get your employee and citizen access URLs.",
       },
-      { property: "og:title", content: "Set Up Your Organisation — DIGIT Complaint Management" },
-      { property: "og:description", content: "Create your DIGIT Complaint Management organisation account in three simple steps." },
+      { property: "og:title", content: "Set Up Your Account — DIGIT Complaint Management" },
+      { property: "og:description", content: "Create your DIGIT Complaint Management account in three simple steps." },
     ],
   }),
   component: SignupPage,
@@ -128,7 +128,7 @@ function SignupPage() {
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
-  // Step 1 — identity + organisation
+  // Step 1 — identity + account
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -807,11 +807,11 @@ function StepPreferences(p: any) {
                ))}
              </select>
            </AuthField>
-           <p style={helperStyle}>Used to suggest locale, timezone, and account URL defaults.</p>
+            <p style={helperStyle}>Used to suggest locale, timezone, and account URL defaults.</p>
            {p.codeUpdatedNotice && <p style={okStyle}>{p.codeUpdatedNotice}</p>}
            {p.baseCountry && (
              <p style={helperStyle}>
-               Account code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
+                Account code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
             </p>
           )}
         </div>
