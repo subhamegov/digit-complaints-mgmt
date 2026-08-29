@@ -786,32 +786,32 @@ function StepPreferences(p: any) {
   return (
     <div>
       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Personalise your account</h1>
-      <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        Set the defaults your organisation will use across the product.
-      </p>
+       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
+         Set the defaults your account will use across the product.
+       </p>
 
-      <div className="mt-6 space-y-4">
-        <div>
-          <AuthField label="Base country of operations">
-            <select
-              value={p.baseCountry}
-              onChange={(e: any) => p.onCountryChange(e.target.value)}
-              className={authInputCls}
-              style={selectStyle}
-            >
-              <option value="">Select a country</option>
-              {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </AuthField>
-          <p style={helperStyle}>Used to suggest locale, timezone, and organisation URL defaults.</p>
-          {p.codeUpdatedNotice && <p style={okStyle}>{p.codeUpdatedNotice}</p>}
-          {p.baseCountry && (
-            <p style={helperStyle}>
-              Organisation code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
+       <div className="mt-6 space-y-4">
+         <div>
+           <AuthField label="Base country of operations">
+             <select
+               value={p.baseCountry}
+               onChange={(e: any) => p.onCountryChange(e.target.value)}
+               className={authInputCls}
+               style={selectStyle}
+             >
+               <option value="">Select a country</option>
+               {COUNTRIES.map((c) => (
+                 <option key={c.code} value={c.code}>
+                   {c.label}
+                 </option>
+               ))}
+             </select>
+           </AuthField>
+           <p style={helperStyle}>Used to suggest locale, timezone, and account URL defaults.</p>
+           {p.codeUpdatedNotice && <p style={okStyle}>{p.codeUpdatedNotice}</p>}
+           {p.baseCountry && (
+             <p style={helperStyle}>
+               Account code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
             </p>
           )}
         </div>
@@ -1021,19 +1021,19 @@ function StepUrls({
     .join(", ");
 
   const rows: [string, string][] = [
-    ["Organisation name", summary.organisationName],
-    ["Organisation code", summary.organisationCode],
-    ["Base country", country?.label ?? "—"],
-    ["Languages", langLabels],
-    ["Timezone", summary.timezone.replace(/_/g, " ")],
-    ["Financial year", fy?.label ?? "—"],
-  ];
+     ["Account name", summary.organisationName],
+     ["Account code", summary.organisationCode],
+     ["Base country", country?.label ?? "—"],
+     ["Languages", langLabels],
+     ["Timezone", summary.timezone.replace(/_/g, " ")],
+     ["Financial year", fy?.label ?? "—"],
+   ];
 
-  return (
-    <div>
-      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
-      <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        These will be the main entry points for your organisation once your workspace has been set up.
+   return (
+     <div>
+       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
+       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
+         These will be the main entry points for your account once your workspace has been set up.
       </p>
 
       <div className="mt-5 flex items-start gap-2.5 rounded-md px-3 py-2.5" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
