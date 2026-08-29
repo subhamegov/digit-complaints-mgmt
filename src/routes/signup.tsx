@@ -616,18 +616,18 @@ function StepAccount(p: any) {
               onChange={(e: any) => p.setEmail(e.target.value)}
               placeholder="Email address"
               autoComplete="email"
-              readOnly={p.authMethod === "google"}
-              className={authInputCls}
-              style={{ ...authInputStyle, ...(p.authMethod === "google" ? { background: "#F4F6FB", color: "#5E6675", paddingRight: 92 } : {}) }}
-            />
-            {p.authMethod === "google" && (
-              <span
-                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5"
-                style={{ background: "#ECFDF3", color: "#12703A", fontSize: 11, fontWeight: 600 }}
-              >
-                <CheckCircle2 className="h-3 w-3" /> Verified
-              </span>
-            )}
+               readOnly={p.authMethod !== null}
+               className={authInputCls}
+               style={{ ...authInputStyle, ...(p.authMethod !== null ? { background: "#F4F6FB", color: "#5E6675", paddingRight: 92 } : {}) }}
+             />
+             {p.authMethod !== null && (
+               <span
+                 className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5"
+                 style={{ background: "#ECFDF3", color: "#12703A", fontSize: 11, fontWeight: 600 }}
+               >
+                 <CheckCircle2 className="h-3 w-3" /> Verified
+               </span>
+             )}
           </div>
         </AuthField>
 
@@ -649,20 +649,20 @@ function StepAccount(p: any) {
           {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an organisation name between 3 and 120 characters.</p>}
         </div>
 
-        <div>
-          <AuthField label="Organisation code">
-            <input
-              value={p.organisationCode}
-              onChange={(e: any) => {
-                p.setCodeTouched(true);
-                p.setOrganisationCode(normaliseCode(e.target.value));
-              }}
-              placeholder="KE-MCG"
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
-          <p style={helperStyle}>Used as a short identifier for your organisation across configuration, URLs, and system references.</p>
+            <div>
+              <AuthField label="Account code">
+                <input
+                  value={p.organisationCode}
+                  onChange={(e: any) => {
+                    p.setCodeTouched(true);
+                    p.setOrganisationCode(normaliseCode(e.target.value));
+                  }}
+                  placeholder="KE-MCG"
+                  className={authInputCls}
+                  style={authInputStyle}
+                />
+              </AuthField>
+              <p style={helperStyle}>Used as a short identifier for your account across configuration, URLs, and system references.</p>
           {p.organisationCode && !p.codeValid && <p style={errorStyle}>Use 2–12 letters or numbers, for example MCG or KE-MCG.</p>}
           {p.codeValid && p.codeStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
           {p.codeValid && p.codeStatus === "available" && (
