@@ -343,6 +343,11 @@ function SignupPage() {
     navigate({ to: "/auth/google" });
   };
 
+  const startGithub = () => {
+    saveDraft();
+    navigate({ to: "/auth/github" });
+  };
+
   if (accountState) {
     const copy = ACCOUNT_STATE_COPY[accountState];
     const accent = copy.tone === "caution" ? "#8A5A00" : "#2D4FC4";
