@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, Github, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
