@@ -318,7 +318,7 @@ function SignupPage() {
       setSubmitted(false);
       return;
     }
-    if (firstName.trim() === "" || lastName.trim() === "" || !emailValid || !nameValid || !terms) return;
+    if (firstName.trim() === "" || lastName.trim() === "" || !emailValid || !terms) return;
     setStage("check-email");
   };
 
