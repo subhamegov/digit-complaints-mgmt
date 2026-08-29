@@ -87,7 +87,7 @@ import {
 export const Route = createFileRoute("/admin/users")({
   head: () => ({
     meta: [
-      { title: "Users — Account Administration" },
+      { title: "Users - Account Administration" },
       {
         name: "description",
         content:
@@ -294,7 +294,7 @@ function EmployeesTab() {
     if (editing) {
       const changes: AuditChange[] = [];
       const track = (field: string, prev: string, next: string) => {
-        if (prev !== next) changes.push({ field, previous: prev || "—", next: next || "—" });
+        if (prev !== next) changes.push({ field, previous: prev || "-", next: next || "-" });
       };
       track("Full name", editing.name, name);
       track("Email", editing.email, email);
@@ -362,11 +362,11 @@ function EmployeesTab() {
         result: "SUCCESS",
         lastLoggedIn: null,
         changes: [
-          { field: "Department", previous: "—", next: created.department },
-          { field: "Designation", previous: "—", next: created.designation },
-          { field: "Role", previous: "—", next: getRoleLabel(created.roleKey) },
-          { field: "Jurisdiction", previous: "—", next: created.jurisdiction || "—" },
-          { field: "Status", previous: "—", next: "Invited" },
+          { field: "Department", previous: "-", next: created.department },
+          { field: "Designation", previous: "-", next: created.designation },
+          { field: "Role", previous: "-", next: getRoleLabel(created.roleKey) },
+          { field: "Jurisdiction", previous: "-", next: created.jurisdiction || "-" },
+          { field: "Status", previous: "-", next: "Invited" },
         ],
         context: { source: "Account Administration › Users › Employees" },
       });
@@ -737,13 +737,13 @@ function EmployeesTab() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{viewing?.name}</DialogTitle>
-            <DialogDescription>Employee record — read only</DialogDescription>
+            <DialogDescription>Employee record - read only</DialogDescription>
           </DialogHeader>
           {viewing && (
             <dl className="space-y-2 text-[13px]">
               <Row label="Employee ID" value={viewing.id} />
-              <Row label="Email" value={viewing.email || "—"} />
-              <Row label="Mobile number" value={viewing.mobile || "—"} />
+              <Row label="Email" value={viewing.email || "-"} />
+              <Row label="Mobile number" value={viewing.mobile || "-"} />
               <Row label="Department" value={viewing.department} />
               <Row label="Designation" value={viewing.designation} />
               <Row label="Role" value={getRoleLabel(viewing.roleKey)} />
@@ -852,7 +852,7 @@ function CitizensTab() {
       previousStatus: c.status,
       sessionRevocation,
     };
-    // Authentication state only — complaints, profile and identifiers untouched.
+    // Authentication state only - complaints, profile and identifiers untouched.
     persist(citizens.map((x) => (x.id === c.id ? { ...x, status: "BLOCKED" as CitizenStatus, block } : x)));
     audit(
       c,
@@ -863,7 +863,7 @@ function CitizensTab() {
         reason,
         ...(block.justification ? { justification: block.justification } : {}),
         accessDuration: duration,
-        expiry: expiresAt ? formatTs(expiresAt) : "No expiry — manual unblock required",
+        expiry: expiresAt ? formatTs(expiresAt) : "No expiry - manual unblock required",
         sessionRevocation,
       },
     );
@@ -904,7 +904,7 @@ function CitizensTab() {
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>
           Citizen accounts are protected identities. Names, full identifiers, addresses, profiles and
-          complaint history are not available here — only the minimum needed for authentication
+          complaint history are not available here - only the minimum needed for authentication
           support. Every support action is audited.
         </p>
       </div>
@@ -1217,18 +1217,18 @@ function CitizensTab() {
               <Row label="Login identifier" value={detailsTarget.maskedIdentifier} />
               <Row label="Status" value={CITIZEN_STATUS_LABEL[detailsTarget.status]} />
               <Row label="Blocked on" value={formatTs(detailsTarget.block?.blockedAt ?? null)} />
-              <Row label="Blocked by" value={detailsTarget.block?.blockedBy ?? "—"} />
-              <Row label="Reason" value={detailsTarget.block?.reason ?? "—"} />
-              <Row label="Duration" value={detailsTarget.block?.duration ?? "—"} />
+              <Row label="Blocked by" value={detailsTarget.block?.blockedBy ?? "-"} />
+              <Row label="Reason" value={detailsTarget.block?.reason ?? "-"} />
+              <Row label="Duration" value={detailsTarget.block?.duration ?? "-"} />
               <Row
                 label="Expiry"
                 value={
                   detailsTarget.block?.expiresAt
                     ? formatTs(detailsTarget.block.expiresAt)
-                    : "No expiry — manual unblock required"
+                    : "No expiry - manual unblock required"
                 }
               />
-              <Row label="Sessions" value={detailsTarget.block?.sessionRevocation ?? "—"} />
+              <Row label="Sessions" value={detailsTarget.block?.sessionRevocation ?? "-"} />
               <Row label="Last logged in" value={formatTs(detailsTarget.lastLoggedIn)} />
               {detailsTarget.block?.justification && (
                 <div className="pt-2">

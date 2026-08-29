@@ -6,9 +6,9 @@ import { ACCOUNTS } from "@/lib/accounts";
 export const Route = createFileRoute("/$org/login")({
   head: () => ({
     meta: [
-      { title: "Organisation Sign In — DIGIT Complaint Management" },
+      { title: "Organisation Sign In - DIGIT Complaint Management" },
       { name: "description", content: "Sign in through your organisation's dedicated sign-in page." },
-      { property: "og:title", content: "Organisation Sign In — DIGIT Complaint Management" },
+      { property: "og:title", content: "Organisation Sign In - DIGIT Complaint Management" },
       { property: "og:description", content: "Sign in through your organisation's dedicated sign-in page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -45,7 +45,7 @@ function OrgLoginPage() {
           {account?.label ?? "Organisation"}
         </h1>
         <p style={{ marginTop: 12, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-          This organisation uses its own sign-in page. Your account selection has been carried over — continue with the
+          This organisation uses its own sign-in page. Your account selection has been carried over - continue with the
           sign-in method configured by your administrator.
         </p>
 
@@ -54,7 +54,7 @@ function OrgLoginPage() {
           style={{ background: "#EEF3FF", border: "1px solid #DCE4FF", color: "#2D4FC4", fontSize: 13 }}
         >
           <ShieldCheck className="h-4 w-4 shrink-0" />
-          <span>Prototype placeholder — no authentication is performed here.</span>
+          <span>Prototype placeholder - no authentication is performed here.</span>
         </div>
 
         <button

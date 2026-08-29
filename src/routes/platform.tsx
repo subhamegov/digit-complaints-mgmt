@@ -16,7 +16,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/platform")({
   head: () => ({
     meta: [
-      { title: "Account Administrator — DIGIT Complaints" },
+      { title: "Account Administrator - DIGIT Complaints" },
       {
         name: "description",
         content:

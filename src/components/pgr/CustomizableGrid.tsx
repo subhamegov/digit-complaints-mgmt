@@ -1,5 +1,5 @@
 /**
- * CustomizableGrid — reusable dashboard shell with drag-to-reorder, snap-resize,
+ * CustomizableGrid - reusable dashboard shell with drag-to-reorder, snap-resize,
  * and an Add-KPI picker. Extracted from the test-user dashboard so other roles
  * (e.g. Department Head) can share the exact same behavior.
  *

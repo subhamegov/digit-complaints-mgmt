@@ -5,7 +5,7 @@ import { ADMIN_ROLES, type AdminRoleKey } from "@/lib/admin-roles";
 
 export const Route = createFileRoute("/admin/workflow-config/role-hierarchy")({
   head: () => ({
-    meta: [{ title: "Role Hierarchy — Account Administrator" }],
+    meta: [{ title: "Role Hierarchy - Account Administrator" }],
   }),
   component: RoleHierarchyPage,
 });

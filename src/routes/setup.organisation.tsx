@@ -4,9 +4,9 @@ import { CheckCircle2 } from "lucide-react";
 export const Route = createFileRoute("/setup/organisation")({
   head: () => ({
     meta: [
-      { title: "Organisation Setup — DIGIT Complaint Management" },
+      { title: "Organisation Setup - DIGIT Complaint Management" },
       { name: "description", content: "Continue setting up your DIGIT Complaint Management account and organisation details." },
-      { property: "og:title", content: "Organisation Setup — DIGIT Complaint Management" },
+      { property: "og:title", content: "Organisation Setup - DIGIT Complaint Management" },
       { property: "og:description", content: "Continue setting up your DIGIT Complaint Management account." },
     ],
   }),

@@ -3,7 +3,7 @@
  * Used by Users page (assignment dropdown) and Roles & Permissions page
  * to ensure both surfaces stay in sync.
  *
- * Platform Administrator is intentionally excluded — it is a system role
+ * Platform Administrator is intentionally excluded - it is a system role
  * managed outside the account administration console.
  */
 

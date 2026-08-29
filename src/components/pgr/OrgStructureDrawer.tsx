@@ -21,7 +21,7 @@ function UnitNode({ unit, profile, depth }: { unit: OrgUnit; profile: OrgProfile
           )}
         </div>
         <div className="mt-0.5 text-[11px] text-muted-foreground">
-          Jurisdictions: {unit.jurisdictions.join(", ") || "—"}
+          Jurisdictions: {unit.jurisdictions.join(", ") || "-"}
         </div>
         {unit.members.length > 0 && (
           <ul className="mt-1 space-y-0.5">
@@ -75,7 +75,7 @@ export function OrgStructureDrawer({
               <div><dt className="text-muted-foreground">Active jurisdiction</dt><dd className="font-medium">{jurisdictionName}</dd></div>
               <div><dt className="text-muted-foreground">Your role</dt><dd className="font-medium">{ROLE_LABEL[profile.role]}</dd></div>
               <div><dt className="text-muted-foreground">Your unit</dt><dd className="font-medium">{profile.department}</dd></div>
-              <div className="col-span-2"><dt className="text-muted-foreground">Reports to</dt><dd className="font-medium">{profile.reportsTo ?? "—"}</dd></div>
+              <div className="col-span-2"><dt className="text-muted-foreground">Reports to</dt><dd className="font-medium">{profile.reportsTo ?? "-"}</dd></div>
             </dl>
 
             <div className="space-y-1">

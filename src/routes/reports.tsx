@@ -6,7 +6,7 @@ import { t } from "@/lib/i18n";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend } from "recharts";
 
 export const Route = createFileRoute("/reports")({
-  head: () => ({ meta: [{ title: "Reports — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Reports - DIGIT PGR" }] }),
   component: ReportsPage,
 });
 

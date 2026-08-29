@@ -8,7 +8,7 @@ import type { LanguageCode } from "@/lib/accounts";
  * Shared authentication shell used by /login and /signup.
  * Left: brand / narrative media column. Right: the auth card slot.
  */
-/** Shared product messaging — identical on /login and /signup. */
+/** Shared product messaging - identical on /login and /signup. */
 const AUTH_HEADLINE = "Manage complaints from intake to closure.";
 const AUTH_NARRATIVE =
   "Sign in to receive complaints, assign them to the right team, track service timelines, record actions and evidence, and monitor resolution across departments and localities.";
@@ -23,7 +23,7 @@ const AUTH_ROTATING: { title: string; quote: string }[] = [
   {
     title: "Service you can track",
     quote:
-      "Every complaint carries a clear owner, a service timeline, and a record of what was done — visible end to end.",
+      "Every complaint carries a clear owner, a service timeline, and a record of what was done - visible end to end.",
   },
   {
     title: "Trust, built daily",

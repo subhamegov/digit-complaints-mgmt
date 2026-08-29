@@ -1,5 +1,5 @@
 /**
- * Data Dictionary — source of truth for KPI metadata.
+ * Data Dictionary - source of truth for KPI metadata.
  *
  * Dashboards reference these records by id; KPI metadata is never duplicated
  * inside a dashboard definition. Records are read-only in the console.
@@ -455,8 +455,8 @@ export function getDashboardKpiRows(dashboardId: string): DashboardKpiRow[] {
         id,
         name: typeof ref === "string" ? id : ref.name,
         measures: "Definition not available",
-        source: "—",
-        refresh: "—",
+        source: "-",
+        refresh: "-",
         mapped: false,
       };
     }

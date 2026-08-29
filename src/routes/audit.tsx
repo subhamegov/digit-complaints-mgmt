@@ -6,7 +6,7 @@ import { ROLE_LABEL, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/audit")({
-  head: () => ({ meta: [{ title: "Audit Log — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Audit Log - DIGIT PGR" }] }),
   component: AuditPage,
 });
 
@@ -60,7 +60,7 @@ function AuditPage() {
                   </td>
                   <td className="px-4 py-2">{e.entity}</td>
                   <td className="px-4 py-2 font-mono text-[12px] text-primary">{e.entityId}</td>
-                  <td className="px-4 py-2 text-[12px] text-muted-foreground">{e.meta ?? "—"}</td>
+                  <td className="px-4 py-2 text-[12px] text-muted-foreground">{e.meta ?? "-"}</td>
                 </tr>
               ))}
             </tbody>

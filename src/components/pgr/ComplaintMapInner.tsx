@@ -1,5 +1,5 @@
 /**
- * ComplaintMapInner — Leaflet implementation of the Civic Operations Hub map.
+ * ComplaintMapInner - Leaflet implementation of the Civic Operations Hub map.
  *
  * Three tabs (Complaints Filed / Open / Resolved) drive a choropleth across
  * a District → Subdistrict → Sub-subdistrict hierarchy. At the deepest zoom
@@ -44,11 +44,11 @@ interface Ramp {
   emptyStroke: string;
 }
 
-// Blue ramp — raw counts. Buckets are picked dynamically from data max.
+// Blue ramp - raw counts. Buckets are picked dynamically from data max.
 const BLUE_FILLS = ["#eff6ff", "#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#1d4ed8"];
 const BLUE_STROKES = ["#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#1d4ed8", "#1e3a8a"];
 
-// Red ramp — % open.
+// Red ramp - % open.
 const RED_RAMP: Ramp = {
   emptyFill: "#f8fafc", emptyStroke: "#cbd5e1",
   stops: [
@@ -61,7 +61,7 @@ const RED_RAMP: Ramp = {
   ],
 };
 
-// Green ramp — % resolved.
+// Green ramp - % resolved.
 const GREEN_RAMP: Ramp = {
   emptyFill: "#f8fafc", emptyStroke: "#cbd5e1",
   stops: [
@@ -238,7 +238,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
         ramp: buildBlueRamp(maxCount),
         valueOf: (a: PolyAgg) => (a.total === 0 ? null : a.total),
         metricLabel: "Created",
-        formatValue: (v: number | null) => (v === null ? "—" : String(Math.round(v))),
+        formatValue: (v: number | null) => (v === null ? "-" : String(Math.round(v))),
       };
     }
     if (metric === "open") {
@@ -246,14 +246,14 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
         ramp: RED_RAMP,
         valueOf: (a: PolyAgg) => a.openPct,
         metricLabel: "% Open",
-        formatValue: (v: number | null) => (v === null ? "—" : `${Math.round(v * 100)}%`),
+        formatValue: (v: number | null) => (v === null ? "-" : `${Math.round(v * 100)}%`),
       };
     }
     return {
       ramp: GREEN_RAMP,
       valueOf: (a: PolyAgg) => a.resolvedPct,
       metricLabel: "% Resolved",
-      formatValue: (v: number | null) => (v === null ? "—" : `${Math.round(v * 100)}%`),
+      formatValue: (v: number | null) => (v === null ? "-" : `${Math.round(v * 100)}%`),
     };
   }, [metric, localityAgg, wardAgg, subwardAgg]);
 
@@ -313,7 +313,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
     <div
       ref={containerRef}
       role="region"
-      aria-label={`Complaint distribution map for ${activeName} — ${metricLabel}`}
+      aria-label={`Complaint distribution map for ${activeName} - ${metricLabel}`}
       className="flex h-full min-h-[260px] w-full flex-col gap-2 p-3"
     >
       {/* Toolbar: metric tabs + breadcrumb */}
@@ -524,7 +524,7 @@ export default function ComplaintMapInner({ complaints }: { complaints: Complain
             );
           })}
 
-          {/* Pin layer — identical across tabs */}
+          {/* Pin layer - identical across tabs */}
           {showPins && complaints.map((c) => {
             const ward = WARD_BY_LOCALITY_FIELD[c.locality];
             if (!ward) return null;

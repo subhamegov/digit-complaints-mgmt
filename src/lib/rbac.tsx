@@ -17,14 +17,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Role =
-  | "CITIZEN" // Citizen — files and tracks own complaints
-  | "CSR" // Citizen Service Representative — registers complaints
-  | "GRO" // Grievance Routing Officer — assigns / reassigns / rejects
-  | "LME" // Last-Mile Employee — resolves
-  | "DEPT_HEAD" // Department head — escalations, approvals
-  | "ACCOUNT_ADMIN" // Account admin — per-account configuration, users, audit
-  | "PLATFORM_ADMIN" // Platform admin — cross-account platform operations
-  | "TEST_USER"; // Test user — sandbox role for dashboard customization
+  | "CITIZEN" // Citizen - files and tracks own complaints
+  | "CSR" // Citizen Service Representative - registers complaints
+  | "GRO" // Grievance Routing Officer - assigns / reassigns / rejects
+  | "LME" // Last-Mile Employee - resolves
+  | "DEPT_HEAD" // Department head - escalations, approvals
+  | "ACCOUNT_ADMIN" // Account admin - per-account configuration, users, audit
+  | "PLATFORM_ADMIN" // Platform admin - cross-account platform operations
+  | "TEST_USER"; // Test user - sandbox role for dashboard customization
 
 
 
@@ -111,7 +111,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "AUDIT_LOG_VIEW",
   ],
   ACCOUNT_ADMIN: [
-    // Administrative persona — no personal complaint-resolution inbox,
+    // Administrative persona - no personal complaint-resolution inbox,
     // so PGR_TASKS_VIEW is intentionally not granted.
     "PGR_DASHBOARD_VIEW",
     "PGR_INBOX_VIEW",

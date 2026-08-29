@@ -7,7 +7,7 @@ import { Can, useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/inbox/$id")({
-  head: ({ params }) => ({ meta: [{ title: `${params.id} — DIGIT PGR` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${params.id} - DIGIT PGR` }] }),
   component: ComplaintDetail,
   notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Complaint not found.</div>,
 });
@@ -67,7 +67,7 @@ function ComplaintDetail() {
             </dl>
           </Panel>
 
-          {/* Citizen — PII-gated */}
+          {/* Citizen - PII-gated */}
           <Can perm="PGR_CITIZEN_PII_VIEW" fallback={
             <Panel title={t("CS_CITIZEN_DETAILS")}>
               <div className="text-[12px] text-muted-foreground italic">Citizen PII is masked for your role.</div>
@@ -144,7 +144,7 @@ function ComplaintDetail() {
               <label className="block">
                 <span className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Select officer</span>
                 <select value={assignTo} onChange={(e) => setAssignTo(e.target.value)} className="h-9 w-full rounded-sm border border-border bg-background px-2 text-[13px] outline-none focus:border-primary">
-                  <option value="">— Select —</option>
+                  <option value="">- Select -</option>
                   {OFFICERS.filter((o) => o.department === type.department).map((o) => (
                     <option key={o.id} value={o.id}>{o.name} · {o.ward} · load {o.activeLoad}</option>
                   ))}

@@ -2,7 +2,7 @@
  * Department Head dashboard.
  *
  * Reads exclusively from `TEST_USER_COMPLAINTS` filtered through
- * `userScope` — the single source of truth for what data the signed-in
+ * `userScope` - the single source of truth for what data the signed-in
  * department head is allowed to see. When the RBAC backend lands, only
  * `useUserScope` changes; this file does not.
  *
@@ -43,7 +43,7 @@ const isOpen = (c: Complaint) =>
 const isResolved = (c: Complaint) => c.status === "RESOLVED" || c.status === "CLOSED";
 
 function fmtHrs(h: number): string {
-  if (!isFinite(h) || h <= 0) return "—";
+  if (!isFinite(h) || h <= 0) return "-";
   if (h < 24) return `${Math.round(h * 10) / 10}h`;
   const d = h / 24;
   return `${Math.round(d * 10) / 10}d`;
@@ -220,7 +220,7 @@ export function DeptHeadDashboard() {
   // the last day of month m AND not resolved as of that day. It is NOT a running
   // cumulative `created - resolved`, and NOT a live "currently open" count.
   // When wiring to real data, derive each month's snapshot from createdAt and
-  // resolvedAt timestamps against the month boundary — do not substitute the
+  // resolvedAt timestamps against the month boundary - do not substitute the
   // live open count.
   const overTime = useMemo(() => {
     const buckets = Array.from({ length: 12 }, () => ({ created: 0, resolved: 0, onTime: 0, reached: 0 }));
@@ -460,7 +460,7 @@ export function DeptHeadDashboard() {
       id: "dh-csat", kind: "stat", label: "Citizen satisfaction",
       description: "Average CSAT from resolved complaints in scope.",
       icon: ThumbsUp, intent: "positive",
-      getValue: () => metrics.csat ? `${metrics.csat} / 5` : "—",
+      getValue: () => metrics.csat ? `${metrics.csat} / 5` : "-",
       getDelta: () => `${metrics.csatResp} responses · ${metrics.csatRate}% rate`,
       getTrend: () => makeTrend(sparks.csat, "up"),
     },
@@ -491,7 +491,7 @@ export function DeptHeadDashboard() {
       description: "Age of the longest-open complaint in scope.",
       icon: Clock, intent: "warning",
       getValue: () => fmtHrs(metrics.oldestHrs),
-      // No delta / sparkline by design — just label + value.
+      // No delta / sparkline by design - just label + value.
     },
     {
       id: "dh-total", kind: "stat", label: "Total complaints",
@@ -555,7 +555,7 @@ export function DeptHeadDashboard() {
       icon: Repeat, title: "Recurring complaints by ward & sub-type", colSpan: 2,
       render: () => (
         <>
-          <p className="mb-2 text-[12px] text-muted-foreground">Same problem, same locality — recurring (≥ 3 reports).</p>
+          <p className="mb-2 text-[12px] text-muted-foreground">Same problem, same locality - recurring (≥ 3 reports).</p>
           <RecurringTable rows={recurring} />
         </>
       ),
@@ -574,13 +574,13 @@ export function DeptHeadDashboard() {
     },
     {
       id: "dh-flow-ratio-dept", kind: "panel", label: "Flow ratio by department",
-      description: "Resolved ÷ created per department — worst-first. > 1 means backlog is shrinking.",
+      description: "Resolved ÷ created per department - worst-first. > 1 means backlog is shrinking.",
       icon: BarChart3, title: "Flow ratio by department", colSpan: 2,
       render: () => <FlowRatioByDeptChart rows={flowRatioByDept} />,
     },
     {
       id: "dh-ward-load-sla", kind: "panel", label: "Complaints by Wards",
-      description: "All complaints by SLA state — per-ward totals on a shared scale.",
+      description: "All complaints by SLA state - per-ward totals on a shared scale.",
       icon: MapPin, title: "Complaints by Wards", colSpan: 2,
       render: () => <WardLoadBySlaChart data={wardLoadBySla} />,
     },
@@ -741,7 +741,7 @@ function SortHeader<K extends string>({ label, k, sortKey, sortDir, onSort, alig
   );
 }
 
-// ---------- Row 2A — Ward performance --------------------------------------
+// ---------- Row 2A - Ward performance --------------------------------------
 
 type WardRow = { ward: string; created: number; open: number; reopenRate: number; onTimeRate: number; csat: number | null };
 type WardKey = "ward" | "created" | "open" | "reopen" | "ontime" | "csat";
@@ -774,7 +774,7 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
               <td className="px-3 py-1.5 text-right tabular-nums">{r.open}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.reopenRate.toFixed(1)}%</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.onTimeRate.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "—"}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "-"}</td>
             </tr>
           ))}
         </tbody>
@@ -783,7 +783,7 @@ function WardPerformanceTable({ rows }: { rows: WardRow[] }) {
   );
 }
 
-// ---------- Row 2B — Subtype performance -----------------------------------
+// ---------- Row 2B - Subtype performance -----------------------------------
 
 type SubtypeRow = {
   subtype: string; typeName: string; avgResolveHrs: number; slaHours: number; overSla: boolean;
@@ -824,12 +824,12 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
               </td>
               <td className="px-3 py-1.5 text-muted-foreground">{r.typeName}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.pctOfTotal.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.avgResolveHrs ? fmtHrs(r.avgResolveHrs) : "—"}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.avgResolveHrs ? fmtHrs(r.avgResolveHrs) : "-"}</td>
               <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{fmtHrs(r.slaHours)}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.reopenRate.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.oldestOpenHrs ? fmtHrs(r.oldestOpenHrs) : "—"}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.oldestOpenHrs ? fmtHrs(r.oldestOpenHrs) : "-"}</td>
               <td className="px-3 py-1.5 text-right tabular-nums">{r.onTimeRate.toFixed(1)}%</td>
-              <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "—"}</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? `${r.csat.toFixed(1)}` : "-"}</td>
             </tr>
           ))}
         </tbody>
@@ -838,7 +838,7 @@ function SubtypePerformanceTable({ rows }: { rows: SubtypeRow[] }) {
   );
 }
 
-// ---------- Row 3A — over time ---------------------------------------------
+// ---------- Row 3A - over time ---------------------------------------------
 
 type OverTimeBar = "created" | "resolved" | "open";
 const BAR_META: { key: OverTimeBar; name: string; color: string }[] = [
@@ -849,7 +849,7 @@ const BAR_META: { key: OverTimeBar; name: string; color: string }[] = [
 
 function ComplaintsOverTimeChart({ data }: { data: { month: string; created: number; resolved: number; open: number; sla: number }[] }) {
   // `active`: null = all three shown. Otherwise only that series is visible.
-  // The On-time % line is NOT toggleable — it's reference context.
+  // The On-time % line is NOT toggleable - it's reference context.
   const [active, setActive] = React.useState<OverTimeBar | null>(null);
 
   const toggle = (k: OverTimeBar) => setActive((cur) => (cur === k ? null : k));
@@ -898,7 +898,7 @@ function ComplaintsOverTimeChart({ data }: { data: { month: string; created: num
   );
 }
 
-// ---------- Row 3B — inflow by subtype -------------------------------------
+// ---------- Row 3B - inflow by subtype -------------------------------------
 
 const SERIES_COLORS = [
   "var(--color-chart-1)", "var(--color-chart-2)", "var(--color-chart-3)",
@@ -924,7 +924,7 @@ function InflowBySubtypeChart({ data, series }: { data: Record<string, number | 
   );
 }
 
-// ---------- Row 4A — recurring ---------------------------------------------
+// ---------- Row 4A - recurring ---------------------------------------------
 
 function RecurringTable({ rows }: { rows: { ward: string; subtype: string; total: number; trendPct: number }[] }) {
   if (rows.length === 0) return <Empty message="No ward/sub-type pair has 3+ complaints in scope." />;
@@ -956,7 +956,7 @@ function RecurringTable({ rows }: { rows: { ward: string; subtype: string; total
   );
 }
 
-// ---------- Row 4B — channel equity ----------------------------------------
+// ---------- Row 4B - channel equity ----------------------------------------
 
 function ChannelEquityTable({ rows }: { rows: { channel: string; total: number; resolutionRate: number; csat: number | null }[] }) {
   if (rows.length === 0) return <Empty />;
@@ -976,7 +976,7 @@ function ChannelEquityTable({ rows }: { rows: { channel: string; total: number; 
             <td className="px-3 py-1.5">{r.channel}</td>
             <td className="px-3 py-1.5 text-right tabular-nums">{r.total}</td>
             <td className="px-3 py-1.5 text-right tabular-nums">{r.resolutionRate.toFixed(1)}%</td>
-            <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? r.csat.toFixed(1) : "—"}</td>
+            <td className="px-3 py-1.5 text-right tabular-nums">{r.csat !== null ? r.csat.toFixed(1) : "-"}</td>
           </tr>
         ))}
       </tbody>
@@ -984,7 +984,7 @@ function ChannelEquityTable({ rows }: { rows: { channel: string; total: number; 
   );
 }
 
-// ---------- Row 5A — caseload per officer ----------------------------------
+// ---------- Row 5A - caseload per officer ----------------------------------
 
 function CaseloadPanel({ data }: { data: { officers: { id: string; name: string; total: number; breachPct: number }[]; avg: number; median: number; max: number; count: number } }) {
   if (data.officers.length === 0) return <Empty message="No assigned officers in scope." />;
@@ -1023,7 +1023,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-// ---------- Complaints by type — horizontal bar ----------------------------
+// ---------- Complaints by type - horizontal bar ----------------------------
 
 function ComplaintsByTypeBars({ rows }: { rows: { name: string; count: number }[] }) {
   if (rows.length === 0) return <Empty />;
@@ -1055,7 +1055,7 @@ function ComplaintsByTypeBars({ rows }: { rows: { name: string; count: number }[
   );
 }
 
-// ---------- Row 5B — breach vs caseload scatter ----------------------------
+// ---------- Row 5B - breach vs caseload scatter ----------------------------
 
 
 
@@ -1136,7 +1136,7 @@ function FlowRatioByDeptChart({ rows }: { rows: { department: string; created: n
             {rows.map((r) => {
               const below = r.ratio < 1;
               const color = below ? "var(--color-chart-4)" : "var(--color-chart-3)";
-              const tip = `${r.department}: ${r.ratio.toFixed(2)} — ${r.resolved} resolved of ${r.created} created`;
+              const tip = `${r.department}: ${r.ratio.toFixed(2)} - ${r.resolved} resolved of ${r.created} created`;
               return (
                 <div key={r.department} className="h-6 relative" title={tip}>
                   <div className="absolute inset-y-0 left-0 rounded-sm" style={{ width: pct(r.ratio), background: color }} />
@@ -1179,7 +1179,7 @@ function WardLoadBySlaChart({ data }: { data: WardLoadData }) {
   ] as const;
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-[11px] text-muted-foreground -mt-1">All complaints by SLA state — per ward</div>
+      <div className="text-[11px] text-muted-foreground -mt-1">All complaints by SLA state - per ward</div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
         {segs.map((s) => (
           <span key={s.key} className="inline-flex items-center gap-1.5">

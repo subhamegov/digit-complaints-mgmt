@@ -9,9 +9,9 @@ import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
 export const Route = createFileRoute("/signup/pending-approval")({
   head: () => ({
     meta: [
-      { title: "Account Request Submitted — DIGIT Complaint Management" },
+      { title: "Account Request Submitted - DIGIT Complaint Management" },
       { name: "description", content: "Your account request is awaiting Platform Administrator approval before workspace setup begins." },
-      { property: "og:title", content: "Account Request Submitted — DIGIT Complaint Management" },
+      { property: "og:title", content: "Account Request Submitted - DIGIT Complaint Management" },
       { property: "og:description", content: "Track the approval status of your DIGIT Complaint Management account request." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -46,12 +46,12 @@ function PendingApprovalPage() {
   const status = request?.status ?? "pending_approval";
 
   const rows: [string, string][] = [
-    ["Organisation name", request?.organisationName || "—"],
-    ["Organisation code", request?.organisationCode || "—"],
-    ["Base country", request?.country || "—"],
+    ["Organisation name", request?.organisationName || "-"],
+    ["Organisation code", request?.organisationCode || "-"],
+    ["Base country", request?.country || "-"],
     ["Employee URL", request?.employeeUrl || "Pending"],
     ["Citizen URL", request?.citizenUrl || "Pending"],
-    ["Requester email", request?.requesterEmail || "—"],
+    ["Requester email", request?.requesterEmail || "-"],
   ];
 
   const heading =

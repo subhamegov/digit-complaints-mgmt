@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 export const Route = createFileRoute("/admin/dashboards/")({
   head: () => ({
     meta: [
-      { title: "Dashboards — Account Administrator" },
+      { title: "Dashboards - Account Administrator" },
       {
         name: "description",
         content:

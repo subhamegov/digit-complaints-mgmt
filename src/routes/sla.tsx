@@ -5,7 +5,7 @@ import { t } from "@/lib/i18n";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/sla")({
-  head: () => ({ meta: [{ title: "SLA Monitor — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "SLA Monitor - DIGIT PGR" }] }),
   component: SlaPage,
 });
 

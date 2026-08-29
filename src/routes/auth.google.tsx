@@ -7,9 +7,9 @@ import { setPrototypeIdentity } from "@/lib/prototype-identity";
 export const Route = createFileRoute("/auth/google")({
   head: () => ({
     meta: [
-      { title: "Continue with Google — DIGIT Complaint Management" },
+      { title: "Continue with Google - DIGIT Complaint Management" },
       { name: "description", content: "Prototype Google sign-in step for DIGIT Complaint Management signup." },
-      { property: "og:title", content: "Continue with Google — DIGIT Complaint Management" },
+      { property: "og:title", content: "Continue with Google - DIGIT Complaint Management" },
       { property: "og:description", content: "Prototype Google sign-in step for DIGIT Complaint Management signup." },
     ],
   }),

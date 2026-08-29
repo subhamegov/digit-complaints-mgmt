@@ -3,9 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/legal/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Notice — DIGIT Complaint Management" },
+      { title: "Privacy Notice - DIGIT Complaint Management" },
       { name: "description", content: "Prototype privacy notice for DIGIT Complaint Management." },
-      { property: "og:title", content: "Privacy Notice — DIGIT Complaint Management" },
+      { property: "og:title", content: "Privacy Notice - DIGIT Complaint Management" },
       { property: "og:description", content: "Prototype privacy notice for DIGIT Complaint Management." },
     ],
   }),

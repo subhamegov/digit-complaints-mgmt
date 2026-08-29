@@ -13,7 +13,7 @@ import {
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/inbox/")({
-  head: () => ({ meta: [{ title: "Inbox — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Inbox - DIGIT PGR" }] }),
   component: InboxPage,
 });
 

@@ -1,7 +1,7 @@
 /**
  * Synthetic Bangalore boundary hierarchy for the Civic Operations Hub map.
  *
- * The complaint dataset (TEST_USER_COMPLAINTS / COMPLAINTS) is themed —
+ * The complaint dataset (TEST_USER_COMPLAINTS / COMPLAINTS) is themed -
  * its `ward` field carries Locality/Zone-level names (e.g. "Heritage City")
  * and its `locality` field carries the actual Ward-level neighbourhood
  * (e.g. "Mall Road"). We re-use those strings so the map reconciles with
@@ -9,10 +9,10 @@
  * Bangalore's BBMP extent.
  *
  * Hierarchy used by the map:
- *   City        — Bangalore (the full BBMP bounding box)
- *   Locality    — dataset.ward (4 zones tiling the city in a 2x2 grid)
- *   Ward        — dataset.locality (3 wards inside each locality)
- *   Pin         — individual complaint, deterministic lat/lng inside its ward
+ *   City        - Bangalore (the full BBMP bounding box)
+ *   Locality    - dataset.ward (4 zones tiling the city in a 2x2 grid)
+ *   Ward        - dataset.locality (3 wards inside each locality)
+ *   Pin         - individual complaint, deterministic lat/lng inside its ward
  */
 
 export type LatLng = [number, number]; // [lat, lng]
@@ -43,7 +43,7 @@ const LOCALITY_BOXES: { code: string; name: string; minLat: number; maxLat: numb
   { code: "LOC_EAST",      name: "East Village",       minLat: 12.86, maxLat: 12.99, minLng: 77.63, maxLng: 77.78 },
 ];
 
-/** Per-locality ward subdivisions — 3 wards each, names from the seed dataset. */
+/** Per-locality ward subdivisions - 3 wards each, names from the seed dataset. */
 const WARDS_PER_LOCALITY: Record<string, string[]> = {
   "Heritage City":      ["Mall Road", "Civil Lines", "Hall Bazaar"],
   "Financial District": ["Crown Plaza", "Trade Centre", "Lawrence Avenue"],
@@ -66,7 +66,7 @@ function organicPolygon(
   const rand = mulberry32(hashString(seed));
   const cLat = (minLat + maxLat) / 2;
   const cLng = (minLng + maxLng) / 2;
-  // Half-extents — ellipse inscribed in the box, slightly enlarged so
+  // Half-extents - ellipse inscribed in the box, slightly enlarged so
   // adjacent polygons touch / overlap and the seams disappear.
   const rLat = (maxLat - minLat) / 2 * 1.05;
   const rLng = (maxLng - minLng) / 2 * 1.05;
@@ -120,7 +120,7 @@ export const WARD_POLYGONS: BoundaryPolygon[] = LOCALITY_BOXES.flatMap((loc) => 
 });
 
 /**
- * Sub-ward polygons (3 per ward) — the lowest colored hierarchy level.
+ * Sub-ward polygons (3 per ward) - the lowest colored hierarchy level.
  * Each ward bounding box is split into 3 horizontal strips so the
  * sub-wards stack within the parent ward's vertical column.
  */

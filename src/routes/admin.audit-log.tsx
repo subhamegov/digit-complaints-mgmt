@@ -38,7 +38,7 @@ import {
 export const Route = createFileRoute("/admin/audit-log")({
   head: () => ({
     meta: [
-      { title: "Audit Log — Account Administration" },
+      { title: "Audit Log - Account Administration" },
       {
         name: "description",
         content:

@@ -5,13 +5,13 @@ import { KPI_DICTIONARY } from "@/lib/kpi-dictionary";
 export const Route = createFileRoute("/admin/data-dictionary/")({
   head: () => ({
     meta: [
-      { title: "Data dictionary — Account Administrator" },
+      { title: "Data dictionary - Account Administrator" },
       {
         name: "description",
         content:
           "Formal definitions for the KPIs used across published complaint management dashboards.",
       },
-      { property: "og:title", content: "Data dictionary — Account Administrator" },
+      { property: "og:title", content: "Data dictionary - Account Administrator" },
       {
         property: "og:description",
         content: "Business definitions, calculations and sources for complaint KPIs.",

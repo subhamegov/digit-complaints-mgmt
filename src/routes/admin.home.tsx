@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/admin/home")({
-  head: () => ({ meta: [{ title: "Home — Account Administrator" }] }),
+  head: () => ({ meta: [{ title: "Home - Account Administrator" }] }),
   component: HomePage,
 });
 

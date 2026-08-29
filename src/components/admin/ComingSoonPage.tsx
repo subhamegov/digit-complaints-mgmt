@@ -1,5 +1,5 @@
 /**
- * ComingSoonPage — branded placeholder for admin surfaces that are
+ * ComingSoonPage - branded placeholder for admin surfaces that are
  * planned but not yet built. Uses the existing admin layout chrome
  * (AdminPageHeader) and design tokens; RBAC- and i18n-ready via the
  * surrounding route + t() shim.

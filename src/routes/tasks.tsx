@@ -18,9 +18,9 @@ import {
 export const Route = createFileRoute("/tasks")({
   head: () => ({
     meta: [
-      { title: "Complaints — DIGIT Complaint Management" },
+      { title: "Complaints - DIGIT Complaint Management" },
       { name: "description", content: "Complaints assigned to you, complaints requiring your attention and complaints handled by your organisation." },
-      { property: "og:title", content: "Complaints — DIGIT Complaint Management" },
+      { property: "og:title", content: "Complaints - DIGIT Complaint Management" },
       { property: "og:description", content: "Complaints assigned to you, complaints requiring your attention and complaints handled by your organisation." },
     ],
   }),
@@ -36,7 +36,7 @@ function TasksPage() {
   const navigate = useNavigate();
   const allowed = hasPermission("PGR_TASKS_VIEW");
   // Administrative personas (e.g. Account Administrator) have no personal
-  // complaint inbox — send them back to their Home page.
+  // complaint inbox - send them back to their Home page.
   useEffect(() => {
     if (!allowed) navigate({ to: "/admin/home", replace: true });
   }, [allowed, navigate]);
@@ -310,7 +310,7 @@ function OrgTab({ showEscalation }: { showEscalation: boolean }) {
 
 
 /* ------------------------------------------------------------------ */
-/* Legacy task list — unchanged for all other personas                 */
+/* Legacy task list - unchanged for all other personas                 */
 /* ------------------------------------------------------------------ */
 
 function LegacyTasks() {

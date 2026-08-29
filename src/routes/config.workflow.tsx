@@ -5,7 +5,7 @@ import { t } from "@/lib/i18n";
 import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/config/workflow")({
-  head: () => ({ meta: [{ title: "Workflow & SLA — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Workflow & SLA - DIGIT PGR" }] }),
   component: WorkflowConfigPage,
 });
 
@@ -15,10 +15,10 @@ const TRANSITIONS = [
   { from: "OPEN", action: "ASSIGN", to: "ASSIGNED", role: "GRO", sla: "2h" },
   { from: "OPEN", action: "REJECT", to: "REJECTED", role: "GRO", sla: "2h" },
   { from: "ASSIGNED", action: "PICKUP", to: "IN_PROGRESS", role: "LME", sla: "4h" },
-  { from: "ASSIGNED", action: "REASSIGN", to: "ASSIGNED", role: "GRO / DEPT_HEAD", sla: "—" },
+  { from: "ASSIGNED", action: "REASSIGN", to: "ASSIGNED", role: "GRO / DEPT_HEAD", sla: "-" },
   { from: "IN_PROGRESS", action: "RESOLVE", to: "RESOLVED", role: "LME", sla: "Per type" },
   { from: "RESOLVED", action: "REOPEN", to: "REOPENED", role: "CITIZEN", sla: "Within 7d" },
-  { from: "RESOLVED", action: "CLOSE", to: "CLOSED", role: "Auto (7d)", sla: "—" },
+  { from: "RESOLVED", action: "CLOSE", to: "CLOSED", role: "Auto (7d)", sla: "-" },
 ];
 
 const ESCALATION_MATRIX = [

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/admin/workflow-config/sla-maps")({
   head: () => ({
-    meta: [{ title: "SLA Maps — Account Administrator" }],
+    meta: [{ title: "SLA Maps - Account Administrator" }],
   }),
   component: SlaMapsPage,
 });

@@ -3,7 +3,7 @@
  * department, channel, status, age bucket, SLA state, and per-stage timing
  * so every widget on the Test User dashboard reconciles against ONE dataset.
  *
- * NOT used by any other role — see DashboardPage's `canCustomize` branch.
+ * NOT used by any other role - see DashboardPage's `canCustomize` branch.
  */
 import {
   COMPLAINT_TYPES,
@@ -32,7 +32,7 @@ export interface TestComplaint extends Complaint {
   subtype: string;
 }
 
-// Anchor "now" — same value used by mock-data.ts so all timestamps align.
+// Anchor "now" - same value used by mock-data.ts so all timestamps align.
 const NOW = new Date("2026-05-23T10:00:00").getTime();
 const isoMinus = (h: number) => new Date(NOW - h * 3600_000).toISOString();
 
@@ -90,7 +90,7 @@ const DESCRIPTIONS: Record<string, string[]> = {
   ],
   SWM_DEAD_ANIMAL: [
     "Dead stray dog on footpath; needs immediate removal.",
-    "Carcass near school gate — health hazard for children.",
+    "Carcass near school gate - health hazard for children.",
   ],
   STR_POTHOLE: [
     "Large pothole near block A causing two-wheeler accidents.",
@@ -100,7 +100,7 @@ const DESCRIPTIONS: Record<string, string[]> = {
   STR_STREETLIGHT: [
     "Streetlight pole non-functional for over a week.",
     "Three consecutive streetlights dark on main road.",
-    "Pole flickering — unsafe for night-time pedestrians.",
+    "Pole flickering - unsafe for night-time pedestrians.",
   ],
   WS_LEAKAGE: [
     "Continuous water leakage from mainline near temple.",
@@ -108,7 +108,7 @@ const DESCRIPTIONS: Record<string, string[]> = {
     "Slow leak wetting compound wall and footpath.",
   ],
   WS_NO_SUPPLY: [
-    "No water supply since morning — entire street affected.",
+    "No water supply since morning - entire street affected.",
     "Tanker did not arrive for scheduled supply.",
   ],
   SEW_OVERFLOW: [
@@ -127,7 +127,7 @@ const DESCRIPTIONS: Record<string, string[]> = {
 
 const CHANNELS: Channel[] = ["MOBILE_APP", "WEB", "CALL_CENTER", "COUNTER", "WHATSAPP"];
 
-// 143 complaints — distribution preserves the original status mix while
+// 143 complaints - distribution preserves the original status mix while
 // scaling up so every widget has realistic data density.
 const STATUS_DISTRIBUTION: Array<[ComplaintStatus, number]> = [
   ["OPEN", 24],
@@ -143,7 +143,7 @@ const STATUS_PATTERN: ComplaintStatus[] = STATUS_DISTRIBUTION.flatMap(
   ([s, n]) => Array.from({ length: n }, () => s),
 );
 
-// Deterministic age generator — spans <1d, 1–3d, 3–7d, >7d buckets with a
+// Deterministic age generator - spans <1d, 1–3d, 3–7d, >7d buckets with a
 // healthy WITHIN / NEARING / BREACHED mix.
 const AGE_PATTERN: number[] = Array.from({ length: STATUS_PATTERN.length }, (_, i) => {
   // Mix four buckets in a repeating cycle, with per-row jitter.

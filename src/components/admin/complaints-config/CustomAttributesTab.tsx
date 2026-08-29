@@ -178,7 +178,7 @@ export function CustomAttributesTab({ locale, search }: { locale: LocaleCode; se
                     </div>
                   ))}
                   {a.options.length === 0 && (
-                    <p className="text-[12px] text-muted-foreground">No options yet — add at least one.</p>
+                    <p className="text-[12px] text-muted-foreground">No options yet - add at least one.</p>
                   )}
                 </div>
               </div>
