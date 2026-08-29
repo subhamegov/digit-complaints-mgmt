@@ -625,8 +625,9 @@ function StepAccount(p: any) {
           </div>
         </AuthField>
 
+        {p.authenticated && (
         <div>
-          <AuthField label="Organisation name">
+          <AuthField label="Account name">
             <input
               value={p.organisationName}
               onChange={(e: any) => p.setOrganisationName(e.target.value)}
