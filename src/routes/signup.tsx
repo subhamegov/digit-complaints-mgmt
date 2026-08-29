@@ -633,21 +633,22 @@ function StepAccount(p: any) {
 
         {p.authenticated && (
           <>
-          <AuthField label="Account name">
-            <input
-              value={p.organisationName}
-              onChange={(e: any) => p.setOrganisationName(e.target.value)}
-              placeholder="Makueni County Government"
-              autoComplete="organization"
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
-          <p style={helperStyle}>
-            Enter the government organisation, agency, department, parastatal body, institution, or programme you are setting up.
-          </p>
-          {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an organisation name between 3 and 120 characters.</p>}
-        </div>
+            <div>
+              <AuthField label="Account name">
+                <input
+                  value={p.organisationName}
+                  onChange={(e: any) => p.setOrganisationName(e.target.value)}
+                  placeholder="Makueni County Government"
+                  autoComplete="organization"
+                  className={authInputCls}
+                  style={authInputStyle}
+                />
+              </AuthField>
+              <p style={helperStyle}>
+                Enter the name of your account — it could be a government organisation, agency, department, parastatal body, institution, or programme.
+              </p>
+              {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an account name between 3 and 120 characters.</p>}
+            </div>
 
             <div>
               <AuthField label="Account code">
@@ -663,38 +664,38 @@ function StepAccount(p: any) {
                 />
               </AuthField>
               <p style={helperStyle}>Used as a short identifier for your account across configuration, URLs, and system references.</p>
-          {p.organisationCode && !p.codeValid && <p style={errorStyle}>Use 2–12 letters or numbers, for example MCG or KE-MCG.</p>}
-          {p.codeValid && p.codeStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
-          {p.codeValid && p.codeStatus === "available" && (
-            <p style={okStyle} className="flex items-center gap-1">
-              <Check className="h-3.5 w-3.5" /> Organisation code is available.
-            </p>
-          )}
-          {p.codeValid && p.codeStatus === "unavailable" && (
-            <div>
-              <p style={errorStyle} className="flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" /> This organisation code is already in use.
-              </p>
-              {p.codeSuggestion && (
-                <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
-                  <span>
-                    Suggested code: <strong style={{ color: "#17191F" }}>{p.codeSuggestion}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      p.setCodeTouched(true);
-                      p.setOrganisationCode(p.codeSuggestion);
-                    }}
-                    style={{ color: "#2D4FC4", fontWeight: 600 }}
-                    className="hover:underline"
-                  >
-                    Use suggestion
-                  </button>
+              {p.organisationCode && !p.codeValid && <p style={errorStyle}>Use 2–12 letters or numbers, for example MCG or KE-MCG.</p>}
+              {p.codeValid && p.codeStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
+              {p.codeValid && p.codeStatus === "available" && (
+                <p style={okStyle} className="flex items-center gap-1">
+                  <Check className="h-3.5 w-3.5" /> Account code is available.
+                </p>
+              )}
+              {p.codeValid && p.codeStatus === "unavailable" && (
+                <div>
+                  <p style={errorStyle} className="flex items-center gap-1">
+                    <AlertCircle className="h-3.5 w-3.5" /> This account code is already in use.
+                  </p>
+                  {p.codeSuggestion && (
+                    <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
+                      <span>
+                        Suggested code: <strong style={{ color: "#17191F" }}>{p.codeSuggestion}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          p.setCodeTouched(true);
+                          p.setOrganisationCode(p.codeSuggestion);
+                        }}
+                        style={{ color: "#2D4FC4", fontWeight: 600 }}
+                        className="hover:underline"
+                      >
+                        Use suggestion
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
             </div>
           </>
         )}
