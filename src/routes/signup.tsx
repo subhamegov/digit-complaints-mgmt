@@ -483,7 +483,8 @@ function SignupPage() {
               authenticated,
               step1Valid,
               submitStep1,
-              startGoogle,
+               startGoogle,
+               startGithub,
             }}
           />
         )}
