@@ -568,10 +568,15 @@ function SignupPage() {
 function StepAccount(p: any) {
   return (
     <form onSubmit={p.submitStep1}>
-      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Set up your organisation</h1>
+      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
+        {p.authenticated ? "Set up your account" : "Verify your email to begin"}
+      </h1>
       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        Create the account details that will identify your organisation in DIGIT Complaint Management.
+        {p.authenticated
+          ? "Create the account details that will identify your account in DIGIT Complaint Management."
+          : "Confirm who you are first. Once your email is verified, you can name your account and continue the setup."}
       </p>
+
 
       <div className="mt-6 space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
