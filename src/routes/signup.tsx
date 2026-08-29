@@ -632,7 +632,7 @@ function StepAccount(p: any) {
         </AuthField>
 
         {p.authenticated && (
-        <div>
+          <>
           <AuthField label="Account name">
             <input
               value={p.organisationName}
