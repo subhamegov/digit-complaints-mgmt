@@ -222,7 +222,7 @@ function SignupPage() {
     if (!code || /^[A-Z]{2}-/.test(code)) return;
     const next = normaliseCode(`${baseCountry}-${code}`);
     setOrganisationCode(next);
-    setCodeUpdatedNotice(`Organisation code updated to ${next} for ${baseCountry}.`);
+    setCodeUpdatedNotice(`Account code updated to ${next} for ${baseCountry}.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseCountry]);
 
@@ -843,7 +843,7 @@ function StepPreferences(p: any) {
               })}
             </div>
           </AuthField>
-          <p style={helperStyle}>Choose the languages your organisation may use in the product.</p>
+          <p style={helperStyle}>Choose the languages your account may use in the product.</p>
         </div>
 
         <div>
@@ -875,11 +875,11 @@ function StepPreferences(p: any) {
               ))}
             </select>
           </AuthField>
-          <p style={helperStyle}>Choose when your organisation's financial year begins.</p>
+          <p style={helperStyle}>Choose when your account's financial year begins.</p>
         </div>
 
         <div>
-          <AuthField label="Organisation URL">
+          <AuthField label="Account URL">
             <input
               value={p.orgSlug}
               onChange={(e: any) => {
@@ -891,7 +891,7 @@ function StepPreferences(p: any) {
               style={authInputStyle}
             />
           </AuthField>
-          <p style={helperStyle}>This short name will be used in your organisation URLs.</p>
+          <p style={helperStyle}>This short name will be used in your account URLs.</p>
           <p style={{ ...helperStyle, color: "#5E6675" }}>
             Preview: <strong style={{ color: "#17191F" }}>{`https://${p.orgSlug || "your-organisation"}.${BASE_DOMAIN}`}</strong>
           </p>
@@ -899,12 +899,12 @@ function StepPreferences(p: any) {
           {p.slugStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
           {p.slugStatus === "available" && (
             <p style={okStyle} className="flex items-center gap-1">
-              <Check className="h-3.5 w-3.5" /> This organisation URL is available.
+              <Check className="h-3.5 w-3.5" /> This account URL is available.
             </p>
           )}
           {p.slugStatus === "unavailable" && (
             <div>
-              <p style={errorStyle}>This organisation URL is already in use.</p>
+              <p style={errorStyle}>This account URL is already in use.</p>
               {p.slugSuggestion && (
                 <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
                   <span>
@@ -1058,7 +1058,7 @@ function StepUrls({
       </div>
 
       <div className="mt-6">
-        <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Organisation details</div>
+        <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Account details</div>
         <dl className="mt-2 space-y-1.5">
           {rows.map(([k, v]) => (
             <div key={k} className="flex items-start justify-between gap-4">
