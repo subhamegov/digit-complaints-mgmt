@@ -749,15 +749,24 @@ function StepAccount(p: any) {
             <span style={{ color: "#8A90A2", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em" }}>OR</span>
             <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
           </div>
-          <button
-            type="button"
-            onClick={p.startGoogle}
-            className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
-            style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
-          >
-            <GoogleIcon />
-            Sign up with Google
-          </button>
+           <button
+             type="button"
+             onClick={p.startGoogle}
+             className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+             style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+           >
+             <GoogleIcon />
+             Sign up with Google
+           </button>
+           <button
+             type="button"
+             onClick={p.startGithub}
+             className="mt-2.5 flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+             style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+           >
+             <Github className="h-[18px] w-[18px]" />
+             Sign up with GitHub
+           </button>
         </>
       )}
     </form>
