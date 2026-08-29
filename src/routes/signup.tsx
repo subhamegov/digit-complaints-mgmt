@@ -140,7 +140,7 @@ function SignupPage() {
   const [terms, setTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [stage, setStage] = useState<"form" | "check-email">("form");
-  const [authMethod, setAuthMethod] = useState<"google" | "email" | null>(null);
+  const [authMethod, setAuthMethod] = useState<"google" | "github" | "email" | null>(null);
   const [accountState, setAccountState] = useState<NonActiveAccountStatus | null>(null);
 
   // Step 2 — preferences
