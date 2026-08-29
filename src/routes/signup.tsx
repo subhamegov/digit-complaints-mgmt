@@ -31,12 +31,12 @@ import {
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Set Up Your Account — DIGIT Complaint Management" },
+      { title: "Set Up Your Account - DIGIT Complaint Management" },
       {
         name: "description",
         content: "Create your account, set your preferences, and get your employee and citizen access URLs.",
       },
-      { property: "og:title", content: "Set Up Your Account — DIGIT Complaint Management" },
+      { property: "og:title", content: "Set Up Your Account - DIGIT Complaint Management" },
       { property: "og:description", content: "Create your DIGIT Complaint Management account in three simple steps." },
     ],
   }),
@@ -128,7 +128,7 @@ function SignupPage() {
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
-  // Step 1 — identity + account
+  // Step 1 - identity + account
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -143,7 +143,7 @@ function SignupPage() {
   const [authMethod, setAuthMethod] = useState<"google" | "github" | "email" | null>(null);
   const [accountState, setAccountState] = useState<NonActiveAccountStatus | null>(null);
 
-  // Step 2 — preferences
+  // Step 2 - preferences
   const [baseCountry, setBaseCountry] = useState("");
   const [languages, setLanguages] = useState<string[]>(["en"]);
   const [timezone, setTimezone] = useState("");
@@ -645,7 +645,7 @@ function StepAccount(p: any) {
                 />
               </AuthField>
               <p style={helperStyle}>
-                Enter the name of your account — it could be a government organisation, agency, department, parastatal body, institution, or programme.
+                Enter the name of your account - it could be a government organisation, agency, department, parastatal body, institution, or programme.
               </p>
               {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an account name between 3 and 120 characters.</p>}
             </div>
@@ -1023,10 +1023,10 @@ function StepUrls({
   const rows: [string, string][] = [
      ["Account name", summary.organisationName],
      ["Account code", summary.organisationCode],
-     ["Base country", country?.label ?? "—"],
+     ["Base country", country?.label ?? "-"],
      ["Languages", langLabels],
      ["Timezone", summary.timezone.replace(/_/g, " ")],
-     ["Financial year", fy?.label ?? "—"],
+     ["Financial year", fy?.label ?? "-"],
    ];
 
    return (
@@ -1063,7 +1063,7 @@ function StepUrls({
           {rows.map(([k, v]) => (
             <div key={k} className="flex items-start justify-between gap-4">
               <dt style={{ color: "#8A90A2", fontSize: 12.5 }}>{k}</dt>
-              <dd style={{ color: "#17191F", fontSize: 12.5, fontWeight: 500, textAlign: "right" }}>{v || "—"}</dd>
+              <dd style={{ color: "#17191F", fontSize: 12.5, fontWeight: 500, textAlign: "right" }}>{v || "-"}</dd>
             </div>
           ))}
         </dl>

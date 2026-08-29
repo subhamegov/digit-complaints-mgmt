@@ -1,5 +1,5 @@
 /**
- * ComplaintMap — SSR-safe wrapper around the Leaflet implementation.
+ * ComplaintMap - SSR-safe wrapper around the Leaflet implementation.
  *
  * Leaflet touches `window` at import time so the inner module is loaded
  * via React.lazy after mount; on SSR (and the first client paint before

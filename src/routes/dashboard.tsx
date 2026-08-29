@@ -52,7 +52,7 @@ type KpiDef = {
 };
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Dashboard - DIGIT PGR" }] }),
   component: DashboardPage,
 });
 
@@ -187,7 +187,7 @@ function sortValue(c: Complaint, key: RiskSortKey): string | number {
 
 /**
  * Personas that get the full (Test User) dashboard experience: same layout,
- * KPIs, filters, export and customization. Add a role here to opt it in —
+ * KPIs, filters, export and customization. Add a role here to opt it in -
  * there is intentionally no duplicated dashboard implementation.
  */
 const FULL_DASHBOARD_ROLES: Role[] = ["TEST_USER", "LME", "GRO", "DEPT_HEAD"];
@@ -551,7 +551,7 @@ export function DashboardPage() {
     };
     const rows = Array.from(m, ([department, v]) => {
       const h = hash(department);
-      // Multiplier in [0.55, 1.35] — roughly half of depts land above 1.0.
+      // Multiplier in [0.55, 1.35] - roughly half of depts land above 1.0.
       const mult = 0.55 + ((h % 1000) / 1000) * 0.8;
       const baseRatio = v.created ? v.resolved / v.created : 0;
       // Backlog cleared from prior periods (extra resolutions not in created).
@@ -800,9 +800,9 @@ export function DashboardPage() {
         : `${s.resolved}/${s.total} resolved`,
       getTrend: () => ({ change: 6, display: "6%", improveDirection: "up", sparkline: [71, 70, 73, 72, 75, 74, 77, 79] }),
     },
-    { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "—", getDelta: () => "Nearing breach" },
-    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "—", getDelta: () => "Out of 42 Open Complaints", getTrend: () => ({ change: 0.6, display: "0.6", improveDirection: "down", sparkline: [14, 15, 13, 16, 17, 16, 18, 19] }) },
-    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "—", getDelta: () => "" },
+    { id: "at-risk-open", kind: "stat", label: "At risk (open)", description: "Open complaints nearing SLA breach (≤ 25% of SLA window remaining).", icon: AlertTriangle, intent: "warning", getValue: () => canCustomize ? String(tu.atRisk) : "-", getDelta: () => "Nearing breach" },
+    { id: "breached-sla", kind: "stat", label: "Breached SLA (open)", description: "Open complaints that have crossed their SLA deadline.", icon: AlertTriangle, intent: "negative", getValue: () => canCustomize ? String(tu.openPastSla) : "-", getDelta: () => "Out of 42 Open Complaints", getTrend: () => ({ change: 0.6, display: "0.6", improveDirection: "down", sparkline: [14, 15, 13, 16, 17, 16, 18, 19] }) },
+    { id: "first-assignment", kind: "stat", label: "Time to first assignment", description: "Average time from registration to first officer assignment.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.firstAssignmentHrs) : "-", getDelta: () => "" },
 
     { id: "escalation-rate", kind: "stat", label: "Escalation rate", description: "Share of complaints escalated to L2/L3.", icon: TrendingUp, intent: "warning", getValue: () => canCustomize ? `${tu.escalationRate}%` : "9.2%", getDelta: () => canCustomize ? "Escalated ÷ total" : "+1.1 pts" },
     { id: "median-resolution", kind: "stat", label: "Median resolution", description: "Median time from filing to resolution.", icon: Clock, intent: "neutral", getValue: () => canCustomize ? fmtHHMM(tu.medianResolution) : fmtHHMM(36), getDelta: () => `Avg ${fmtHHMM(canCustomize ? tu.avgResolution : avgResolutionHrs)}` },
@@ -818,7 +818,7 @@ export function DashboardPage() {
     // Chart / Panel KPIs
     {
       id: "trend", kind: "panel", label: "Complaints filed vs resolved", description: "7-day line chart of complaints filed vs resolved.",
-      icon: LineChartIcon, colSpan: 2, title: "Complaints filed vs resolved — last 7 days",
+      icon: LineChartIcon, colSpan: 2, title: "Complaints filed vs resolved - last 7 days",
       render: () => (
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -872,7 +872,7 @@ export function DashboardPage() {
     },
     {
       id: "dept", kind: "panel", label: "By department", description: "Open vs resolved vs breached by department.",
-      icon: BarChart3, colSpan: 2, title: "By department — open vs resolved",
+      icon: BarChart3, colSpan: 2, title: "By department - open vs resolved",
       render: () => (
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -1096,7 +1096,7 @@ export function DashboardPage() {
     },
     {
       id: "open-breakdown", kind: "panel", label: "Open complaints breakdown", description: "New vs reopened open complaints.",
-      icon: Repeat, colSpan: 1, title: "Open complaints — new vs reopened",
+      icon: Repeat, colSpan: 1, title: "Open complaints - new vs reopened",
       render: () => (
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -1233,7 +1233,7 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "team-load-sla", kind: "panel", label: "Team load by SLA", description: "All complaints by SLA state — per-person totals on a shared scale.",
+      id: "team-load-sla", kind: "panel", label: "Team load by SLA", description: "All complaints by SLA state - per-person totals on a shared scale.",
       icon: Users, colSpan: 2, title: "Team load by SLA",
       render: () => {
         const { rows, mean, upper, ticks } = teamLoadBySla;
@@ -1423,7 +1423,7 @@ export function DashboardPage() {
       ),
     },
     {
-      id: "flow-ratio-dept", kind: "panel", label: "Flow ratio by department", description: "Resolved ÷ created per department — worst-first.",
+      id: "flow-ratio-dept", kind: "panel", label: "Flow ratio by department", description: "Resolved ÷ created per department - worst-first.",
       icon: BarChart3, colSpan: 2, title: "Flow ratio by department",
       render: () => {
         const { rows } = flowRatioByDept;
@@ -1473,7 +1473,7 @@ export function DashboardPage() {
                   {rows.map((r) => {
                     const below = r.ratio < 1;
                     const color = below ? "var(--color-chart-4)" : "var(--color-chart-3)";
-                    const tip = `${r.department}: ${r.ratio.toFixed(2)} — ${r.resolved} resolved of ${r.created} created`;
+                    const tip = `${r.department}: ${r.ratio.toFixed(2)} - ${r.resolved} resolved of ${r.created} created`;
                     return (
                       <div key={r.department} className="h-6 relative" title={tip}>
                         <div
@@ -1505,7 +1505,7 @@ export function DashboardPage() {
     },
 
     {
-      id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state — exposes bottleneck stage.",
+      id: "stage-timings", kind: "panel", label: "Average time per workflow stage", description: "Mean dwell time per PGR state - exposes bottleneck stage.",
       icon: Clock, colSpan: 2, title: "Average time per workflow stage",
       render: () => (
         <table className="w-full text-[12px]">
@@ -1954,7 +1954,7 @@ export function DashboardPage() {
                   </div>
                 )}
 
-                {/* Right edge — horizontal resize */}
+                {/* Right edge - horizontal resize */}
                 <div
                   onPointerDown={(e) => startResize(id, k.kind, "x", e)}
                   onPointerEnter={() => setHandleHoverId(id)}
@@ -1968,7 +1968,7 @@ export function DashboardPage() {
                   )}
                 />
 
-                {/* Bottom edge — vertical resize (panels only) */}
+                {/* Bottom edge - vertical resize (panels only) */}
                 {k.kind === "panel" && (
                   <div
                     onPointerDown={(e) => startResize(id, k.kind, "y", e)}
@@ -1984,7 +1984,7 @@ export function DashboardPage() {
                   />
                 )}
 
-                {/* Bottom-right corner — both axes */}
+                {/* Bottom-right corner - both axes */}
                 <div
                   onPointerDown={(e) => startResize(id, k.kind, k.kind === "panel" ? "xy" : "x", e)}
                   onPointerEnter={() => setHandleHoverId(id)}

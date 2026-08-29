@@ -140,7 +140,7 @@ function build(
 export const COMPLAINTS: Complaint[] = [
   build("PGR-2026-04812", "SWM_GARBAGE", "ASSIGNED", 18, "W-12", "Civil Lines", { name: "Harjeet Singh", mobile: "98xxxxxx21" }, "Garbage has not been lifted from the corner of Lawrence Road for 3 days. Heap is overflowing onto the footpath.", { assignedOfficerId: "EMP-1042", attachments: 2, priority: "HIGH", workflow: [
     { at: isoMinus(18), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
-    { at: isoMinus(16), actor: "Manjit Singh", role: "GRO", action: "ASSIGNED", from: "OPEN", to: "ASSIGNED", note: "Routed to Sanitary Inspector — Civil Lines" },
+    { at: isoMinus(16), actor: "Manjit Singh", role: "GRO", action: "ASSIGNED", from: "OPEN", to: "ASSIGNED", note: "Routed to Sanitary Inspector - Civil Lines" },
   ]}),
   build("PGR-2026-04813", "STR_STREETLIGHT", "IN_PROGRESS", 30, "W-18", "Ranjit Avenue", { name: "Simran Kaur", mobile: "98xxxxxx32" }, "Streetlight pole no. RA-118 has been non-functional for over a week. Causing safety concerns at night.", { assignedOfficerId: "EMP-1071", channel: "WEB", workflow: [
     { at: isoMinus(30), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
@@ -163,7 +163,7 @@ export const COMPLAINTS: Complaint[] = [
     { at: isoMinus(60), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
     { at: isoMinus(58), actor: "Manjit Singh", role: "GRO", action: "REJECTED", from: "OPEN", to: "REJECTED", note: "Duplicate of PGR-2026-04812. Closed as duplicate." },
   ]}),
-  build("PGR-2026-04822", "STR_STRAY_ANIMAL", "ASSIGNED", 28, "W-12", "Civil Lines", { name: "Sunita Rani", mobile: "98xxxxxx31" }, "Pack of stray dogs in school zone — risk to children during morning hours.", { assignedOfficerId: "EMP-1042", priority: "HIGH" }),
+  build("PGR-2026-04822", "STR_STRAY_ANIMAL", "ASSIGNED", 28, "W-12", "Civil Lines", { name: "Sunita Rani", mobile: "98xxxxxx31" }, "Pack of stray dogs in school zone - risk to children during morning hours.", { assignedOfficerId: "EMP-1042", priority: "HIGH" }),
   build("PGR-2026-04823", "STR_POTHOLE", "IN_PROGRESS", 50, "W-27", "Cantonment", { name: "Davinder Singh", mobile: "98xxxxxx42" }, "Multiple potholes on stretch leading to government school.", { assignedOfficerId: "EMP-1058" }),
   build("PGR-2026-04824", "SWM_GARBAGE", "RESOLVED", 110, "W-21", "Hall Bazaar", { name: "Market Association", mobile: "98xxxxxx53" }, "Daily garbage collection skipped from main market area.", { assignedOfficerId: "EMP-1124", reopenCount: 1, workflow: [
     { at: isoMinus(110), actor: "Citizen", role: "CITIZEN", action: "FILED", to: "OPEN" },
@@ -172,7 +172,7 @@ export const COMPLAINTS: Complaint[] = [
     { at: isoMinus(60), actor: "Market Association", role: "CITIZEN", action: "REOPENED", from: "RESOLVED", to: "REOPENED", note: "Issue recurring." },
     { at: isoMinus(40), actor: "Pritam Singh", role: "LME", action: "RESOLVED", from: "REOPENED", to: "RESOLVED" },
   ]}),
-  build("PGR-2026-04825", "WS_LEAKAGE", "OPEN", 3, "W-18", "Ranjit Avenue", { name: "Pooja Aggarwal", mobile: "98xxxxxx64" }, "Pipeline burst near park gate — water flooding the road.", { priority: "HIGH" }),
+  build("PGR-2026-04825", "WS_LEAKAGE", "OPEN", 3, "W-18", "Ranjit Avenue", { name: "Pooja Aggarwal", mobile: "98xxxxxx64" }, "Pipeline burst near park gate - water flooding the road.", { priority: "HIGH" }),
   build("PGR-2026-04826", "SEW_OVERFLOW", "IN_PROGRESS", 7, "W-12", "Civil Lines", { name: "Mohinder Pal", mobile: "98xxxxxx75" }, "Manhole cover missing and sewage spilling.", { assignedOfficerId: "EMP-1103", priority: "HIGH" }),
 ];
 

@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/workflow-config/")({
   head: () => ({
-    meta: [{ title: "Workflows — Account Administrator" }],
+    meta: [{ title: "Workflows - Account Administrator" }],
   }),
   component: WorkflowConfigIndex,
 });
@@ -145,7 +145,7 @@ function WorkflowConfigIndex() {
         subtitle="Workflow definitions installed for this account. The DIGIT reference workflow is locked and cannot be edited or deleted."
         actions={
           <button
-            onClick={() => toast.message("New workflow — clone a base to start")}
+            onClick={() => toast.message("New workflow - clone a base to start")}
             className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-primary px-3 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -182,7 +182,7 @@ function WorkflowConfigIndex() {
                       </Link>
                       {w.locked && (
                         <span
-                          title="System workflow — clone to customize"
+                          title="System workflow - clone to customize"
                           className="inline-flex items-center gap-1 rounded-sm border border-border bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
                         >
                           <Lock className="h-3 w-3" />
@@ -265,7 +265,7 @@ function WorkflowConfigIndex() {
                             onClick={() => !w.locked && onEdit(w)}
                             title={
                               w.locked
-                                ? "System workflow — clone to customize"
+                                ? "System workflow - clone to customize"
                                 : undefined
                             }
                           >
@@ -281,7 +281,7 @@ function WorkflowConfigIndex() {
                             onClick={() => !w.locked && setDeleteTarget(w)}
                             title={
                               w.locked
-                                ? "System workflow — clone to customize"
+                                ? "System workflow - clone to customize"
                                 : undefined
                             }
                             className={cn(

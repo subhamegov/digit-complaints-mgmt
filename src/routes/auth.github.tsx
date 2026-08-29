@@ -8,9 +8,9 @@ import { setPrototypeIdentity } from "@/lib/prototype-identity";
 export const Route = createFileRoute("/auth/github")({
   head: () => ({
     meta: [
-      { title: "Continue with GitHub — DIGIT Complaint Management" },
+      { title: "Continue with GitHub - DIGIT Complaint Management" },
       { name: "description", content: "Prototype GitHub sign-in step for DIGIT Complaint Management signup." },
-      { property: "og:title", content: "Continue with GitHub — DIGIT Complaint Management" },
+      { property: "og:title", content: "Continue with GitHub - DIGIT Complaint Management" },
       { property: "og:description", content: "Prototype GitHub sign-in step for DIGIT Complaint Management signup." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

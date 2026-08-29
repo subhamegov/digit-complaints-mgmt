@@ -7,7 +7,7 @@ import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/config/complaint-types")({
-  head: () => ({ meta: [{ title: "Complaint Types — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Complaint Types - DIGIT PGR" }] }),
   component: ComplaintTypesPage,
 });
 

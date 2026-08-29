@@ -286,7 +286,7 @@ export function escalationLevel(c: Complaint): string {
 
 /**
  * Escalation visible to this persona. Field Employees are outside the
- * escalation chain — escalation never surfaces in their workspace.
+ * escalation chain - escalation never surfaces in their workspace.
  */
 export function escalationOf(c: Complaint, role: Role): EscalationInfo | null {
   if (role === "LME") return null;
@@ -298,7 +298,7 @@ export function escalationOf(c: Complaint, role: Role): EscalationInfo | null {
     to: ROLE_TITLE[role] ?? "Assigned officer",
     reason: c.reopenCount > 0
       ? "Reopened after resolution and still unresolved"
-      : !c.assignedOfficerId ? "No eligible assignee — routing incomplete" : "SLA exceeded without resolution",
+      : !c.assignedOfficerId ? "No eligible assignee - routing incomplete" : "SLA exceeded without resolution",
     sinceHrs: Math.max(1, overdueHrs(c)),
     requiredAction: role === "GRO" ? "Correct routing and reassign" : "Review, add direction or resolve escalation",
   };
@@ -324,7 +324,7 @@ function needsActionToday(c: Complaint, role: Role): boolean {
 const dueToday = (c: Complaint) => !isCompleted(c) && c.slaRemainingHrs > 0 && c.slaRemainingHrs <= 24;
 const atRisk = (c: Complaint) => !isCompleted(c) && (c.slaState === "NEARING" || dueToday(c));
 
-/** Section for the "Assigned to me" tab — one section per complaint. */
+/** Section for the "Assigned to me" tab - one section per complaint. */
 export function assignedGroupOf(c: Complaint, role: Role): GroupKey {
   if (isCompleted(c)) return "completed";
   if (needsActionToday(c, role)) return "action_required";
@@ -333,7 +333,7 @@ export function assignedGroupOf(c: Complaint, role: Role): GroupKey {
   return "in_progress";
 }
 
-/** Section for the "Needs my attention" tab — one section per complaint. */
+/** Section for the "Needs my attention" tab - one section per complaint. */
 export function attentionGroupOf(c: Complaint, role: Role): GroupKey | null {
   if (isCompleted(c)) return null;
   if (role === "LME") {

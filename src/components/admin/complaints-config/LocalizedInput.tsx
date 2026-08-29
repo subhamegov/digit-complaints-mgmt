@@ -97,7 +97,7 @@ export function LocaleChips({ value }: { value: LocalizedString }) {
         return (
           <span
             key={lc}
-            title={`${LOCALE_LABEL[lc]}${filled ? "" : " — missing"}`}
+            title={`${LOCALE_LABEL[lc]}${filled ? "" : " - missing"}`}
             className={cn(
               "h-1.5 w-1.5 rounded-full",
               filled ? "bg-emerald-500" : "bg-amber-400",

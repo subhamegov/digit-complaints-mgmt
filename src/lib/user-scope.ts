@@ -1,5 +1,5 @@
 /**
- * userScope — RBAC scoping shim for the prototype.
+ * userScope - RBAC scoping shim for the prototype.
  *
  * In production, this object will be populated by the RBAC backend (the
  * platform's Access Control service) from the signed-in user's role and
@@ -59,7 +59,7 @@ export const SCOPE_PRESETS: UserScope[] = [
 
 const STORAGE_KEY = "pgr.userScope.preset";
 
-/** Single source of truth — what the rest of the app reads. */
+/** Single source of truth - what the rest of the app reads. */
 export function useUserScope() {
   const [idx, setIdx] = useState(0);
   useEffect(() => {

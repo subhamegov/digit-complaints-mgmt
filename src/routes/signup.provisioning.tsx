@@ -18,13 +18,13 @@ export interface ProvisioningSummary {
 export const Route = createFileRoute("/signup/provisioning")({
   head: () => ({
     meta: [
-      { title: "Account Being Created — DIGIT Complaint Management" },
+      { title: "Account Being Created - DIGIT Complaint Management" },
       {
         name: "description",
         content:
           "Your DIGIT Complaint Management account is being created. Workspace setup usually takes 30 to 45 minutes and we will email you when it is ready.",
       },
-      { property: "og:title", content: "Account Being Created — DIGIT Complaint Management" },
+      { property: "og:title", content: "Account Being Created - DIGIT Complaint Management" },
       {
         property: "og:description",
         content: "Workspace provisioning is in progress. We will email you when your workspace is ready for personalisation.",
@@ -62,9 +62,9 @@ function ProvisioningPage() {
   const email = summary?.email || "your registered email address";
 
   const rows: [string, string][] = [
-    ["Organisation name", summary?.organisationName || "—"],
-    ["Organisation code", summary?.organisationCode || "—"],
-    ["Base country", summary?.baseCountry || "—"],
+    ["Organisation name", summary?.organisationName || "-"],
+    ["Organisation code", summary?.organisationCode || "-"],
+    ["Base country", summary?.baseCountry || "-"],
     ["Employee URL", summary?.employeeUrl || "Pending"],
     ["Citizen URL", summary?.citizenUrl || "Pending"],
   ];

@@ -172,7 +172,7 @@ function Card({ c, role, group, showEscalation }: RowProps) {
 }
 
 /**
- * Shared complaint list used by all three tabs — grouped (Assigned to me,
+ * Shared complaint list used by all three tabs - grouped (Assigned to me,
  * Needs my attention) and flat (My Organisation's Complaints).
  */
 export function ComplaintList({

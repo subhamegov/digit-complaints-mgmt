@@ -15,7 +15,7 @@ import { ADMIN_ROLES, type AdminRoleKey } from "@/lib/admin-roles";
 
 export const Route = createFileRoute("/admin/roles")({
   head: () => ({
-    meta: [{ title: "Roles & Permissions — Account Administrator" }],
+    meta: [{ title: "Roles & Permissions - Account Administrator" }],
   }),
   component: RolesPage,
 });

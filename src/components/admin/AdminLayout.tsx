@@ -411,7 +411,7 @@ export function EmptyStateCard({
 }
 
 /**
- * BlankAdminPage — uniform placeholder used by every navigation item
+ * BlankAdminPage - uniform placeholder used by every navigation item
  * until its real surface is built. Title is derived from the active
  * nav item; subtitle is the standard ready-for-configuration line.
  */

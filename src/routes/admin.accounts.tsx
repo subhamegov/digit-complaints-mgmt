@@ -1,5 +1,5 @@
 /**
- * Platform Administrator — Accounts page.
+ * Platform Administrator - Accounts page.
  *
  * Lists platform accounts with summary KPIs, filter bar, a dense admin
  * table, and a right-side detail drawer. All actions are no-op for the
@@ -73,7 +73,7 @@ const SAMPLE_ACCOUNTS: Account[] = [
   {
     id: "nairobi",
     name: "Nairobi City County",
-    description: "County government — service delivery",
+    description: "County government - service delivery",
     code: "nairobi",
     type: "Government",
     status: "Active",

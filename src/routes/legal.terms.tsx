@@ -3,9 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/legal/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — DIGIT Complaint Management" },
+      { title: "Terms of Service - DIGIT Complaint Management" },
       { name: "description", content: "Prototype terms of service for DIGIT Complaint Management." },
-      { property: "og:title", content: "Terms of Service — DIGIT Complaint Management" },
+      { property: "og:title", content: "Terms of Service - DIGIT Complaint Management" },
       { property: "og:description", content: "Prototype terms of service for DIGIT Complaint Management." },
     ],
   }),

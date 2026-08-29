@@ -6,14 +6,14 @@ import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/escalations")({
-  head: () => ({ meta: [{ title: "Escalations — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Escalations - DIGIT PGR" }] }),
   component: EscalationPage,
 });
 
 const LEVEL_TOK = {
-  L1: { bg: "bg-status-progress-bg", fg: "text-status-progress", label: "L1 — Supervisor" },
-  L2: { bg: "bg-status-overdue-bg", fg: "text-status-overdue", label: "L2 — Department Head" },
-  L3: { bg: "bg-status-breach-bg", fg: "text-status-breach", label: "L3 — Commissioner" },
+  L1: { bg: "bg-status-progress-bg", fg: "text-status-progress", label: "L1 - Supervisor" },
+  L2: { bg: "bg-status-overdue-bg", fg: "text-status-overdue", label: "L2 - Department Head" },
+  L3: { bg: "bg-status-breach-bg", fg: "text-status-breach", label: "L3 - Commissioner" },
 } as const;
 
 function EscalationPage() {
@@ -25,7 +25,7 @@ function EscalationPage() {
 
   return (
     <div>
-      <PageHeader title={t("CS_ESCALATIONS")} subtitle="Complaints breaching SLA — routed by escalation matrix" />
+      <PageHeader title={t("CS_ESCALATIONS")} subtitle="Complaints breaching SLA - routed by escalation matrix" />
 
       <div className="p-4 lg:p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

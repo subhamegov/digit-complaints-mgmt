@@ -1,7 +1,7 @@
 /**
  * In-memory store for the Complaints configuration screen.
  *
- * Persistence: sessionStorage (resets on full reload — demo intent).
+ * Persistence: sessionStorage (resets on full reload - demo intent).
  * Subscription: useSyncExternalStore so any component can read/write
  * without prop-drilling. No external state library required.
  */

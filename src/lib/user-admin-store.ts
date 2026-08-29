@@ -1,5 +1,5 @@
 /**
- * Account Administration — user directory + mandatory audit trail.
+ * Account Administration - user directory + mandatory audit trail.
  *
  * Single source of truth for:
  *   - Employee users (admin-managed directory)
@@ -118,7 +118,7 @@ export type AuditEvent = {
   eventId: string;
   at: string;
   userType: AuditUserType;
-  /** Employee: full name. Citizen: system reference only — never a name. */
+  /** Employee: full name. Citizen: system reference only - never a name. */
   targetLabel: string;
   /** Employee: work email/mobile. Citizen: masked identifier. */
   targetIdentifier: string;
@@ -165,9 +165,9 @@ export const JURISDICTIONS = [
   "City-wide",
   "Zone North",
   "Zone South",
-  "Ward 12 — Civil Lines",
-  "Ward 18 — Ranjit Avenue",
-  "Ward 27 — Cantonment",
+  "Ward 12 - Civil Lines",
+  "Ward 18 - Ranjit Avenue",
+  "Ward 27 - Cantonment",
 ];
 
 export const SEED_EMPLOYEES: Employee[] = [
@@ -215,7 +215,7 @@ export const SEED_EMPLOYEES: Employee[] = [
     department: "Health Services",
     designation: "Sanitary Inspector",
     roleKey: "ROLE_COMPLAINT_OFFICER",
-    jurisdiction: "Ward 18 — Ranjit Avenue",
+    jurisdiction: "Ward 18 - Ranjit Avenue",
     status: "INVITED",
     lastLoggedIn: null,
   },
@@ -365,7 +365,7 @@ export const SEED_AUDIT: AuditEvent[] = [
     performedBy: "Vikram Mehta (Account Administrator)",
     result: "FAILED",
     lastLoggedIn: "2026-05-03T16:50:00Z",
-    context: { reason: "Account archived — reset rejected", source: "Account Administration › Users" },
+    context: { reason: "Account archived - reset rejected", source: "Account Administration › Users" },
   },
 ];
 

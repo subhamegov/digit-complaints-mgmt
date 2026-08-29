@@ -106,7 +106,7 @@ function S3ExportForm({ onCancel }: { onCancel: () => void }) {
 
       <p className="text-[11px] text-muted-foreground">
         {authMethod === "iam"
-          ? "Recommended. No long-lived secrets stored — the export service assumes a role in your account."
+          ? "Recommended. No long-lived secrets stored - the export service assumes a role in your account."
           : "Fallback. Only if role assumption is not available in your environment."}
       </p>
 

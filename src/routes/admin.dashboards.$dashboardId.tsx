@@ -47,18 +47,18 @@ export const Route = createFileRoute("/admin/dashboards/$dashboardId")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Unavailable — Account Administrator" },
+          { title: "Unavailable - Account Administrator" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
     return {
       meta: [
-        { title: `${loaderData.dashboard.name} — Account Administrator` },
+        { title: `${loaderData.dashboard.name} - Account Administrator` },
         { name: "description", content: loaderData.dashboard.purpose },
         {
           property: "og:title",
-          content: `${loaderData.dashboard.name} — Account Administrator`,
+          content: `${loaderData.dashboard.name} - Account Administrator`,
         },
         { property: "og:description", content: loaderData.dashboard.purpose },
         { property: "og:type", content: "website" },

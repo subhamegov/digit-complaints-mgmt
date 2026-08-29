@@ -15,9 +15,9 @@ import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
 export const Route = createFileRoute("/platform-admin/account-requests")({
   head: () => ({
     meta: [
-      { title: "Account Requests — DIGIT Complaint Management" },
+      { title: "Account Requests - DIGIT Complaint Management" },
       { name: "description", content: "Review and manage prototype account requests for DIGIT Complaint Management." },
-      { property: "og:title", content: "Account Requests — DIGIT Complaint Management" },
+      { property: "og:title", content: "Account Requests - DIGIT Complaint Management" },
       { property: "og:description", content: "Review approval-based account requests." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

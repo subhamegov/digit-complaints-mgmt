@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/data-dictionary/$kpiId")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Unavailable — Data dictionary" },
+          { title: "Unavailable - Data dictionary" },
           { name: "robots", content: "noindex" },
         ],
       };
@@ -28,14 +28,14 @@ export const Route = createFileRoute("/admin/data-dictionary/$kpiId")({
     const name = loaderData.kpi?.name ?? "Definition not available";
     return {
       meta: [
-        { title: `${name} — Data dictionary` },
+        { title: `${name} - Data dictionary` },
         {
           name: "description",
           content:
             loaderData.kpi?.businessDefinition ??
             "KPI definition in the complaint management data dictionary.",
         },
-        { property: "og:title", content: `${name} — Data dictionary` },
+        { property: "og:title", content: `${name} - Data dictionary` },
         {
           property: "og:description",
           content:

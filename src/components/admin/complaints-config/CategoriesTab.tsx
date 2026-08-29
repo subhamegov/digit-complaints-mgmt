@@ -160,7 +160,7 @@ export function CategoriesTab({ locale, search }: { locale: LocaleCode; search: 
                 >
                   <SelectTrigger className="h-8 text-[13px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none">— None —</SelectItem>
+                    <SelectItem value="__none">- None -</SelectItem>
                     {cfg.priorities.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{labelFor(p.label, locale, p.code)}</SelectItem>
                     ))}

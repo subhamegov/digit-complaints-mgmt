@@ -6,7 +6,7 @@ import { ROLE_LABEL, Can, type Role } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/users")({
-  head: () => ({ meta: [{ title: "Users & Roles — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Users & Roles - DIGIT PGR" }] }),
   component: UsersPage,
 });
 

@@ -301,7 +301,7 @@ export function ActionButton({
   );
 }
 
-/** Filter / action strip used above tables — keeps every page consistent. */
+/** Filter / action strip used above tables - keeps every page consistent. */
 export function Toolbar({
   children,
   meta,
@@ -317,7 +317,7 @@ export function Toolbar({
   );
 }
 
-/** Owner cell — shows assigned officer with designation, or Unassigned. */
+/** Owner cell - shows assigned officer with designation, or Unassigned. */
 export function OwnerCell({ id }: { id?: string }) {
   const o = officerOf(id);
   if (!o)
@@ -338,12 +338,12 @@ export function nextActionFor(c: Complaint): string {
     case "IN_PROGRESS": return t("ACTION_RESOLVE");
     case "REOPENED":    return t("ACTION_RESOLVE");
     case "RESOLVED":    return t("ACTION_VERIFY");
-    case "REJECTED":    return "—";
-    case "CLOSED":      return "—";
+    case "REJECTED":    return "-";
+    case "CLOSED":      return "-";
   }
 }
 
-/** Table column type — supports component-level RBAC via `requires`. */
+/** Table column type - supports component-level RBAC via `requires`. */
 export interface Column<T> {
   key: string;
   header: string;

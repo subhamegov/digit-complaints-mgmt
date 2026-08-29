@@ -7,7 +7,7 @@ import { t } from "@/lib/i18n";
 import { Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/complaints/new")({
-  head: () => ({ meta: [{ title: "Register Complaint — DIGIT PGR" }] }),
+  head: () => ({ meta: [{ title: "Register Complaint - DIGIT PGR" }] }),
   component: NewComplaintPage,
 });
 
@@ -70,7 +70,7 @@ function NewComplaintPage() {
               <Field label={`${t("CS_COMPLAINT_TYPE")} *`}>
                 <select value={typeCode} onChange={(e) => setTypeCode(e.target.value)} className={inp}>
                   {COMPLAINT_TYPES.filter((c) => c.active).map((c) => (
-                    <option key={c.code} value={c.code}>{c.name} — {c.department}</option>
+                    <option key={c.code} value={c.code}>{c.name} - {c.department}</option>
                   ))}
                 </select>
               </Field>

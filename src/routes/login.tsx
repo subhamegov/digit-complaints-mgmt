@@ -8,7 +8,7 @@ import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components
 
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign In — DIGIT Complaint Management" }] }),
+  head: () => ({ meta: [{ title: "Sign In - DIGIT Complaint Management" }] }),
   component: LoginPage,
 });
 

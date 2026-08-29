@@ -1,5 +1,5 @@
 /**
- * Platform Administrator — Domains page.
+ * Platform Administrator - Domains page.
  *
  * Manages platform and account domain URLs with summary KPIs, filters,
  * a dense admin table, a view drawer, and an add-domain drawer. All
@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/admin/domains")({
-  head: () => ({ meta: [{ title: "Domains — Platform Administration" }] }),
+  head: () => ({ meta: [{ title: "Domains - Platform Administration" }] }),
   component: DomainsPage,
 });
 
@@ -589,7 +589,7 @@ export function DomainDetailsDrawer({
                 <DrawerSection title="Configuration" code="ADMIN_DOMAIN_SEC_CONFIG">
                   <DrawerField label="Managed by" code="ADMIN_F_MANAGED_BY" value={domain.managedBy} />
                   <DrawerField label="Certificate owner" code="ADMIN_F_CERT_OWNER" value={domain.certificateOwner} />
-                  <DrawerField label="Notes" code="ADMIN_F_NOTES" value={domain.notes ?? "—"} />
+                  <DrawerField label="Notes" code="ADMIN_F_NOTES" value={domain.notes ?? "-"} />
                 </DrawerSection>
               </Can>
             </div>

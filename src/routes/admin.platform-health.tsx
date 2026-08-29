@@ -1,5 +1,5 @@
 /**
- * Platform Administrator — Platform Health page.
+ * Platform Administrator - Platform Health page.
  *
  * Surfaces Gatus-based health monitoring and lets administrators
  * configure SMTP email alerts. All actions are prototype-only (toast
@@ -29,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/admin/platform-health")({
-  head: () => ({ meta: [{ title: "Platform Health — Platform Administration" }] }),
+  head: () => ({ meta: [{ title: "Platform Health - Platform Administration" }] }),
   component: PlatformHealthPage,
 });
 

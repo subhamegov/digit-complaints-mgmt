@@ -4,7 +4,7 @@ import { GitBranch, ArrowRight, Circle, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/workflow-config/visualization")({
   head: () => ({
-    meta: [{ title: "Workflow Visualization — Account Administrator" }],
+    meta: [{ title: "Workflow Visualization - Account Administrator" }],
   }),
   component: WorkflowVisualizationPage,
 });

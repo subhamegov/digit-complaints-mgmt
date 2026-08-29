@@ -1,5 +1,5 @@
 /**
- * Dashboard catalogue — single source of truth for the Account Administrator
+ * Dashboard catalogue - single source of truth for the Account Administrator
  * "Dashboards" section. Both the catalogue table, the read-only KPI list and
  * the read-only layout preview are derived from this configuration so the
  * preview cannot drift from the published dashboard definition.
