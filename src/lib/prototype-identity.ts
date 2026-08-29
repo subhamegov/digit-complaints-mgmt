@@ -2,7 +2,7 @@ export type PrototypeIdentity = {
   firstName: string;
   lastName: string;
   email: string;
-  method: "google" | "email";
+  method: "google" | "github" | "email";
 };
 
 const KEY = "digit.prototype.identity";

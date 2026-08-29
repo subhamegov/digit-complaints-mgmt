@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, MailCheck, ShieldAlert } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, Github, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
@@ -31,13 +31,13 @@ import {
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Set Up Your Organisation — DIGIT Complaint Management" },
+      { title: "Set Up Your Account — DIGIT Complaint Management" },
       {
         name: "description",
-        content: "Create your organisation account, set your preferences, and get your employee and citizen access URLs.",
+        content: "Create your account, set your preferences, and get your employee and citizen access URLs.",
       },
-      { property: "og:title", content: "Set Up Your Organisation — DIGIT Complaint Management" },
-      { property: "og:description", content: "Create your DIGIT Complaint Management organisation account in three simple steps." },
+      { property: "og:title", content: "Set Up Your Account — DIGIT Complaint Management" },
+      { property: "og:description", content: "Create your DIGIT Complaint Management account in three simple steps." },
     ],
   }),
   component: SignupPage,
@@ -128,7 +128,7 @@ function SignupPage() {
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
-  // Step 1 — identity + organisation
+  // Step 1 — identity + account
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -140,7 +140,7 @@ function SignupPage() {
   const [terms, setTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [stage, setStage] = useState<"form" | "check-email">("form");
-  const [authMethod, setAuthMethod] = useState<"google" | "email" | null>(null);
+  const [authMethod, setAuthMethod] = useState<"google" | "github" | "email" | null>(null);
   const [accountState, setAccountState] = useState<NonActiveAccountStatus | null>(null);
 
   // Step 2 — preferences
@@ -222,7 +222,7 @@ function SignupPage() {
     if (!code || /^[A-Z]{2}-/.test(code)) return;
     const next = normaliseCode(`${baseCountry}-${code}`);
     setOrganisationCode(next);
-    setCodeUpdatedNotice(`Organisation code updated to ${next} for ${baseCountry}.`);
+    setCodeUpdatedNotice(`Account code updated to ${next} for ${baseCountry}.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseCountry]);
 
@@ -318,7 +318,7 @@ function SignupPage() {
       setSubmitted(false);
       return;
     }
-    if (firstName.trim() === "" || lastName.trim() === "" || !emailValid || !nameValid || !terms) return;
+    if (firstName.trim() === "" || lastName.trim() === "" || !emailValid || !terms) return;
     setStage("check-email");
   };
 
@@ -341,6 +341,11 @@ function SignupPage() {
   const startGoogle = () => {
     saveDraft();
     navigate({ to: "/auth/google" });
+  };
+
+  const startGithub = () => {
+    saveDraft();
+    navigate({ to: "/auth/github" });
   };
 
   if (accountState) {
@@ -478,7 +483,8 @@ function SignupPage() {
               authenticated,
               step1Valid,
               submitStep1,
-              startGoogle,
+               startGoogle,
+               startGithub,
             }}
           />
         )}
@@ -568,10 +574,15 @@ function SignupPage() {
 function StepAccount(p: any) {
   return (
     <form onSubmit={p.submitStep1}>
-      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Set up your organisation</h1>
+      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
+        {p.authenticated ? "Set up your account" : "Verify your email to begin"}
+      </h1>
       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        Create the account details that will identify your organisation in DIGIT Complaint Management.
+        {p.authenticated
+          ? "Create the account details that will identify your account in DIGIT Complaint Management."
+          : "Confirm who you are first. Once your email is verified, you can name your account and continue the setup."}
       </p>
+
 
       <div className="mt-6 space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -605,85 +616,89 @@ function StepAccount(p: any) {
               onChange={(e: any) => p.setEmail(e.target.value)}
               placeholder="Email address"
               autoComplete="email"
-              readOnly={p.authMethod === "google"}
-              className={authInputCls}
-              style={{ ...authInputStyle, ...(p.authMethod === "google" ? { background: "#F4F6FB", color: "#5E6675", paddingRight: 92 } : {}) }}
-            />
-            {p.authMethod === "google" && (
-              <span
-                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5"
-                style={{ background: "#ECFDF3", color: "#12703A", fontSize: 11, fontWeight: 600 }}
-              >
-                <CheckCircle2 className="h-3 w-3" /> Verified
-              </span>
-            )}
+               readOnly={p.authMethod !== null}
+               className={authInputCls}
+               style={{ ...authInputStyle, ...(p.authMethod !== null ? { background: "#F4F6FB", color: "#5E6675", paddingRight: 92 } : {}) }}
+             />
+             {p.authMethod !== null && (
+               <span
+                 className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5"
+                 style={{ background: "#ECFDF3", color: "#12703A", fontSize: 11, fontWeight: 600 }}
+               >
+                 <CheckCircle2 className="h-3 w-3" /> Verified
+               </span>
+             )}
           </div>
         </AuthField>
 
-        <div>
-          <AuthField label="Organisation name">
-            <input
-              value={p.organisationName}
-              onChange={(e: any) => p.setOrganisationName(e.target.value)}
-              placeholder="Makueni County Government"
-              autoComplete="organization"
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
-          <p style={helperStyle}>
-            Enter the government organisation, agency, department, parastatal body, institution, or programme you are setting up.
-          </p>
-          {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an organisation name between 3 and 120 characters.</p>}
-        </div>
-
-        <div>
-          <AuthField label="Organisation code">
-            <input
-              value={p.organisationCode}
-              onChange={(e: any) => {
-                p.setCodeTouched(true);
-                p.setOrganisationCode(normaliseCode(e.target.value));
-              }}
-              placeholder="KE-MCG"
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
-          <p style={helperStyle}>Used as a short identifier for your organisation across configuration, URLs, and system references.</p>
-          {p.organisationCode && !p.codeValid && <p style={errorStyle}>Use 2–12 letters or numbers, for example MCG or KE-MCG.</p>}
-          {p.codeValid && p.codeStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
-          {p.codeValid && p.codeStatus === "available" && (
-            <p style={okStyle} className="flex items-center gap-1">
-              <Check className="h-3.5 w-3.5" /> Organisation code is available.
-            </p>
-          )}
-          {p.codeValid && p.codeStatus === "unavailable" && (
+        {p.authenticated && (
+          <>
             <div>
-              <p style={errorStyle} className="flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" /> This organisation code is already in use.
+              <AuthField label="Account name">
+                <input
+                  value={p.organisationName}
+                  onChange={(e: any) => p.setOrganisationName(e.target.value)}
+                  placeholder="Makueni County Government"
+                  autoComplete="organization"
+                  className={authInputCls}
+                  style={authInputStyle}
+                />
+              </AuthField>
+              <p style={helperStyle}>
+                Enter the name of your account — it could be a government organisation, agency, department, parastatal body, institution, or programme.
               </p>
-              {p.codeSuggestion && (
-                <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
-                  <span>
-                    Suggested code: <strong style={{ color: "#17191F" }}>{p.codeSuggestion}</strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      p.setCodeTouched(true);
-                      p.setOrganisationCode(p.codeSuggestion);
-                    }}
-                    style={{ color: "#2D4FC4", fontWeight: 600 }}
-                    className="hover:underline"
-                  >
-                    Use suggestion
-                  </button>
+              {p.submitted && !p.nameValid && <p style={errorStyle}>Enter an account name between 3 and 120 characters.</p>}
+            </div>
+
+            <div>
+              <AuthField label="Account code">
+                <input
+                  value={p.organisationCode}
+                  onChange={(e: any) => {
+                    p.setCodeTouched(true);
+                    p.setOrganisationCode(normaliseCode(e.target.value));
+                  }}
+                  placeholder="KE-MCG"
+                  className={authInputCls}
+                  style={authInputStyle}
+                />
+              </AuthField>
+              <p style={helperStyle}>Used as a short identifier for your account across configuration, URLs, and system references.</p>
+              {p.organisationCode && !p.codeValid && <p style={errorStyle}>Use 2–12 letters or numbers, for example MCG or KE-MCG.</p>}
+              {p.codeValid && p.codeStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
+              {p.codeValid && p.codeStatus === "available" && (
+                <p style={okStyle} className="flex items-center gap-1">
+                  <Check className="h-3.5 w-3.5" /> Account code is available.
+                </p>
+              )}
+              {p.codeValid && p.codeStatus === "unavailable" && (
+                <div>
+                  <p style={errorStyle} className="flex items-center gap-1">
+                    <AlertCircle className="h-3.5 w-3.5" /> This account code is already in use.
+                  </p>
+                  {p.codeSuggestion && (
+                    <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
+                      <span>
+                        Suggested code: <strong style={{ color: "#17191F" }}>{p.codeSuggestion}</strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          p.setCodeTouched(true);
+                          p.setOrganisationCode(p.codeSuggestion);
+                        }}
+                        style={{ color: "#2D4FC4", fontWeight: 600 }}
+                        className="hover:underline"
+                      >
+                        Use suggestion
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        )}
 
         <label className="flex cursor-pointer items-start gap-2.5" style={{ color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
           <input
@@ -737,15 +752,24 @@ function StepAccount(p: any) {
             <span style={{ color: "#8A90A2", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em" }}>OR</span>
             <span className="h-px flex-1" style={{ background: "#DCE4FF" }} />
           </div>
-          <button
-            type="button"
-            onClick={p.startGoogle}
-            className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
-            style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
-          >
-            <GoogleIcon />
-            Sign up with Google
-          </button>
+           <button
+             type="button"
+             onClick={p.startGoogle}
+             className="flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+             style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+           >
+             <GoogleIcon />
+             Sign up with Google
+           </button>
+           <button
+             type="button"
+             onClick={p.startGithub}
+             className="mt-2.5 flex w-full items-center justify-center gap-2.5 transition-colors hover:bg-[#F5F7FF] focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
+             style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontWeight: 500, fontSize: 14 }}
+           >
+             <Github className="h-[18px] w-[18px]" />
+             Sign up with GitHub
+           </button>
         </>
       )}
     </form>
@@ -762,32 +786,32 @@ function StepPreferences(p: any) {
   return (
     <div>
       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Personalise your account</h1>
-      <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        Set the defaults your organisation will use across the product.
-      </p>
+       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
+         Set the defaults your account will use across the product.
+       </p>
 
-      <div className="mt-6 space-y-4">
-        <div>
-          <AuthField label="Base country of operations">
-            <select
-              value={p.baseCountry}
-              onChange={(e: any) => p.onCountryChange(e.target.value)}
-              className={authInputCls}
-              style={selectStyle}
-            >
-              <option value="">Select a country</option>
-              {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </AuthField>
-          <p style={helperStyle}>Used to suggest locale, timezone, and organisation URL defaults.</p>
-          {p.codeUpdatedNotice && <p style={okStyle}>{p.codeUpdatedNotice}</p>}
-          {p.baseCountry && (
-            <p style={helperStyle}>
-              Organisation code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
+       <div className="mt-6 space-y-4">
+         <div>
+           <AuthField label="Base country of operations">
+             <select
+               value={p.baseCountry}
+               onChange={(e: any) => p.onCountryChange(e.target.value)}
+               className={authInputCls}
+               style={selectStyle}
+             >
+               <option value="">Select a country</option>
+               {COUNTRIES.map((c) => (
+                 <option key={c.code} value={c.code}>
+                   {c.label}
+                 </option>
+               ))}
+             </select>
+           </AuthField>
+            <p style={helperStyle}>Used to suggest locale, timezone, and account URL defaults.</p>
+           {p.codeUpdatedNotice && <p style={okStyle}>{p.codeUpdatedNotice}</p>}
+           {p.baseCountry && (
+             <p style={helperStyle}>
+                Account code: <strong style={{ color: "#17191F" }}>{p.organisationCode}</strong>
             </p>
           )}
         </div>
@@ -819,7 +843,7 @@ function StepPreferences(p: any) {
               })}
             </div>
           </AuthField>
-          <p style={helperStyle}>Choose the languages your organisation may use in the product.</p>
+          <p style={helperStyle}>Choose the languages your account may use in the product.</p>
         </div>
 
         <div>
@@ -851,11 +875,11 @@ function StepPreferences(p: any) {
               ))}
             </select>
           </AuthField>
-          <p style={helperStyle}>Choose when your organisation's financial year begins.</p>
+          <p style={helperStyle}>Choose when your account's financial year begins.</p>
         </div>
 
         <div>
-          <AuthField label="Organisation URL">
+          <AuthField label="Account URL">
             <input
               value={p.orgSlug}
               onChange={(e: any) => {
@@ -867,7 +891,7 @@ function StepPreferences(p: any) {
               style={authInputStyle}
             />
           </AuthField>
-          <p style={helperStyle}>This short name will be used in your organisation URLs.</p>
+          <p style={helperStyle}>This short name will be used in your account URLs.</p>
           <p style={{ ...helperStyle, color: "#5E6675" }}>
             Preview: <strong style={{ color: "#17191F" }}>{`https://${p.orgSlug || "your-organisation"}.${BASE_DOMAIN}`}</strong>
           </p>
@@ -875,12 +899,12 @@ function StepPreferences(p: any) {
           {p.slugStatus === "checking" && <p style={helperStyle}>Checking availability…</p>}
           {p.slugStatus === "available" && (
             <p style={okStyle} className="flex items-center gap-1">
-              <Check className="h-3.5 w-3.5" /> This organisation URL is available.
+              <Check className="h-3.5 w-3.5" /> This account URL is available.
             </p>
           )}
           {p.slugStatus === "unavailable" && (
             <div>
-              <p style={errorStyle}>This organisation URL is already in use.</p>
+              <p style={errorStyle}>This account URL is already in use.</p>
               {p.slugSuggestion && (
                 <div className="mt-1.5 flex items-center gap-2" style={{ fontSize: 12, color: "#5E6675" }}>
                   <span>
@@ -997,19 +1021,19 @@ function StepUrls({
     .join(", ");
 
   const rows: [string, string][] = [
-    ["Organisation name", summary.organisationName],
-    ["Organisation code", summary.organisationCode],
-    ["Base country", country?.label ?? "—"],
-    ["Languages", langLabels],
-    ["Timezone", summary.timezone.replace(/_/g, " ")],
-    ["Financial year", fy?.label ?? "—"],
-  ];
+     ["Account name", summary.organisationName],
+     ["Account code", summary.organisationCode],
+     ["Base country", country?.label ?? "—"],
+     ["Languages", langLabels],
+     ["Timezone", summary.timezone.replace(/_/g, " ")],
+     ["Financial year", fy?.label ?? "—"],
+   ];
 
-  return (
-    <div>
-      <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
-      <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-        These will be the main entry points for your organisation once your workspace has been set up.
+   return (
+     <div>
+       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
+       <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
+         These will be the main entry points for your account once your workspace has been set up.
       </p>
 
       <div className="mt-5 flex items-start gap-2.5 rounded-md px-3 py-2.5" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
@@ -1034,7 +1058,7 @@ function StepUrls({
       </div>
 
       <div className="mt-6">
-        <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Organisation details</div>
+        <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Account details</div>
         <dl className="mt-2 space-y-1.5">
           {rows.map(([k, v]) => (
             <div key={k} className="flex items-start justify-between gap-4">
