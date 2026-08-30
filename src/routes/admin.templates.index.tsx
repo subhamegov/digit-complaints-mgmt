@@ -32,6 +32,7 @@ export const Route = createFileRoute("/admin/templates/")({
 
 function TemplatesPage() {
   const { projects_enabled } = useAccountFeatures();
+  const [confirmDisable, setConfirmDisable] = useState(false);
   return (
     <div className="flex h-full flex-col">
       <AdminPageHeader
