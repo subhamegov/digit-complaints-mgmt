@@ -34,7 +34,7 @@ const LABELS: Record<string, string> = {
 
 function SignInPage() {
   const state = useBranding();
-  const [mode, setMode] = useRef<"employee" | "citizen">("employee");
+  
   const initial = useRef(state.draft.sign_in);
   const signIn = state.draft.sign_in;
 
