@@ -134,7 +134,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     icon: BarChart3,
     items: [
       { to: "/admin/knowledge-base",    labelCode: "ADMIN_NAV_KB",             label: "Knowledge Base", icon: BookOpen },
-      { to: "/admin/operations/health", labelCode: "ADMIN_NAV_HEALTH",         label: "Health",         icon: Activity },
+      { to: "/operations/health",        labelCode: "ADMIN_NAV_HEALTH",         label: "Health",         icon: Activity, requires: ["SYSTEM_HEALTH_VIEW"] },
       { to: "/admin/audit-log",         labelCode: "ADMIN_NAV_AUDIT",          label: "Audit Log",      icon: ScrollText },
     ],
   },
