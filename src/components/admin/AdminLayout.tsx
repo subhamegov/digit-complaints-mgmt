@@ -44,6 +44,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   MapPin,
+  ChevronDown,
 } from "lucide-react";
 import {
   useRbac,
@@ -56,6 +57,7 @@ import {
 import { ContextCombobox } from "@/components/pgr/ContextCombobox";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useAccountFeatures } from "@/lib/account-features";
 
 /* ------------------------------------------------------------------ */
 /* Navigation registry                                                */
@@ -187,10 +189,12 @@ export function SidebarItem({
   item,
   active,
   onNavigate,
+  indented = false,
 }: {
   item: AdminNavItem;
   active: boolean;
   onNavigate?: () => void;
+  indented?: boolean;
 }) {
   const Icon = item.icon;
   return (
@@ -198,7 +202,8 @@ export function SidebarItem({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
+        "group flex items-center gap-2.5 border-l-2 py-1.5 text-[13px] transition-colors",
+        indented ? "pl-8 pr-2.5" : "px-2.5",
         active
           ? "border-transparent bg-[#2563EB] font-medium text-white [&_svg]:text-white"
           : "border-transparent text-[#CBD5E1] [&_svg]:text-[#94A3B8] hover:bg-[#2563EB]/[0.12] hover:text-white",
@@ -213,32 +218,54 @@ export function SidebarItem({
 export function SidebarSection({
   section,
   pathname,
+  expanded,
+  onToggle,
   onNavigate,
 }: {
   section: AdminNavSection;
   pathname: string;
+  expanded: boolean;
+  onToggle: () => void;
   onNavigate?: () => void;
 }) {
   const { hasAnyPermission } = useRbac();
+  const { projects_enabled } = useAccountFeatures();
   const items = section.items.filter(
-    (i) => !i.requires || hasAnyPermission(i.requires),
+    (i) => (!i.requires || hasAnyPermission(i.requires)) &&
+      (!i.feature || (i.feature === "projects_enabled" && projects_enabled)),
   );
   if (items.length === 0) return null;
+  const active = items.some((item) => isItemActive(item, pathname));
   return (
-    <div className="mb-3">
-      <div className="px-2.5 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
-        {t(section.titleCode, section.title)}
-      </div>
-      <div className="space-y-0.5">
-        {items.map((item) => (
-          <SidebarItem
-            key={item.to}
-            item={item}
-            active={pathname === item.to}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </div>
+    <div className="mb-1">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className={cn(
+          "group flex w-full items-center gap-2.5 border-l-2 px-2.5 py-2 text-left text-[13px] font-medium transition-colors",
+          active
+            ? "border-transparent bg-[#2563EB]/[0.16] text-white [&_svg]:text-white"
+            : "border-transparent text-[#CBD5E1] hover:bg-[#2563EB]/[0.12] hover:text-white",
+        )}
+      >
+        <section.icon className="h-4 w-4 shrink-0 text-[#94A3B8]" />
+        <span className="min-w-0 flex-1 truncate">{t(section.titleCode, section.title)}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-[#94A3B8] transition-transform", expanded && "rotate-180")} />
+      </button>
+      {expanded && (
+        <div className="mt-0.5 space-y-0.5">
+          {items.map((item) => (
+            <SidebarItem
+              key={item.to}
+              item={item}
+              active={isItemActive(item, pathname)}
+              indented
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -250,13 +277,28 @@ export function SidebarNavigation({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const activeSection = ADMIN_NAV.findIndex((section) =>
+    section.items.some((item) => isItemActive(item, pathname)),
+  );
+  const [expandedIndex, setExpandedIndex] = useState(activeSection >= 0 ? activeSection : 0);
+  const visibleSections = ADMIN_NAV;
+
+  useEffect(() => {
+    if (activeSection >= 0) setExpandedIndex(activeSection);
+  }, [activeSection]);
+
   return (
     <nav className="flex-1 overflow-y-auto px-2 py-3">
-      {ADMIN_NAV.map((section) => (
+      <div className="mb-1">
+        <SidebarItem item={ADMIN_NAV_HOME} active={isItemActive(ADMIN_NAV_HOME, pathname)} onNavigate={onNavigate} />
+      </div>
+      {visibleSections.map((section, index) => (
         <SidebarSection
           key={section.titleCode}
           section={section}
           pathname={pathname}
+          expanded={expandedIndex === index}
+          onToggle={() => setExpandedIndex(expandedIndex === index ? -1 : index)}
           onNavigate={onNavigate}
         />
       ))}
@@ -303,13 +345,15 @@ function SidebarShell({
           options={JURISDICTIONS.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
           onChange={(v) => setJurisdiction(JURISDICTIONS.find((j) => j.code === v)!)}
         />
-        <ContextCombobox
-          icon={ShieldCheck}
-          label={t("COMMON_ROLE")}
-          value={role}
-          options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
-          onChange={(v) => setRole(v as Role)}
-        />
+        {role !== "ACCOUNT_ADMIN" && (
+          <ContextCombobox
+            icon={ShieldCheck}
+            label={t("COMMON_ROLE")}
+            value={role}
+            options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
+            onChange={(v) => setRole(v as Role)}
+          />
+        )}
       </div>
       <SidebarNavigation pathname={pathname} onNavigate={onNavigate} />
 
