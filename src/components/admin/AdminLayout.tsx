@@ -317,13 +317,13 @@ function SidebarShell({
   const { userName, role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
-        <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold">
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-primary text-[15px] font-bold text-primary-foreground">
           P
         </div>
-        <div className="leading-tight">
-          <div className="text-[13px] font-semibold tracking-wide">DIGIT Complaint Management</div>
-          <div className="text-[10px] uppercase tracking-wider text-[#93A4BC]">
+        <div className="min-w-0 leading-tight">
+          <div className="truncate text-[12.5px] font-semibold">DIGIT Complaint Management</div>
+          <div className="truncate text-[10.5px] text-[#93A4BC]">
             {t("ADMIN_CONSOLE", "Admin Console")}
           </div>
         </div>
