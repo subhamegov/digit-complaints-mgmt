@@ -313,7 +313,7 @@ function SidebarShell({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const { userName, role, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
+  const { userName, role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
     <>
       <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
