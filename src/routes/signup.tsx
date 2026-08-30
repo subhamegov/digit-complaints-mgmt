@@ -1052,6 +1052,9 @@ function StepUrls({
           description="Main entry point for administrators, supervisors, resolvers, and other government employees."
           url={urls.employeeUrl}
         />
+        <p style={{ marginTop: 6, color: "#8A90A2", fontSize: 11.5, lineHeight: 1.5 }}>
+          This URL is representative. Working URLs will be available post provisioning of your workspace.
+        </p>
       </div>
 
       <div className="mt-6 flex gap-2.5">
@@ -1075,7 +1078,13 @@ function StepUrls({
         </a>
       </div>
 
-      <div className="mt-8 text-center" style={{ color: "#A6ABBA", fontSize: 11, letterSpacing: "0.04em" }}>
+      <div className="mt-5 text-center">
+        <Link to="/login" style={{ color: "#5E6675", fontSize: 12.5, textDecoration: "underline", textUnderlineOffset: 3 }}>
+          Go to sign in
+        </Link>
+      </div>
+
+      <div className="mt-6 text-center" style={{ color: "#A6ABBA", fontSize: 11, letterSpacing: "0.04em" }}>
         Powered by DIGIT
       </div>
     </div>
