@@ -84,7 +84,18 @@ export type AuditAction =
   | "BRANDING_LOGO_UPDATED"
   | "BRANDING_SIGN_IN_UPDATED"
   | "CITIZEN_LANDING_UPDATED"
-  | "BRANDING_PUBLISHED";
+  | "BRANDING_PUBLISHED"
+  | "EXPORT_DESTINATION_CREATED"
+  | "EXPORT_DESTINATION_UPDATED"
+  | "EXPORT_DESTINATION_DELETED"
+  | "EXPORT_DESTINATION_TESTED"
+  | "EXPORT_JOB_CREATED"
+  | "EXPORT_JOB_UPDATED"
+  | "EXPORT_JOB_DELETED"
+  | "EXPORT_JOB_PAUSED"
+  | "EXPORT_JOB_RESUMED"
+  | "EXPORT_JOB_MANUALLY_TRIGGERED"
+  | "EXPORT_RUN_RETRIED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CREATE: "Created",
@@ -116,6 +127,17 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   BRANDING_SIGN_IN_UPDATED: "Sign-in content updated",
   CITIZEN_LANDING_UPDATED: "Citizen landing page updated",
   BRANDING_PUBLISHED: "Branding published",
+  EXPORT_DESTINATION_CREATED: "Export destination created",
+  EXPORT_DESTINATION_UPDATED: "Export destination updated",
+  EXPORT_DESTINATION_DELETED: "Export destination deleted",
+  EXPORT_DESTINATION_TESTED: "Export destination tested",
+  EXPORT_JOB_CREATED: "Export job created",
+  EXPORT_JOB_UPDATED: "Export job updated",
+  EXPORT_JOB_DELETED: "Export job deleted",
+  EXPORT_JOB_PAUSED: "Export job paused",
+  EXPORT_JOB_RESUMED: "Export job resumed",
+  EXPORT_JOB_MANUALLY_TRIGGERED: "Export job triggered",
+  EXPORT_RUN_RETRIED: "Export run retried",
 };
 
 export type AuditChange = {
