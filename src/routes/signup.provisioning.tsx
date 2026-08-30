@@ -22,7 +22,7 @@ export const Route = createFileRoute("/signup/provisioning")({
       {
         name: "description",
         content:
-          "Your DIGIT Complaint Management account is being created. Workspace setup usually takes 30 to 45 minutes and we will email you when it is ready.",
+          "Your DIGIT Complaint Management account is being created. Workspace setup usually takes 10 to 15 minutes and we will email you when it is ready.",
       },
       { property: "og:title", content: "Account Being Created - DIGIT Complaint Management" },
       {
@@ -78,7 +78,7 @@ function ProvisioningPage() {
 
         <h1 style={{ marginTop: 16, color: "#17191F", fontSize: 26, fontWeight: 600, lineHeight: 1.2 }}>Your account is being created</h1>
         <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-          Setting up your workspace usually takes 30 to 45 minutes.
+          Setting up your workspace usually takes 10 to 15 minutes.
         </p>
 
         {/* Status */}
@@ -88,7 +88,7 @@ function ProvisioningPage() {
         >
           <div>
             <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Workspace setup</div>
-            <div style={{ color: "#6F7684", fontSize: 12.5 }}>Estimated 30–45 minutes</div>
+            <div style={{ color: "#6F7684", fontSize: 12.5 }}>Estimated 10-15 minutes</div>
           </div>
           <span
             className="shrink-0 rounded-full px-2.5 py-1"
