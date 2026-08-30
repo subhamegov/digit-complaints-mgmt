@@ -161,6 +161,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "DOMAIN_CREATE",
     "DOMAIN_EDIT",
     "DOMAIN_VERIFY",
+    "SYSTEM_HEALTH_VIEW",
     "HEALTH_VIEW",
     "HEALTH_CONFIGURE",
     "HEALTH_ALERT_TEST",

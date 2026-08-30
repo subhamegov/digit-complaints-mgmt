@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import {
   Activity,
@@ -43,11 +44,12 @@ const categoryIcon = {
 
 function HealthPage() {
   const { role, tenant, hasPermission } = useRbac();
+  const fetchHealth = useServerFn(getAccountHealth);
   const [health, setHealth] = useState<Awaited<ReturnType<typeof getAccountHealth>> | null>(null);
   const [checkedAt, setCheckedAt] = useState("");
 
   const checkHealth = async () => {
-    const result = await getAccountHealth({ data: { accountId: tenant.code, role } });
+    const result = await fetchHealth({ data: { accountId: tenant.code, role } });
     setHealth(result);
     if (result.authorized) setCheckedAt(result.checkedAt);
   };
