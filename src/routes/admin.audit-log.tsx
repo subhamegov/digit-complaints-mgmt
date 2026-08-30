@@ -49,6 +49,12 @@ export const Route = createFileRoute("/admin/audit-log")({
   component: AuditLogPage,
 });
 
+const USER_TYPE_LABEL: Record<string, string> = {
+  EMPLOYEE: "Employee",
+  CITIZEN: "Citizen",
+  CONFIGURATION: "Configuration",
+};
+
 function AuditLogPage() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [userType, setUserType] = useState("ALL");
@@ -127,6 +133,7 @@ function AuditLogPage() {
                 <SelectItem value="ALL">All user types</SelectItem>
                 <SelectItem value="EMPLOYEE">Employee</SelectItem>
                 <SelectItem value="CITIZEN">Citizen</SelectItem>
+                <SelectItem value="CONFIGURATION">Configuration</SelectItem>
               </SelectContent>
             </Select>
             <Select value={action} onValueChange={setAction}>
@@ -211,17 +218,20 @@ function AuditLogPage() {
                           <div className="font-medium text-foreground">{e.targetLabel}</div>
                           <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
                         </>
-                      ) : (
+                      ) : e.userType === "CITIZEN" ? (
                         <>
                           <div className="font-mono text-[12.5px] text-foreground">{e.targetLabel}</div>
-                          <div className="font-mono text-[12px] text-muted-foreground">
-                            {e.targetIdentifier}
-                          </div>
+                          <div className="font-mono text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="font-medium text-foreground">{e.targetLabel}</div>
+                          <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
                         </>
                       )}
                     </TableCell>
                     <TableCell className="text-[13px]">
-                      {e.userType === "EMPLOYEE" ? "Employee" : "Citizen"}
+                      {USER_TYPE_LABEL[e.userType]}
                     </TableCell>
                     <TableCell className="text-[13px]">{AUDIT_ACTION_LABEL[e.action]}</TableCell>
                     <TableCell className="text-[12.5px]">{e.performedBy}</TableCell>
@@ -276,10 +286,10 @@ function AuditLogPage() {
                     <Field label="Date & time" value={formatTs(selected.at)} />
                     <Field
                       label="User type"
-                      value={selected.userType === "EMPLOYEE" ? "Employee" : "Citizen"}
+                      value={USER_TYPE_LABEL[selected.userType]}
                     />
                     <Field label="User reference" value={selected.targetLabel} mono={selected.userType === "CITIZEN"} />
-                    <Field label="Identifier" value={selected.targetIdentifier} mono />
+                    <Field label="Identifier" value={selected.targetIdentifier} mono={selected.userType === "CITIZEN"} />
                     <Field label="Performed by" value={selected.performedBy} />
                     <Field label="Result" value={selected.result === "SUCCESS" ? "Success" : "Failed"} />
                     <Field label="Last logged in" value={formatTs(selected.lastLoggedIn)} />

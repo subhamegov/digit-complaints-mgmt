@@ -53,7 +53,7 @@ export type Citizen = {
   block?: CitizenBlock;
 };
 
-export type AuditUserType = "EMPLOYEE" | "CITIZEN";
+export type AuditUserType = "EMPLOYEE" | "CITIZEN" | "CONFIGURATION";
 
 export type AuditAction =
   | "CREATE"
@@ -79,7 +79,12 @@ export type AuditAction =
   | "PROTECTED_DATA_ACCESS"
   | "PERMISSION_CHANGE"
   | "CITIZEN_SIGN_IN_BLOCKED"
-  | "CITIZEN_SIGN_IN_UNBLOCKED";
+  | "CITIZEN_SIGN_IN_UNBLOCKED"
+  | "BRANDING_THEME_UPDATED"
+  | "BRANDING_LOGO_UPDATED"
+  | "BRANDING_SIGN_IN_UPDATED"
+  | "CITIZEN_LANDING_UPDATED"
+  | "BRANDING_PUBLISHED";
 
 export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CREATE: "Created",
@@ -106,6 +111,11 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   PERMISSION_CHANGE: "Permission changed",
   CITIZEN_SIGN_IN_BLOCKED: "Sign-in blocked",
   CITIZEN_SIGN_IN_UNBLOCKED: "Sign-in unblocked",
+  BRANDING_THEME_UPDATED: "Theme updated",
+  BRANDING_LOGO_UPDATED: "Logo updated",
+  BRANDING_SIGN_IN_UPDATED: "Sign-in content updated",
+  CITIZEN_LANDING_UPDATED: "Citizen landing page updated",
+  BRANDING_PUBLISHED: "Branding published",
 };
 
 export type AuditChange = {
