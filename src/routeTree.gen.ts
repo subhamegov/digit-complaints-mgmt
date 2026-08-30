@@ -74,6 +74,7 @@ import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.wor
 import { Route as AdminTemplatesIndexRouteImport } from './routes/admin.templates.index'
 import { Route as AdminDataDictionaryIndexRouteImport } from './routes/admin.data-dictionary.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
+import { Route as AdminBrandingIndexRouteImport } from './routes/admin.branding.index'
 import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
 import { Route as AdminWorkflowConfigSlaMapsRouteImport } from './routes/admin.workflow-config.sla-maps'
 import { Route as AdminWorkflowConfigRoleHierarchyRouteImport } from './routes/admin.workflow-config.role-hierarchy'
@@ -84,6 +85,10 @@ import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
 import { Route as AdminDataDictionaryKpiIdRouteImport } from './routes/admin.data-dictionary.$kpiId'
 import { Route as AdminDashboardsDashboardIdRouteImport } from './routes/admin.dashboards.$dashboardId'
+import { Route as AdminBrandingThemeRouteImport } from './routes/admin.branding.theme'
+import { Route as AdminBrandingSignInRouteImport } from './routes/admin.branding.sign-in'
+import { Route as AdminBrandingLogoRouteImport } from './routes/admin.branding.logo'
+import { Route as AdminBrandingCitizenLandingRouteImport } from './routes/admin.branding.citizen-landing'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
@@ -415,6 +420,11 @@ const AdminDashboardsIndexRoute = AdminDashboardsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminDashboardsRoute,
 } as any)
+const AdminBrandingIndexRoute = AdminBrandingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminBrandingRoute,
+} as any)
 const AdminWorkflowConfigVisualizationRoute =
   AdminWorkflowConfigVisualizationRouteImport.update({
     id: '/visualization',
@@ -470,6 +480,27 @@ const AdminDashboardsDashboardIdRoute =
     path: '/$dashboardId',
     getParentRoute: () => AdminDashboardsRoute,
   } as any)
+const AdminBrandingThemeRoute = AdminBrandingThemeRouteImport.update({
+  id: '/theme',
+  path: '/theme',
+  getParentRoute: () => AdminBrandingRoute,
+} as any)
+const AdminBrandingSignInRoute = AdminBrandingSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AdminBrandingRoute,
+} as any)
+const AdminBrandingLogoRoute = AdminBrandingLogoRouteImport.update({
+  id: '/logo',
+  path: '/logo',
+  getParentRoute: () => AdminBrandingRoute,
+} as any)
+const AdminBrandingCitizenLandingRoute =
+  AdminBrandingCitizenLandingRouteImport.update({
+    id: '/citizen-landing',
+    path: '/citizen-landing',
+    getParentRoute: () => AdminBrandingRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -489,7 +520,7 @@ export interface FileRoutesByFullPath {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
-  '/admin/branding': typeof AdminBrandingRoute
+  '/admin/branding': typeof AdminBrandingRouteWithChildren
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -533,6 +564,10 @@ export interface FileRoutesByFullPath {
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
+  '/admin/branding/logo': typeof AdminBrandingLogoRoute
+  '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
+  '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
@@ -543,6 +578,7 @@ export interface FileRoutesByFullPath {
   '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
+  '/admin/branding/': typeof AdminBrandingIndexRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
   '/admin/templates/': typeof AdminTemplatesIndexRoute
@@ -566,7 +602,6 @@ export interface FileRoutesByTo {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
-  '/admin/branding': typeof AdminBrandingRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -607,6 +642,10 @@ export interface FileRoutesByTo {
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox': typeof InboxIndexRoute
+  '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
+  '/admin/branding/logo': typeof AdminBrandingLogoRoute
+  '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
+  '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
@@ -617,6 +656,7 @@ export interface FileRoutesByTo {
   '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
+  '/admin/branding': typeof AdminBrandingIndexRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary': typeof AdminDataDictionaryIndexRoute
   '/admin/templates': typeof AdminTemplatesIndexRoute
@@ -641,7 +681,7 @@ export interface FileRoutesById {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
-  '/admin/branding': typeof AdminBrandingRoute
+  '/admin/branding': typeof AdminBrandingRouteWithChildren
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -685,6 +725,10 @@ export interface FileRoutesById {
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
+  '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
+  '/admin/branding/logo': typeof AdminBrandingLogoRoute
+  '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
+  '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
@@ -695,6 +739,7 @@ export interface FileRoutesById {
   '/admin/workflow-config/role-hierarchy': typeof AdminWorkflowConfigRoleHierarchyRoute
   '/admin/workflow-config/sla-maps': typeof AdminWorkflowConfigSlaMapsRoute
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
+  '/admin/branding/': typeof AdminBrandingIndexRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
   '/admin/templates/': typeof AdminTemplatesIndexRoute
@@ -764,6 +809,10 @@ export interface FileRouteTypes {
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
+    | '/admin/branding/citizen-landing'
+    | '/admin/branding/logo'
+    | '/admin/branding/sign-in'
+    | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
@@ -774,6 +823,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/role-hierarchy'
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
+    | '/admin/branding/'
     | '/admin/dashboards/'
     | '/admin/data-dictionary/'
     | '/admin/templates/'
@@ -797,7 +847,6 @@ export interface FileRouteTypes {
     | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
-    | '/admin/branding'
     | '/admin/channels'
     | '/admin/communications'
     | '/admin/complaints-config'
@@ -838,6 +887,10 @@ export interface FileRouteTypes {
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox'
+    | '/admin/branding/citizen-landing'
+    | '/admin/branding/logo'
+    | '/admin/branding/sign-in'
+    | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
@@ -848,6 +901,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/role-hierarchy'
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
+    | '/admin/branding'
     | '/admin/dashboards'
     | '/admin/data-dictionary'
     | '/admin/templates'
@@ -915,6 +969,10 @@ export interface FileRouteTypes {
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
+    | '/admin/branding/citizen-landing'
+    | '/admin/branding/logo'
+    | '/admin/branding/sign-in'
+    | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
     | '/admin/templates/forms'
@@ -925,6 +983,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/role-hierarchy'
     | '/admin/workflow-config/sla-maps'
     | '/admin/workflow-config/visualization'
+    | '/admin/branding/'
     | '/admin/dashboards/'
     | '/admin/data-dictionary/'
     | '/admin/templates/'
@@ -1415,6 +1474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardsIndexRouteImport
       parentRoute: typeof AdminDashboardsRoute
     }
+    '/admin/branding/': {
+      id: '/admin/branding/'
+      path: '/'
+      fullPath: '/admin/branding/'
+      preLoaderRoute: typeof AdminBrandingIndexRouteImport
+      parentRoute: typeof AdminBrandingRoute
+    }
     '/admin/workflow-config/visualization': {
       id: '/admin/workflow-config/visualization'
       path: '/visualization'
@@ -1485,8 +1551,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardsDashboardIdRouteImport
       parentRoute: typeof AdminDashboardsRoute
     }
+    '/admin/branding/theme': {
+      id: '/admin/branding/theme'
+      path: '/theme'
+      fullPath: '/admin/branding/theme'
+      preLoaderRoute: typeof AdminBrandingThemeRouteImport
+      parentRoute: typeof AdminBrandingRoute
+    }
+    '/admin/branding/sign-in': {
+      id: '/admin/branding/sign-in'
+      path: '/sign-in'
+      fullPath: '/admin/branding/sign-in'
+      preLoaderRoute: typeof AdminBrandingSignInRouteImport
+      parentRoute: typeof AdminBrandingRoute
+    }
+    '/admin/branding/logo': {
+      id: '/admin/branding/logo'
+      path: '/logo'
+      fullPath: '/admin/branding/logo'
+      preLoaderRoute: typeof AdminBrandingLogoRouteImport
+      parentRoute: typeof AdminBrandingRoute
+    }
+    '/admin/branding/citizen-landing': {
+      id: '/admin/branding/citizen-landing'
+      path: '/citizen-landing'
+      fullPath: '/admin/branding/citizen-landing'
+      preLoaderRoute: typeof AdminBrandingCitizenLandingRouteImport
+      parentRoute: typeof AdminBrandingRoute
+    }
   }
 }
+
+interface AdminBrandingRouteChildren {
+  AdminBrandingCitizenLandingRoute: typeof AdminBrandingCitizenLandingRoute
+  AdminBrandingLogoRoute: typeof AdminBrandingLogoRoute
+  AdminBrandingSignInRoute: typeof AdminBrandingSignInRoute
+  AdminBrandingThemeRoute: typeof AdminBrandingThemeRoute
+  AdminBrandingIndexRoute: typeof AdminBrandingIndexRoute
+}
+
+const AdminBrandingRouteChildren: AdminBrandingRouteChildren = {
+  AdminBrandingCitizenLandingRoute: AdminBrandingCitizenLandingRoute,
+  AdminBrandingLogoRoute: AdminBrandingLogoRoute,
+  AdminBrandingSignInRoute: AdminBrandingSignInRoute,
+  AdminBrandingThemeRoute: AdminBrandingThemeRoute,
+  AdminBrandingIndexRoute: AdminBrandingIndexRoute,
+}
+
+const AdminBrandingRouteWithChildren = AdminBrandingRoute._addFileChildren(
+  AdminBrandingRouteChildren,
+)
 
 interface AdminDashboardsRouteChildren {
   AdminDashboardsDashboardIdRoute: typeof AdminDashboardsDashboardIdRoute
@@ -1546,7 +1660,7 @@ interface AdminRouteChildren {
   AdminAdvancedSettingsRoute: typeof AdminAdvancedSettingsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminAuthenticationRoute: typeof AdminAuthenticationRoute
-  AdminBrandingRoute: typeof AdminBrandingRoute
+  AdminBrandingRoute: typeof AdminBrandingRouteWithChildren
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCommunicationsRoute: typeof AdminCommunicationsRoute
   AdminComplaintsConfigRoute: typeof AdminComplaintsConfigRoute
@@ -1586,7 +1700,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdvancedSettingsRoute: AdminAdvancedSettingsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminAuthenticationRoute: AdminAuthenticationRoute,
-  AdminBrandingRoute: AdminBrandingRoute,
+  AdminBrandingRoute: AdminBrandingRouteWithChildren,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCommunicationsRoute: AdminCommunicationsRoute,
   AdminComplaintsConfigRoute: AdminComplaintsConfigRoute,
