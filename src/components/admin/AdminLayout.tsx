@@ -9,7 +9,7 @@
  * the i18n shim with safe fallbacks).
  */
 
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import digitLogo from "@/assets/digit-logo.png.asset.json";
 import {
@@ -49,6 +49,7 @@ import {
 import {
   useRbac,
   ROLE_LABEL,
+  ASSIGNED_ROLE_MEMBERSHIPS,
   TENANTS,
   JURISDICTIONS,
   type Permission,
@@ -314,7 +315,28 @@ function SidebarShell({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const navigate = useNavigate();
   const { userName, role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
+  const assignedRoles = ASSIGNED_ROLE_MEMBERSHIPS[role];
+  const allLocalities = JURISDICTIONS.find((j) => j.code === "ALL") ?? JURISDICTIONS[0];
+  const isAccountAdmin = role === "ACCOUNT_ADMIN";
+  const displayedJurisdiction = isAccountAdmin ? allLocalities : jurisdiction;
+  const jurisdictionOptions = isAccountAdmin ? [allLocalities] : JURISDICTIONS;
+
+  const handleRoleChange = (value: string) => {
+    const nextRole = assignedRoles.find((assignedRole) => assignedRole === value);
+    if (!nextRole) return;
+    setRole(nextRole);
+    onNavigate?.();
+    if (nextRole === "PLATFORM_ADMIN") {
+      navigate({ to: "/platform" });
+    } else if (nextRole === "ACCOUNT_ADMIN") {
+      navigate({ to: "/admin/home" });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
+  };
+
   return (
     <>
       <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
@@ -337,24 +359,30 @@ function SidebarShell({
           label={t("COMMON_TENANT")}
           value={tenant.code}
           options={TENANTS.map((tn) => ({ value: tn.code, label: tn.name, hint: tn.code }))}
-          onChange={(v) => setTenant(TENANTS.find((tn) => tn.code === v)!)}
+          onChange={(v) => {
+            const nextTenant = TENANTS.find((tn) => tn.code === v);
+            if (nextTenant) setTenant(nextTenant);
+          }}
         />
         <ContextCombobox
           icon={MapPin}
           label={t("COMMON_JURISDICTION")}
-          value={jurisdiction.code}
-          options={JURISDICTIONS.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
-          onChange={(v) => setJurisdiction(JURISDICTIONS.find((j) => j.code === v)!)}
+          value={displayedJurisdiction.code}
+          options={jurisdictionOptions.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
+          disabled={isAccountAdmin}
+          helperText="Account Administration applies across all localities. Locality selection is available in operational workspaces where applicable."
+          onChange={(v) => {
+            const nextJurisdiction = jurisdictionOptions.find((j) => j.code === v);
+            if (nextJurisdiction) setJurisdiction(nextJurisdiction);
+          }}
         />
-        {role !== "ACCOUNT_ADMIN" && (
-          <ContextCombobox
-            icon={ShieldCheck}
-            label={t("COMMON_ROLE")}
-            value={role}
-            options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
-            onChange={(v) => setRole(v as Role)}
-          />
-        )}
+        <ContextCombobox
+          icon={ShieldCheck}
+          label={t("COMMON_ROLE")}
+          value={role}
+          options={assignedRoles.map((assignedRole) => ({ value: assignedRole, label: ROLE_LABEL[assignedRole] }))}
+          onChange={handleRoleChange}
+        />
       </div>
       <SidebarNavigation pathname={pathname} onNavigate={onNavigate} />
 
