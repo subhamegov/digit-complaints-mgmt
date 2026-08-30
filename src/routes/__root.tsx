@@ -121,9 +121,10 @@ function AppLayout() {
      pathname === "/auth/google" ||
      pathname === "/auth/github" ||
      pathname === "/setup/organisation" ||
-    pathname === "/" ||
-    pathname === "/platform" ||
-    pathname.startsWith("/admin");
+     pathname === "/" ||
+     pathname === "/platform" ||
+     pathname.startsWith("/admin") ||
+     pathname.startsWith("/operations");
 
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);

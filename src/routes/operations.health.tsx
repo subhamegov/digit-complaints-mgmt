@@ -56,6 +56,15 @@ function HealthPage() {
     if (hasPermission("SYSTEM_HEALTH_VIEW")) void checkHealth();
   }, [tenant.code, role, hasPermission]);
 
+  if (health === null && hasPermission("SYSTEM_HEALTH_VIEW")) {
+    return (
+      <div className="p-4 lg:p-6">
+        <AdminPageHeader title="Health" subtitle="View the operational health of your Complaint Management service, connected services and supporting infrastructure." />
+        <div className="mt-5 border border-border bg-surface p-6 text-sm text-muted-foreground">Checking service health...</div>
+      </div>
+    );
+  }
+
   if (!hasPermission("SYSTEM_HEALTH_VIEW") || health?.authorized === false) {
     return (
       <div className="p-4 lg:p-6">
