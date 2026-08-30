@@ -154,19 +154,23 @@ export const DEFAULT_CONFIG: BrandingConfiguration = {
 };
 
 const STORAGE_KEY = "pgr.branding.v1";
+const INITIAL_TIMESTAMP = "2026-01-01T00:00:00.000Z";
 
 const clone = (c: BrandingConfiguration): BrandingConfiguration =>
   JSON.parse(JSON.stringify(c)) as BrandingConfiguration;
 
-function initialState(): BrandingState {
-  const base: BrandingState = {
+function baseState(): BrandingState {
+  return {
     draft: clone(DEFAULT_CONFIG),
     published: clone(DEFAULT_CONFIG),
     status: "PUBLISHED",
-    updated_at: new Date().toISOString(),
+    updated_at: INITIAL_TIMESTAMP,
     updated_by: CURRENT_ADMIN,
-    published_at: new Date().toISOString(),
+    published_at: INITIAL_TIMESTAMP,
   };
+}
+
+function readStoredState(base: BrandingState): BrandingState {
   if (typeof window === "undefined") return base;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -183,7 +187,8 @@ function initialState(): BrandingState {
   }
 }
 
-let state: BrandingState = initialState();
+let state: BrandingState = baseState();
+let hydrated = false;
 const listeners = new Set<() => void>();
 
 function persist() {
