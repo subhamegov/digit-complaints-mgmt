@@ -49,6 +49,12 @@ export const Route = createFileRoute("/admin/audit-log")({
   component: AuditLogPage,
 });
 
+const USER_TYPE_LABEL: Record<string, string> = {
+  EMPLOYEE: "Employee",
+  CITIZEN: "Citizen",
+  CONFIGURATION: "Configuration",
+};
+
 function AuditLogPage() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [userType, setUserType] = useState("ALL");
@@ -127,6 +133,7 @@ function AuditLogPage() {
                 <SelectItem value="ALL">All user types</SelectItem>
                 <SelectItem value="EMPLOYEE">Employee</SelectItem>
                 <SelectItem value="CITIZEN">Citizen</SelectItem>
+                <SelectItem value="CONFIGURATION">Configuration</SelectItem>
               </SelectContent>
             </Select>
             <Select value={action} onValueChange={setAction}>
@@ -221,7 +228,7 @@ function AuditLogPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-[13px]">
-                      {e.userType === "EMPLOYEE" ? "Employee" : "Citizen"}
+                      {USER_TYPE_LABEL[e.userType]}
                     </TableCell>
                     <TableCell className="text-[13px]">{AUDIT_ACTION_LABEL[e.action]}</TableCell>
                     <TableCell className="text-[12.5px]">{e.performedBy}</TableCell>
@@ -276,7 +283,7 @@ function AuditLogPage() {
                     <Field label="Date & time" value={formatTs(selected.at)} />
                     <Field
                       label="User type"
-                      value={selected.userType === "EMPLOYEE" ? "Employee" : "Citizen"}
+                      value={USER_TYPE_LABEL[selected.userType]}
                     />
                     <Field label="User reference" value={selected.targetLabel} mono={selected.userType === "CITIZEN"} />
                     <Field label="Identifier" value={selected.targetIdentifier} mono />
