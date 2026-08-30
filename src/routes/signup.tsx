@@ -1041,20 +1041,9 @@ function StepUrls({
         <div>
           <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Ready to create</div>
           <div style={{ color: "#5E6675", fontSize: 12.5, lineHeight: 1.5 }}>
-            Workspace setup starts after you create the account and usually takes 30 to 45 minutes.
+            Workspace setup usually takes 10 to 15 minutes. We will inform you by email as soon as it is done.
           </div>
         </div>
-      </div>
-
-
-      <div className="mt-5 space-y-2.5">
-        <UrlCard
-          label="Employee URL"
-          description="For administrators, supervisors, resolvers, and other government employees."
-          url={urls.employeeUrl}
-        />
-        <UrlCard label="Citizen URL" description="Public entry point for residents to file and track complaints." url={urls.citizenUrl} />
-        <UrlCard label="Administration URL" description="For account setup and administration." url={urls.adminUrl} />
       </div>
 
       <div className="mt-6">
@@ -1069,18 +1058,35 @@ function StepUrls({
         </dl>
       </div>
 
-      <div className="mt-6">
-        <PrimaryButton onClick={onFinish}>Create account</PrimaryButton>
+      <div className="mt-5">
+        <UrlCard
+          label="Primary URL"
+          description="Main entry point for administrators, supervisors, resolvers, and other government employees."
+          url={urls.employeeUrl}
+        />
       </div>
 
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-2.5 w-full hover:bg-[#F5F7FF]"
-        style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontSize: 14, fontWeight: 500 }}
-      >
-        Back to preferences
-      </button>
+      <div className="mt-6 flex gap-2.5">
+        <a
+          href="https://core.digit.org/platform/overview"
+          target="_blank"
+          rel="noreferrer"
+          className="flex flex-1 items-center justify-center"
+          style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+        >
+          Read more
+        </a>
+        <a
+          href="https://core.digit.org/guides"
+          target="_blank"
+          rel="noreferrer"
+          className="flex flex-1 items-center justify-center hover:bg-[#F5F7FF]"
+          style={{ height: 46, background: "#FFFFFF", border: "1px solid #CBD5F2", borderRadius: 8, color: "#17191F", fontSize: 14, fontWeight: 500 }}
+        >
+          Documentation and FAQs
+        </a>
+      </div>
+
     </div>
   );
 }
