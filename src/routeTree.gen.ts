@@ -84,7 +84,6 @@ import { Route as AdminTemplatesUseCasesRouteImport } from './routes/admin.templ
 import { Route as AdminTemplatesRolesRouteImport } from './routes/admin.templates.roles'
 import { Route as AdminTemplatesKpisRouteImport } from './routes/admin.templates.kpis'
 import { Route as AdminTemplatesFormsRouteImport } from './routes/admin.templates.forms'
-import { Route as AdminOperationsHealthRouteImport } from './routes/admin.operations.health'
 import { Route as AdminDataDictionaryKpiIdRouteImport } from './routes/admin.data-dictionary.$kpiId'
 import { Route as AdminDashboardsDashboardIdRouteImport } from './routes/admin.dashboards.$dashboardId'
 import { Route as AdminBrandingThemeRouteImport } from './routes/admin.branding.theme'
@@ -475,11 +474,6 @@ const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
   path: '/forms',
   getParentRoute: () => AdminTemplatesRoute,
 } as any)
-const AdminOperationsHealthRoute = AdminOperationsHealthRouteImport.update({
-  id: '/operations/health',
-  path: '/operations/health',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminDataDictionaryKpiIdRoute =
   AdminDataDictionaryKpiIdRouteImport.update({
     id: '/data-dictionary/$kpiId',
@@ -583,7 +577,6 @@ export interface FileRoutesByFullPath {
   '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
-  '/admin/operations/health': typeof AdminOperationsHealthRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -663,7 +656,6 @@ export interface FileRoutesByTo {
   '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
-  '/admin/operations/health': typeof AdminOperationsHealthRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -748,7 +740,6 @@ export interface FileRoutesById {
   '/admin/branding/theme': typeof AdminBrandingThemeRoute
   '/admin/dashboards/$dashboardId': typeof AdminDashboardsDashboardIdRoute
   '/admin/data-dictionary/$kpiId': typeof AdminDataDictionaryKpiIdRoute
-  '/admin/operations/health': typeof AdminOperationsHealthRoute
   '/admin/templates/forms': typeof AdminTemplatesFormsRoute
   '/admin/templates/kpis': typeof AdminTemplatesKpisRoute
   '/admin/templates/roles': typeof AdminTemplatesRolesRoute
@@ -834,7 +825,6 @@ export interface FileRouteTypes {
     | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
-    | '/admin/operations/health'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -914,7 +904,6 @@ export interface FileRouteTypes {
     | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
-    | '/admin/operations/health'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -998,7 +987,6 @@ export interface FileRouteTypes {
     | '/admin/branding/theme'
     | '/admin/dashboards/$dashboardId'
     | '/admin/data-dictionary/$kpiId'
-    | '/admin/operations/health'
     | '/admin/templates/forms'
     | '/admin/templates/kpis'
     | '/admin/templates/roles'
@@ -1569,13 +1557,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTemplatesFormsRouteImport
       parentRoute: typeof AdminTemplatesRoute
     }
-    '/admin/operations/health': {
-      id: '/admin/operations/health'
-      path: '/operations/health'
-      fullPath: '/admin/operations/health'
-      preLoaderRoute: typeof AdminOperationsHealthRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/data-dictionary/$kpiId': {
       id: '/admin/data-dictionary/$kpiId'
       path: '/data-dictionary/$kpiId'
@@ -1730,7 +1711,6 @@ interface AdminRouteChildren {
   AdminValidationRulesRoute: typeof AdminValidationRulesRoute
   AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRouteWithChildren
   AdminDataDictionaryKpiIdRoute: typeof AdminDataDictionaryKpiIdRoute
-  AdminOperationsHealthRoute: typeof AdminOperationsHealthRoute
   AdminDataDictionaryIndexRoute: typeof AdminDataDictionaryIndexRoute
 }
 
@@ -1770,7 +1750,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminValidationRulesRoute: AdminValidationRulesRoute,
   AdminWorkflowConfigRoute: AdminWorkflowConfigRouteWithChildren,
   AdminDataDictionaryKpiIdRoute: AdminDataDictionaryKpiIdRoute,
-  AdminOperationsHealthRoute: AdminOperationsHealthRoute,
   AdminDataDictionaryIndexRoute: AdminDataDictionaryIndexRoute,
 }
 
