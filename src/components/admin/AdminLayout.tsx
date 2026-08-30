@@ -109,15 +109,15 @@ export const ADMIN_NAV: AdminNavSection[] = [
       { to: "/admin/dashboards",        labelCode: "ADMIN_NAV_DASHBOARDS",     label: "Dashboards",                icon: LayoutDashboard },
       { to: "/admin/templates",         labelCode: "ADMIN_NAV_TEMPLATES",      label: "Templates",                 icon: LayoutTemplate },
       { to: "/admin/complaints-config", labelCode: "ADMIN_NAV_COMPLAINTS",     label: "Complaints",                icon: Inbox },
-      { to: "/admin/workflow-config",   labelCode: "ADMIN_NAV_WORKFLOW",       label: "Workflow",                  icon: GitBranch, matches: ["/admin/workflow-config/visualization"] },
+      { to: "/admin/workflow-config",   labelCode: "ADMIN_NAV_WORKFLOW",       label: "Workflows",                 icon: GitBranch, matches: ["/admin/workflow-config/visualization"] },
       { to: "/admin/workflow-config/sla-maps", labelCode: "ADMIN_NAV_SLA",     label: "SLA & Escalation",          icon: Gauge },
-      { to: "/admin/geographies",       labelCode: "ADMIN_NAV_GEOGRAPHIES",    label: "Geography & Jurisdictions", icon: MapPinned },
+      { to: "/admin/geographies",       labelCode: "ADMIN_NAV_GEOGRAPHIES",    label: "Geography",                 icon: MapPinned },
       { to: "/admin/projects",          labelCode: "ADMIN_NAV_PROJECTS",       label: "Projects",                  icon: FileText, feature: "projects_enabled" },
     ],
   },
   {
     titleCode: "ADMIN_SECTION_CHANNELS",
-    title: "Channels & Communications",
+    title: "Communications",
     icon: Bell,
     items: [
       { to: "/admin/sources",           labelCode: "ADMIN_NAV_SOURCES",        label: "Sources",       icon: Globe2 },
