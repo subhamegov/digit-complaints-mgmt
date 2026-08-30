@@ -63,7 +63,7 @@ function PendingApprovalPage() {
 
   const body =
     status === "approved"
-      ? "We're now setting up your workspace. This usually takes 30 to 45 minutes."
+      ? "We're now setting up your workspace. This usually takes 10 to 15 minutes."
       : status === "rejected"
         ? "Your request was not approved. Review the reason below before submitting again."
         : "A Platform Administrator needs to review your request before your workspace can be created.";
@@ -112,7 +112,7 @@ function PendingApprovalPage() {
             </div>
             <div style={{ color: "#6F7684", fontSize: 12.5 }}>
               {status === "approved"
-                ? "Estimated 30–45 minutes"
+                ? "Estimated 10-15 minutes"
                 : status === "rejected"
                   ? "Reviewed by a Platform Administrator"
                   : "Awaiting Platform Administrator review"}
@@ -142,7 +142,7 @@ function PendingApprovalPage() {
                 <li>No further action is required from you right now.</li>
                 <li>We'll email you when your request has been reviewed.</li>
                 <li>If approved, workspace setup will begin automatically.</li>
-                <li>Workspace setup usually takes 30 to 45 minutes after approval.</li>
+                <li>Workspace setup usually takes 10 to 15 minutes after approval.</li>
               </ul>
             )}
           </div>
