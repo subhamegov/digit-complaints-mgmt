@@ -16,7 +16,7 @@
  * (`overrides` is reserved) without exposing them in the UI today.
  */
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { appendAudit, CURRENT_ADMIN, type AuditAction } from "@/lib/user-admin-store";
 
 /* ------------------------------------------------------------------ */

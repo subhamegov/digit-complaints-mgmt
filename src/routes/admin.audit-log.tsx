@@ -218,12 +218,15 @@ function AuditLogPage() {
                           <div className="font-medium text-foreground">{e.targetLabel}</div>
                           <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
                         </>
-                      ) : (
+                      ) : e.userType === "CITIZEN" ? (
                         <>
                           <div className="font-mono text-[12.5px] text-foreground">{e.targetLabel}</div>
-                          <div className="font-mono text-[12px] text-muted-foreground">
-                            {e.targetIdentifier}
-                          </div>
+                          <div className="font-mono text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="font-medium text-foreground">{e.targetLabel}</div>
+                          <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
                         </>
                       )}
                     </TableCell>
@@ -286,7 +289,7 @@ function AuditLogPage() {
                       value={USER_TYPE_LABEL[selected.userType]}
                     />
                     <Field label="User reference" value={selected.targetLabel} mono={selected.userType === "CITIZEN"} />
-                    <Field label="Identifier" value={selected.targetIdentifier} mono />
+                    <Field label="Identifier" value={selected.targetIdentifier} mono={selected.userType === "CITIZEN"} />
                     <Field label="Performed by" value={selected.performedBy} />
                     <Field label="Result" value={selected.result === "SUCCESS" ? "Success" : "Failed"} />
                     <Field label="Last logged in" value={formatTs(selected.lastLoggedIn)} />
