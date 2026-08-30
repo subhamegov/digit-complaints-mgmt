@@ -211,6 +211,16 @@ function subscribe(l: () => void) {
 }
 
 export function useBranding(): BrandingState {
+  useEffect(() => {
+    if (hydrated) return;
+    hydrated = true;
+    const stored = readStoredState(state);
+    if (JSON.stringify(stored) !== JSON.stringify(state)) {
+      state = stored;
+      listeners.forEach((listener) => listener());
+    }
+  }, []);
+
   return useSyncExternalStore(
     subscribe,
     () => state,
