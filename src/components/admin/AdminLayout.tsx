@@ -425,7 +425,7 @@ function AdminTopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const headerTitle =
     role === "ACCOUNT_ADMIN" ? "Account Administration" : "Platform Administration";
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-6">
       <button
         onClick={onMenuClick}
         className="lg:hidden flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted"
