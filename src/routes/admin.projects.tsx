@@ -1,5 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { BlankAdminPage } from "@/components/admin/AdminLayout";
+import { useAccountFeatures } from "@/lib/account-features";
+
 
 export const Route = createFileRoute("/admin/projects")({
   head: () => ({
