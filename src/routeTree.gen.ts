@@ -38,6 +38,7 @@ import { Route as AdminWorkflowConfigRouteImport } from './routes/admin.workflow
 import { Route as AdminValidationRulesRouteImport } from './routes/admin.validation-rules'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUserStatsRouteImport } from './routes/admin.user-stats'
+import { Route as AdminTemplatesRouteImport } from './routes/admin.templates'
 import { Route as AdminTelemetryRouteImport } from './routes/admin.telemetry'
 import { Route as AdminSourcesRouteImport } from './routes/admin.sources'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -225,6 +226,11 @@ const AdminUserStatsRoute = AdminUserStatsRouteImport.update({
   path: '/user-stats',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTemplatesRoute = AdminTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminTelemetryRoute = AdminTelemetryRouteImport.update({
   id: '/telemetry',
   path: '/telemetry',
@@ -398,29 +404,29 @@ const AdminWorkflowConfigRoleHierarchyRoute =
     getParentRoute: () => AdminWorkflowConfigRoute,
   } as any)
 const AdminTemplatesWorkflowsRoute = AdminTemplatesWorkflowsRouteImport.update({
-  id: '/templates/workflows',
-  path: '/templates/workflows',
-  getParentRoute: () => AdminRoute,
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => AdminTemplatesRoute,
 } as any)
 const AdminTemplatesUseCasesRoute = AdminTemplatesUseCasesRouteImport.update({
-  id: '/templates/use-cases',
-  path: '/templates/use-cases',
-  getParentRoute: () => AdminRoute,
+  id: '/use-cases',
+  path: '/use-cases',
+  getParentRoute: () => AdminTemplatesRoute,
 } as any)
 const AdminTemplatesRolesRoute = AdminTemplatesRolesRouteImport.update({
-  id: '/templates/roles',
-  path: '/templates/roles',
-  getParentRoute: () => AdminRoute,
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminTemplatesRoute,
 } as any)
 const AdminTemplatesKpisRoute = AdminTemplatesKpisRouteImport.update({
-  id: '/templates/kpis',
-  path: '/templates/kpis',
-  getParentRoute: () => AdminRoute,
+  id: '/kpis',
+  path: '/kpis',
+  getParentRoute: () => AdminTemplatesRoute,
 } as any)
 const AdminTemplatesFormsRoute = AdminTemplatesFormsRouteImport.update({
-  id: '/templates/forms',
-  path: '/templates/forms',
-  getParentRoute: () => AdminRoute,
+  id: '/forms',
+  path: '/forms',
+  getParentRoute: () => AdminTemplatesRoute,
 } as any)
 const AdminDataDictionaryKpiIdRoute =
   AdminDataDictionaryKpiIdRouteImport.update({
@@ -475,6 +481,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
@@ -545,6 +552,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
@@ -616,6 +624,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
+  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
@@ -689,6 +698,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sources'
     | '/admin/telemetry'
+    | '/admin/templates'
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
@@ -759,6 +769,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sources'
     | '/admin/telemetry'
+    | '/admin/templates'
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
@@ -829,6 +840,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sources'
     | '/admin/telemetry'
+    | '/admin/templates'
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
@@ -1093,6 +1105,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUserStatsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/templates': {
+      id: '/admin/templates'
+      path: '/templates'
+      fullPath: '/admin/templates'
+      preLoaderRoute: typeof AdminTemplatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/telemetry': {
       id: '/admin/telemetry'
       path: '/telemetry'
@@ -1326,38 +1345,38 @@ declare module '@tanstack/react-router' {
     }
     '/admin/templates/workflows': {
       id: '/admin/templates/workflows'
-      path: '/templates/workflows'
+      path: '/workflows'
       fullPath: '/admin/templates/workflows'
       preLoaderRoute: typeof AdminTemplatesWorkflowsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminTemplatesRoute
     }
     '/admin/templates/use-cases': {
       id: '/admin/templates/use-cases'
-      path: '/templates/use-cases'
+      path: '/use-cases'
       fullPath: '/admin/templates/use-cases'
       preLoaderRoute: typeof AdminTemplatesUseCasesRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminTemplatesRoute
     }
     '/admin/templates/roles': {
       id: '/admin/templates/roles'
-      path: '/templates/roles'
+      path: '/roles'
       fullPath: '/admin/templates/roles'
       preLoaderRoute: typeof AdminTemplatesRolesRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminTemplatesRoute
     }
     '/admin/templates/kpis': {
       id: '/admin/templates/kpis'
-      path: '/templates/kpis'
+      path: '/kpis'
       fullPath: '/admin/templates/kpis'
       preLoaderRoute: typeof AdminTemplatesKpisRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminTemplatesRoute
     }
     '/admin/templates/forms': {
       id: '/admin/templates/forms'
-      path: '/templates/forms'
+      path: '/forms'
       fullPath: '/admin/templates/forms'
       preLoaderRoute: typeof AdminTemplatesFormsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminTemplatesRoute
     }
     '/admin/data-dictionary/$kpiId': {
       id: '/admin/data-dictionary/$kpiId'
@@ -1388,6 +1407,26 @@ const AdminDashboardsRouteChildren: AdminDashboardsRouteChildren = {
 
 const AdminDashboardsRouteWithChildren = AdminDashboardsRoute._addFileChildren(
   AdminDashboardsRouteChildren,
+)
+
+interface AdminTemplatesRouteChildren {
+  AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
+  AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
+  AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
+  AdminTemplatesUseCasesRoute: typeof AdminTemplatesUseCasesRoute
+  AdminTemplatesWorkflowsRoute: typeof AdminTemplatesWorkflowsRoute
+}
+
+const AdminTemplatesRouteChildren: AdminTemplatesRouteChildren = {
+  AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
+  AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
+  AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
+  AdminTemplatesUseCasesRoute: AdminTemplatesUseCasesRoute,
+  AdminTemplatesWorkflowsRoute: AdminTemplatesWorkflowsRoute,
+}
+
+const AdminTemplatesRouteWithChildren = AdminTemplatesRoute._addFileChildren(
+  AdminTemplatesRouteChildren,
 )
 
 interface AdminWorkflowConfigRouteChildren {
@@ -1434,16 +1473,12 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSourcesRoute: typeof AdminSourcesRoute
   AdminTelemetryRoute: typeof AdminTelemetryRoute
+  AdminTemplatesRoute: typeof AdminTemplatesRouteWithChildren
   AdminUserStatsRoute: typeof AdminUserStatsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminValidationRulesRoute: typeof AdminValidationRulesRoute
   AdminWorkflowConfigRoute: typeof AdminWorkflowConfigRouteWithChildren
   AdminDataDictionaryKpiIdRoute: typeof AdminDataDictionaryKpiIdRoute
-  AdminTemplatesFormsRoute: typeof AdminTemplatesFormsRoute
-  AdminTemplatesKpisRoute: typeof AdminTemplatesKpisRoute
-  AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
-  AdminTemplatesUseCasesRoute: typeof AdminTemplatesUseCasesRoute
-  AdminTemplatesWorkflowsRoute: typeof AdminTemplatesWorkflowsRoute
   AdminDataDictionaryIndexRoute: typeof AdminDataDictionaryIndexRoute
 }
 
@@ -1474,16 +1509,12 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSourcesRoute: AdminSourcesRoute,
   AdminTelemetryRoute: AdminTelemetryRoute,
+  AdminTemplatesRoute: AdminTemplatesRouteWithChildren,
   AdminUserStatsRoute: AdminUserStatsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminValidationRulesRoute: AdminValidationRulesRoute,
   AdminWorkflowConfigRoute: AdminWorkflowConfigRouteWithChildren,
   AdminDataDictionaryKpiIdRoute: AdminDataDictionaryKpiIdRoute,
-  AdminTemplatesFormsRoute: AdminTemplatesFormsRoute,
-  AdminTemplatesKpisRoute: AdminTemplatesKpisRoute,
-  AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
-  AdminTemplatesUseCasesRoute: AdminTemplatesUseCasesRoute,
-  AdminTemplatesWorkflowsRoute: AdminTemplatesWorkflowsRoute,
   AdminDataDictionaryIndexRoute: AdminDataDictionaryIndexRoute,
 }
 
