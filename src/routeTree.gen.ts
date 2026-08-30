@@ -67,6 +67,7 @@ import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
 import { Route as OrgLoginRouteImport } from './routes/$org.login'
 import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
+import { Route as AdminTemplatesIndexRouteImport } from './routes/admin.templates.index'
 import { Route as AdminDataDictionaryIndexRouteImport } from './routes/admin.data-dictionary.index'
 import { Route as AdminDashboardsIndexRouteImport } from './routes/admin.dashboards.index'
 import { Route as AdminWorkflowConfigVisualizationRouteImport } from './routes/admin.workflow-config.visualization'
@@ -374,6 +375,11 @@ const AdminWorkflowConfigIndexRoute =
     path: '/',
     getParentRoute: () => AdminWorkflowConfigRoute,
   } as any)
+const AdminTemplatesIndexRoute = AdminTemplatesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminTemplatesRoute,
+} as any)
 const AdminDataDictionaryIndexRoute =
   AdminDataDictionaryIndexRouteImport.update({
     id: '/data-dictionary/',
@@ -511,6 +517,7 @@ export interface FileRoutesByFullPath {
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
+  '/admin/templates/': typeof AdminTemplatesIndexRoute
   '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesByTo {
@@ -552,7 +559,6 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/telemetry': typeof AdminTelemetryRoute
-  '/admin/templates': typeof AdminTemplatesRouteWithChildren
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
@@ -581,6 +587,7 @@ export interface FileRoutesByTo {
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary': typeof AdminDataDictionaryIndexRoute
+  '/admin/templates': typeof AdminTemplatesIndexRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRoutesById {
@@ -654,6 +661,7 @@ export interface FileRoutesById {
   '/admin/workflow-config/visualization': typeof AdminWorkflowConfigVisualizationRoute
   '/admin/dashboards/': typeof AdminDashboardsIndexRoute
   '/admin/data-dictionary/': typeof AdminDataDictionaryIndexRoute
+  '/admin/templates/': typeof AdminTemplatesIndexRoute
   '/admin/workflow-config/': typeof AdminWorkflowConfigIndexRoute
 }
 export interface FileRouteTypes {
@@ -728,6 +736,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
     | '/admin/data-dictionary/'
+    | '/admin/templates/'
     | '/admin/workflow-config/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -769,7 +778,6 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sources'
     | '/admin/telemetry'
-    | '/admin/templates'
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
@@ -798,6 +806,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards'
     | '/admin/data-dictionary'
+    | '/admin/templates'
     | '/admin/workflow-config'
   id:
     | '__root__'
@@ -870,6 +879,7 @@ export interface FileRouteTypes {
     | '/admin/workflow-config/visualization'
     | '/admin/dashboards/'
     | '/admin/data-dictionary/'
+    | '/admin/templates/'
     | '/admin/workflow-config/'
   fileRoutesById: FileRoutesById
 }
@@ -1308,6 +1318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWorkflowConfigIndexRouteImport
       parentRoute: typeof AdminWorkflowConfigRoute
     }
+    '/admin/templates/': {
+      id: '/admin/templates/'
+      path: '/'
+      fullPath: '/admin/templates/'
+      preLoaderRoute: typeof AdminTemplatesIndexRouteImport
+      parentRoute: typeof AdminTemplatesRoute
+    }
     '/admin/data-dictionary/': {
       id: '/admin/data-dictionary/'
       path: '/data-dictionary'
@@ -1415,6 +1432,7 @@ interface AdminTemplatesRouteChildren {
   AdminTemplatesRolesRoute: typeof AdminTemplatesRolesRoute
   AdminTemplatesUseCasesRoute: typeof AdminTemplatesUseCasesRoute
   AdminTemplatesWorkflowsRoute: typeof AdminTemplatesWorkflowsRoute
+  AdminTemplatesIndexRoute: typeof AdminTemplatesIndexRoute
 }
 
 const AdminTemplatesRouteChildren: AdminTemplatesRouteChildren = {
@@ -1423,6 +1441,7 @@ const AdminTemplatesRouteChildren: AdminTemplatesRouteChildren = {
   AdminTemplatesRolesRoute: AdminTemplatesRolesRoute,
   AdminTemplatesUseCasesRoute: AdminTemplatesUseCasesRoute,
   AdminTemplatesWorkflowsRoute: AdminTemplatesWorkflowsRoute,
+  AdminTemplatesIndexRoute: AdminTemplatesIndexRoute,
 }
 
 const AdminTemplatesRouteWithChildren = AdminTemplatesRoute._addFileChildren(
