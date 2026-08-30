@@ -289,8 +289,8 @@ export function AccountsFilterBar({
   onChange: (next: AccountFilters) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded border border-border bg-surface p-3 md:flex-row md:flex-wrap md:items-center">
-      <div className="relative flex-1 min-w-[200px]">
+    <div className="grid gap-2 rounded border border-border bg-surface p-3 md:flex md:flex-row md:flex-wrap md:items-center">
+      <div className="relative min-w-0 md:min-w-[200px] md:flex-1">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={filters.q}
