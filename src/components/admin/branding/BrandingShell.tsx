@@ -80,9 +80,12 @@ export function BrandingStatusBar() {
   const state = useBranding();
   const dirty = hasUnpublishedChanges(state);
   const [confirm, setConfirm] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const blocked = themeContrastChecks(state.draft.theme).some(
     (c) => c.blocking && !c.passes,
   );
+
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border bg-background px-4 py-2 lg:px-6">
@@ -96,7 +99,9 @@ export function BrandingStatusBar() {
         </Badge>
       )}
       <span className="text-[12px] text-muted-foreground">
-        Last updated {new Date(state.updated_at).toLocaleString("en-GB")} by {state.updated_by}
+        {mounted
+          ? `Last updated ${new Date(state.updated_at).toLocaleString("en-GB")} by ${state.updated_by}`
+          : "Last updated -"}
       </span>
       <div className="ml-auto flex items-center gap-2">
         {dirty && (
