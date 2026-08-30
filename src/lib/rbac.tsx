@@ -221,6 +221,22 @@ export const JURISDICTIONS: Jurisdiction[] = [
   { code: "W-27", name: "Cantonment" },
 ];
 
+/**
+ * Prototype account memberships. The working-context selector may only expose
+ * roles assigned to the active demo persona, never the complete role catalog.
+ * A real account would hydrate this map from account membership data.
+ */
+export const ASSIGNED_ROLE_MEMBERSHIPS: Record<Role, Role[]> = {
+  CITIZEN: ["CITIZEN"],
+  CSR: ["CSR"],
+  GRO: ["GRO"],
+  LME: ["LME"],
+  DEPT_HEAD: ["DEPT_HEAD"],
+  ACCOUNT_ADMIN: ["ACCOUNT_ADMIN"],
+  PLATFORM_ADMIN: ["PLATFORM_ADMIN"],
+  TEST_USER: ["TEST_USER"],
+};
+
 interface RbacState {
   role: Role;
   setRole: (r: Role) => void;
@@ -292,7 +308,13 @@ export function RbacProvider({ children }: { children: ReactNode }) {
     persist({ role: r });
   };
   const setTenant = (t: Tenant) => { setTenantState(t); persist({ tenant: t }); };
-  const setJurisdiction = (j: Jurisdiction) => { setJurisdictionState(j); persist({ jurisdiction: j }); };
+  const setJurisdiction = (j: Jurisdiction) => {
+    const next = role === "ACCOUNT_ADMIN"
+      ? JURISDICTIONS.find((item) => item.code === "ALL") ?? JURISDICTIONS[0]
+      : j;
+    setJurisdictionState(next);
+    persist({ jurisdiction: next });
+  };
 
   const value = useMemo<RbacState>(() => {
     const perms = new Set(ROLE_PERMISSIONS[role]);
