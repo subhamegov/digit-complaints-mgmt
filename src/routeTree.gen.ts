@@ -47,7 +47,6 @@ import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminPlatformHealthRouteImport } from './routes/admin.platform-health'
 import { Route as AdminPlatformAdministratorsRouteImport } from './routes/admin.platform-administrators'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
 import { Route as AdminMasterDataSchemasRouteImport } from './routes/admin.master-data-schemas'
 import { Route as AdminLocalizationRouteImport } from './routes/admin.localization'
 import { Route as AdminKnowledgeBaseRouteImport } from './routes/admin.knowledge-base'
@@ -280,11 +279,6 @@ const AdminPlatformAdministratorsRoute =
 const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
-  id: '/monitoring',
-  path: '/monitoring',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMasterDataSchemasRoute = AdminMasterDataSchemasRouteImport.update({
@@ -537,7 +531,6 @@ export interface FileRoutesByFullPath {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -617,7 +610,6 @@ export interface FileRoutesByTo {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -698,7 +690,6 @@ export interface FileRoutesById {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -782,7 +773,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -862,7 +852,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -942,7 +931,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -1283,13 +1271,6 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/admin/notifications'
       preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/monitoring': {
-      id: '/admin/monitoring'
-      path: '/monitoring'
-      fullPath: '/admin/monitoring'
-      preLoaderRoute: typeof AdminMonitoringRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/master-data-schemas': {
@@ -1677,7 +1658,6 @@ interface AdminRouteChildren {
   AdminKnowledgeBaseRoute: typeof AdminKnowledgeBaseRoute
   AdminLocalizationRoute: typeof AdminLocalizationRoute
   AdminMasterDataSchemasRoute: typeof AdminMasterDataSchemasRoute
-  AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPlatformAdministratorsRoute: typeof AdminPlatformAdministratorsRoute
   AdminPlatformHealthRoute: typeof AdminPlatformHealthRoute
@@ -1717,7 +1697,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKnowledgeBaseRoute: AdminKnowledgeBaseRoute,
   AdminLocalizationRoute: AdminLocalizationRoute,
   AdminMasterDataSchemasRoute: AdminMasterDataSchemasRoute,
-  AdminMonitoringRoute: AdminMonitoringRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPlatformAdministratorsRoute: AdminPlatformAdministratorsRoute,
   AdminPlatformHealthRoute: AdminPlatformHealthRoute,

@@ -14,6 +14,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import digitLogo from "@/assets/digit-logo.png.asset.json";
 import {
   Home,
+  Activity,
   Building2,
   Users,
   Server,
