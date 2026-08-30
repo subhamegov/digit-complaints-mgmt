@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, ExternalLink, Github, MailCheck, ShieldAlert } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, Github, MailCheck, ShieldAlert } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
@@ -61,7 +61,7 @@ const errorStyle: React.CSSProperties = { marginTop: 6, color: "#B42318", fontSi
 const okStyle: React.CSSProperties = { marginTop: 6, color: "#12703A", fontSize: 12, lineHeight: 1.5 };
 
 function Stepper({ step }: { step: number }) {
-  const labels = ["Account", "Preferences", "Access URLs"];
+  const labels = ["Account", "Preferences", "Review"];
   return (
     <div className="mb-5 flex items-center gap-2">
       {labels.map((label, i) => {
@@ -981,16 +981,6 @@ function UrlCard({ label, description, url }: { label: string; description: stri
         >
           {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </button>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Open ${label}`}
-          className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#F5F7FF]"
-          style={{ border: "1px solid #CBD5F2", color: "#5E6675" }}
-        >
-          <ExternalLink className="h-4 w-4" />
-        </a>
       </div>
     </div>
   );
@@ -1085,6 +1075,9 @@ function StepUrls({
         </a>
       </div>
 
+      <div className="mt-8 text-center" style={{ color: "#A6ABBA", fontSize: 11, letterSpacing: "0.04em" }}>
+        Powered by DIGIT
+      </div>
     </div>
   );
 }
