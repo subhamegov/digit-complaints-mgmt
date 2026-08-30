@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useAccountFeatures, setFeature } from "@/lib/account-features";
 import { AdminPageHeader } from "@/components/admin/AdminLayout";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FileText, Layers3, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/admin/templates/")({

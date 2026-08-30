@@ -43,6 +43,7 @@ import { Route as AdminTelemetryRouteImport } from './routes/admin.telemetry'
 import { Route as AdminSourcesRouteImport } from './routes/admin.sources'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRolesRouteImport } from './routes/admin.roles'
+import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminPlatformHealthRouteImport } from './routes/admin.platform-health'
 import { Route as AdminPlatformAdministratorsRouteImport } from './routes/admin.platform-administrators'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
@@ -57,6 +58,7 @@ import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminGeographiesRouteImport } from './routes/admin.geographies'
 import { Route as AdminDomainsRouteImport } from './routes/admin.domains'
 import { Route as AdminDocumentationRouteImport } from './routes/admin.documentation'
+import { Route as AdminDataExportRouteImport } from './routes/admin.data-export'
 import { Route as AdminDashboardsRouteImport } from './routes/admin.dashboards'
 import { Route as AdminConfigurationRegistryRouteImport } from './routes/admin.configuration-registry'
 import { Route as AdminComplaintsConfigRouteImport } from './routes/admin.complaints-config'
@@ -64,6 +66,7 @@ import { Route as AdminCommunicationsRouteImport } from './routes/admin.communic
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
+import { Route as AdminAdvancedSettingsRouteImport } from './routes/admin.advanced-settings'
 import { Route as AdminAccountsRouteImport } from './routes/admin.accounts'
 import { Route as OrgLoginRouteImport } from './routes/$org.login'
 import { Route as AdminWorkflowConfigIndexRouteImport } from './routes/admin.workflow-config.index'
@@ -252,6 +255,11 @@ const AdminRolesRoute = AdminRolesRouteImport.update({
   path: '/roles',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProjectsRoute = AdminProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPlatformHealthRoute = AdminPlatformHealthRouteImport.update({
   id: '/platform-health',
   path: '/platform-health',
@@ -323,6 +331,11 @@ const AdminDocumentationRoute = AdminDocumentationRouteImport.update({
   path: '/documentation',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDataExportRoute = AdminDataExportRouteImport.update({
+  id: '/data-export',
+  path: '/data-export',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDashboardsRoute = AdminDashboardsRouteImport.update({
   id: '/dashboards',
   path: '/dashboards',
@@ -357,6 +370,11 @@ const AdminAuthenticationRoute = AdminAuthenticationRouteImport.update({
 const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
   id: '/audit-log',
   path: '/audit-log',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdvancedSettingsRoute = AdminAdvancedSettingsRouteImport.update({
+  id: '/advanced-settings',
+  path: '/advanced-settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAccountsRoute = AdminAccountsRouteImport.update({
@@ -462,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof UsersRoute
   '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -469,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
   '/admin/dashboards': typeof AdminDashboardsRouteWithChildren
+  '/admin/data-export': typeof AdminDataExportRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -483,6 +503,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -535,12 +556,14 @@ export interface FileRoutesByTo {
   '/users': typeof UsersRoute
   '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
+  '/admin/data-export': typeof AdminDataExportRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -555,6 +578,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -606,6 +630,7 @@ export interface FileRoutesById {
   '/users': typeof UsersRoute
   '/$org/login': typeof OrgLoginRoute
   '/admin/accounts': typeof AdminAccountsRoute
+  '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
   '/admin/channels': typeof AdminChannelsRoute
@@ -613,6 +638,7 @@ export interface FileRoutesById {
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
   '/admin/configuration-registry': typeof AdminConfigurationRegistryRoute
   '/admin/dashboards': typeof AdminDashboardsRouteWithChildren
+  '/admin/data-export': typeof AdminDataExportRoute
   '/admin/documentation': typeof AdminDocumentationRoute
   '/admin/domains': typeof AdminDomainsRoute
   '/admin/geographies': typeof AdminGeographiesRoute
@@ -627,6 +653,7 @@ export interface FileRoutesById {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
+  '/admin/projects': typeof AdminProjectsRoute
   '/admin/roles': typeof AdminRolesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -681,6 +708,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/$org/login'
     | '/admin/accounts'
+    | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
     | '/admin/channels'
@@ -688,6 +716,7 @@ export interface FileRouteTypes {
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
     | '/admin/dashboards'
+    | '/admin/data-export'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -702,6 +731,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
+    | '/admin/projects'
     | '/admin/roles'
     | '/admin/settings'
     | '/admin/sources'
@@ -754,12 +784,14 @@ export interface FileRouteTypes {
     | '/users'
     | '/$org/login'
     | '/admin/accounts'
+    | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
     | '/admin/channels'
     | '/admin/communications'
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
+    | '/admin/data-export'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -774,6 +806,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
+    | '/admin/projects'
     | '/admin/roles'
     | '/admin/settings'
     | '/admin/sources'
@@ -824,6 +857,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/$org/login'
     | '/admin/accounts'
+    | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
     | '/admin/channels'
@@ -831,6 +865,7 @@ export interface FileRouteTypes {
     | '/admin/complaints-config'
     | '/admin/configuration-registry'
     | '/admin/dashboards'
+    | '/admin/data-export'
     | '/admin/documentation'
     | '/admin/domains'
     | '/admin/geographies'
@@ -845,6 +880,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
+    | '/admin/projects'
     | '/admin/roles'
     | '/admin/settings'
     | '/admin/sources'
@@ -1150,6 +1186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRolesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/projects': {
+      id: '/admin/projects'
+      path: '/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AdminProjectsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/platform-health': {
       id: '/admin/platform-health'
       path: '/platform-health'
@@ -1248,6 +1291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDocumentationRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/data-export': {
+      id: '/admin/data-export'
+      path: '/data-export'
+      fullPath: '/admin/data-export'
+      preLoaderRoute: typeof AdminDataExportRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/dashboards': {
       id: '/admin/dashboards'
       path: '/dashboards'
@@ -1295,6 +1345,13 @@ declare module '@tanstack/react-router' {
       path: '/audit-log'
       fullPath: '/admin/audit-log'
       preLoaderRoute: typeof AdminAuditLogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/advanced-settings': {
+      id: '/admin/advanced-settings'
+      path: '/advanced-settings'
+      fullPath: '/admin/advanced-settings'
+      preLoaderRoute: typeof AdminAdvancedSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/accounts': {
@@ -1467,6 +1524,7 @@ const AdminWorkflowConfigRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminAccountsRoute: typeof AdminAccountsRoute
+  AdminAdvancedSettingsRoute: typeof AdminAdvancedSettingsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminAuthenticationRoute: typeof AdminAuthenticationRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
@@ -1474,6 +1532,7 @@ interface AdminRouteChildren {
   AdminComplaintsConfigRoute: typeof AdminComplaintsConfigRoute
   AdminConfigurationRegistryRoute: typeof AdminConfigurationRegistryRoute
   AdminDashboardsRoute: typeof AdminDashboardsRouteWithChildren
+  AdminDataExportRoute: typeof AdminDataExportRoute
   AdminDocumentationRoute: typeof AdminDocumentationRoute
   AdminDomainsRoute: typeof AdminDomainsRoute
   AdminGeographiesRoute: typeof AdminGeographiesRoute
@@ -1488,6 +1547,7 @@ interface AdminRouteChildren {
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPlatformAdministratorsRoute: typeof AdminPlatformAdministratorsRoute
   AdminPlatformHealthRoute: typeof AdminPlatformHealthRoute
+  AdminProjectsRoute: typeof AdminProjectsRoute
   AdminRolesRoute: typeof AdminRolesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSourcesRoute: typeof AdminSourcesRoute
@@ -1503,6 +1563,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAccountsRoute: AdminAccountsRoute,
+  AdminAdvancedSettingsRoute: AdminAdvancedSettingsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminAuthenticationRoute: AdminAuthenticationRoute,
   AdminChannelsRoute: AdminChannelsRoute,
@@ -1510,6 +1571,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminComplaintsConfigRoute: AdminComplaintsConfigRoute,
   AdminConfigurationRegistryRoute: AdminConfigurationRegistryRoute,
   AdminDashboardsRoute: AdminDashboardsRouteWithChildren,
+  AdminDataExportRoute: AdminDataExportRoute,
   AdminDocumentationRoute: AdminDocumentationRoute,
   AdminDomainsRoute: AdminDomainsRoute,
   AdminGeographiesRoute: AdminGeographiesRoute,
@@ -1524,6 +1586,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPlatformAdministratorsRoute: AdminPlatformAdministratorsRoute,
   AdminPlatformHealthRoute: AdminPlatformHealthRoute,
+  AdminProjectsRoute: AdminProjectsRoute,
   AdminRolesRoute: AdminRolesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSourcesRoute: AdminSourcesRoute,
