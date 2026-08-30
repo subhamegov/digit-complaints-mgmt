@@ -64,6 +64,7 @@ import { Route as AdminConfigurationRegistryRouteImport } from './routes/admin.c
 import { Route as AdminComplaintsConfigRouteImport } from './routes/admin.complaints-config'
 import { Route as AdminCommunicationsRouteImport } from './routes/admin.communications'
 import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
+import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
 import { Route as AdminAuthenticationRouteImport } from './routes/admin.authentication'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAdvancedSettingsRouteImport } from './routes/admin.advanced-settings'
@@ -362,6 +363,11 @@ const AdminChannelsRoute = AdminChannelsRouteImport.update({
   path: '/channels',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBrandingRoute = AdminBrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuthenticationRoute = AdminAuthenticationRouteImport.update({
   id: '/authentication',
   path: '/authentication',
@@ -483,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -559,6 +566,7 @@ export interface FileRoutesByTo {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -633,6 +641,7 @@ export interface FileRoutesById {
   '/admin/advanced-settings': typeof AdminAdvancedSettingsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/authentication': typeof AdminAuthenticationRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/channels': typeof AdminChannelsRoute
   '/admin/communications': typeof AdminCommunicationsRoute
   '/admin/complaints-config': typeof AdminComplaintsConfigRoute
@@ -711,6 +720,7 @@ export interface FileRouteTypes {
     | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
+    | '/admin/branding'
     | '/admin/channels'
     | '/admin/communications'
     | '/admin/complaints-config'
@@ -787,6 +797,7 @@ export interface FileRouteTypes {
     | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
+    | '/admin/branding'
     | '/admin/channels'
     | '/admin/communications'
     | '/admin/complaints-config'
@@ -860,6 +871,7 @@ export interface FileRouteTypes {
     | '/admin/advanced-settings'
     | '/admin/audit-log'
     | '/admin/authentication'
+    | '/admin/branding'
     | '/admin/channels'
     | '/admin/communications'
     | '/admin/complaints-config'
@@ -1333,6 +1345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminChannelsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/branding': {
+      id: '/admin/branding'
+      path: '/branding'
+      fullPath: '/admin/branding'
+      preLoaderRoute: typeof AdminBrandingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/authentication': {
       id: '/admin/authentication'
       path: '/authentication'
@@ -1527,6 +1546,7 @@ interface AdminRouteChildren {
   AdminAdvancedSettingsRoute: typeof AdminAdvancedSettingsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminAuthenticationRoute: typeof AdminAuthenticationRoute
+  AdminBrandingRoute: typeof AdminBrandingRoute
   AdminChannelsRoute: typeof AdminChannelsRoute
   AdminCommunicationsRoute: typeof AdminCommunicationsRoute
   AdminComplaintsConfigRoute: typeof AdminComplaintsConfigRoute
@@ -1566,6 +1586,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAdvancedSettingsRoute: AdminAdvancedSettingsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminAuthenticationRoute: AdminAuthenticationRoute,
+  AdminBrandingRoute: AdminBrandingRoute,
   AdminChannelsRoute: AdminChannelsRoute,
   AdminCommunicationsRoute: AdminCommunicationsRoute,
   AdminComplaintsConfigRoute: AdminComplaintsConfigRoute,
