@@ -115,8 +115,8 @@ function AuditLogPage() {
         </div>
 
         <div className="rounded border border-border bg-surface">
-          <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5">
-            <div className="relative min-w-[220px] flex-1">
+          <div className="grid gap-2 border-b border-border px-3 py-2.5 sm:flex sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 sm:min-w-[220px] sm:flex-1">
               <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={query}
@@ -126,7 +126,7 @@ function AuditLogPage() {
               />
             </div>
             <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger className="h-8 w-[140px] text-[13px]" aria-label="User type">
+              <SelectTrigger className="h-8 w-full text-[13px] sm:w-[140px]" aria-label="User type">
                 <SelectValue placeholder="User type" />
               </SelectTrigger>
               <SelectContent>
@@ -137,7 +137,7 @@ function AuditLogPage() {
               </SelectContent>
             </Select>
             <Select value={action} onValueChange={setAction}>
-              <SelectTrigger className="h-8 w-[210px] text-[13px]" aria-label="Action">
+              <SelectTrigger className="h-8 w-full text-[13px] sm:w-[210px]" aria-label="Action">
                 <SelectValue placeholder="Action" />
               </SelectTrigger>
               <SelectContent>
@@ -150,7 +150,7 @@ function AuditLogPage() {
               </SelectContent>
             </Select>
             <Select value={performedBy} onValueChange={setPerformedBy}>
-              <SelectTrigger className="h-8 w-[200px] text-[13px]" aria-label="Performed by">
+              <SelectTrigger className="h-8 w-full text-[13px] sm:w-[200px]" aria-label="Performed by">
                 <SelectValue placeholder="Performed by" />
               </SelectTrigger>
               <SelectContent>
@@ -163,7 +163,7 @@ function AuditLogPage() {
               </SelectContent>
             </Select>
             <Select value={result} onValueChange={setResult}>
-              <SelectTrigger className="h-8 w-[130px] text-[13px]" aria-label="Result">
+              <SelectTrigger className="h-8 w-full text-[13px] sm:w-[130px]" aria-label="Result">
                 <SelectValue placeholder="Result" />
               </SelectTrigger>
               <SelectContent>
@@ -176,95 +176,95 @@ function AuditLogPage() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="h-8 w-[150px] text-[13px]"
+              className="h-8 w-full text-[13px] sm:w-[150px]"
               aria-label="From date"
             />
             <Input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="h-8 w-[150px] text-[13px]"
+              className="h-8 w-full text-[13px] sm:w-[150px]"
               aria-label="To date"
             />
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date &amp; time</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>User type</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Changed by</TableHead>
-                <TableHead>Last logged in</TableHead>
-                <TableHead>Result</TableHead>
-                <TableHead className="w-[80px]" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="py-10 text-center text-[13px] text-muted-foreground">
-                    No audit events match the current filters.
-                  </TableCell>
+                  <TableHead>Date &amp; time</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>User type</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Changed by</TableHead>
+                  <TableHead>Last logged in</TableHead>
+                  <TableHead>Result</TableHead>
+                  <TableHead className="w-[80px]" />
                 </TableRow>
-              ) : (
-                filtered.map((e) => (
-                  <TableRow key={e.eventId}>
-                    <TableCell className="whitespace-nowrap text-[12.5px]">{formatTs(e.at)}</TableCell>
-                    <TableCell>
-                      {e.userType === "EMPLOYEE" ? (
-                        <>
-                          <div className="font-medium text-foreground">{e.targetLabel}</div>
-                          <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
-                        </>
-                      ) : e.userType === "CITIZEN" ? (
-                        <>
-                          <div className="font-mono text-[12.5px] text-foreground">{e.targetLabel}</div>
-                          <div className="font-mono text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="font-medium text-foreground">{e.targetLabel}</div>
-                          <div className="text-[12px] text-muted-foreground">{e.targetIdentifier}</div>
-                        </>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-[13px]">
-                      {USER_TYPE_LABEL[e.userType]}
-                    </TableCell>
-                    <TableCell className="text-[13px]">{AUDIT_ACTION_LABEL[e.action]}</TableCell>
-                    <TableCell className="text-[12.5px]">{e.performedBy}</TableCell>
-                    <TableCell className="text-[12.5px] text-muted-foreground">
-                      {formatTs(e.lastLoggedIn)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          e.result === "SUCCESS"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-destructive/10 text-destructive border-destructive/30"
-                        }
-                      >
-                        {e.result === "SUCCESS" ? "Success" : "Failed"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 gap-1 text-[12px]"
-                        onClick={() => setSelected(e)}
-                      >
-                        Details <ChevronRight className="h-3.5 w-3.5" />
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-10 text-center text-[13px] text-muted-foreground">
+                      No audit events match the current filters.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filtered.map((e) => (
+                    <TableRow key={e.eventId}>
+                      <TableCell className="whitespace-nowrap text-[12.5px]">{formatTs(e.at)}</TableCell>
+                      <TableCell>
+                        <div className={e.userType === "CITIZEN" ? "font-mono text-[12.5px] text-foreground" : "font-medium text-foreground"}>{e.targetLabel}</div>
+                        <div className={e.userType === "CITIZEN" ? "font-mono text-[12px] text-muted-foreground" : "text-[12px] text-muted-foreground"}>{e.targetIdentifier}</div>
+                      </TableCell>
+                      <TableCell className="text-[13px]">{USER_TYPE_LABEL[e.userType]}</TableCell>
+                      <TableCell className="text-[13px]">{AUDIT_ACTION_LABEL[e.action]}</TableCell>
+                      <TableCell className="text-[12.5px]">{e.performedBy}</TableCell>
+                      <TableCell className="text-[12.5px] text-muted-foreground">{formatTs(e.lastLoggedIn)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={e.result === "SUCCESS" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-destructive/10 text-destructive border-destructive/30"}>
+                          {e.result === "SUCCESS" ? "Success" : "Failed"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" className="h-7 gap-1 text-[12px]" onClick={() => setSelected(e)}>
+                          Details <ChevronRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="divide-y divide-border md:hidden">
+            {filtered.length === 0 ? (
+              <p className="px-3 py-10 text-center text-[13px] text-muted-foreground">No audit events match the current filters.</p>
+            ) : (
+              filtered.map((e) => (
+                <article key={e.eventId} className="space-y-3 px-3 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-muted-foreground">{formatTs(e.at)}</p>
+                      <p className="mt-1 truncate text-[13px] font-medium text-foreground">{e.targetLabel}</p>
+                      <p className="truncate text-[11.5px] text-muted-foreground">{e.targetIdentifier}</p>
+                    </div>
+                    <Badge variant="outline" className={e.result === "SUCCESS" ? "shrink-0 bg-emerald-50 text-emerald-700 border-emerald-200" : "shrink-0 bg-destructive/10 text-destructive border-destructive/30"}>
+                      {e.result === "SUCCESS" ? "Success" : "Failed"}
+                    </Badge>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
+                    <div><dt className="text-muted-foreground">User type</dt><dd className="mt-0.5 font-medium text-foreground">{USER_TYPE_LABEL[e.userType]}</dd></div>
+                    <div><dt className="text-muted-foreground">Changed by</dt><dd className="mt-0.5 truncate font-medium text-foreground">{e.performedBy}</dd></div>
+                    <div className="col-span-2"><dt className="text-muted-foreground">Action</dt><dd className="mt-0.5 text-foreground">{AUDIT_ACTION_LABEL[e.action]}</dd></div>
+                  </dl>
+                  <Button variant="outline" size="sm" className="h-8 w-full justify-center gap-1 text-[12px]" onClick={() => setSelected(e)}>
+                    View details <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </article>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

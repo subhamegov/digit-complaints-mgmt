@@ -384,23 +384,22 @@ function EmployeesTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="grid grid-cols-2 gap-3 sm:flex-1 sm:grid-cols-4">
           <StatCard label="Total" value={counts.total} />
           <StatCard label="Active" value={counts.active} tone="emerald" />
           <StatCard label="Invited" value={counts.invited} tone="sky" />
           <StatCard label="Archived" value={counts.archived} tone="amber" />
-
         </div>
-        <Button onClick={openCreate} size="sm" className="gap-1.5">
+        <Button onClick={openCreate} size="sm" className="w-full justify-center gap-1.5 sm:w-auto">
           <UserPlus className="h-4 w-4" />
           Add Employee
         </Button>
       </div>
 
       <div className="rounded border border-border bg-surface">
-        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5">
-          <div className="relative min-w-[220px] flex-1">
+        <div className="grid gap-2 border-b border-border px-3 py-2.5 sm:flex sm:flex-wrap sm:items-center">
+          <div className="relative min-w-0 sm:min-w-[220px] sm:flex-1">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
@@ -410,7 +409,7 @@ function EmployeesTab() {
             />
           </div>
           <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="h-8 w-[200px] text-[13px]">
+            <SelectTrigger className="h-8 w-full text-[13px] sm:w-[200px]">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
@@ -423,7 +422,7 @@ function EmployeesTab() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-8 w-[150px] text-[13px]">
+            <SelectTrigger className="h-8 w-full text-[13px] sm:w-[150px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -910,8 +909,8 @@ function CitizensTab() {
       </div>
 
       <div className="rounded border border-border bg-surface">
-        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5">
-          <div className="relative min-w-[220px] flex-1">
+        <div className="grid gap-2 border-b border-border px-3 py-2.5 sm:flex sm:flex-wrap sm:items-center">
+          <div className="relative min-w-0 sm:min-w-[220px] sm:flex-1">
             <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
@@ -921,7 +920,7 @@ function CitizensTab() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-8 w-[160px] text-[13px]">
+            <SelectTrigger className="h-8 w-full text-[13px] sm:w-[160px]">
               <SelectValue placeholder="Account status" />
             </SelectTrigger>
             <SelectContent>
