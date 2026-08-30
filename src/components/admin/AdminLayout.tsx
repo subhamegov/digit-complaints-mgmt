@@ -317,13 +317,13 @@ function SidebarShell({
   const { userName, role, setRole, tenant, setTenant, jurisdiction, setJurisdiction } = useRbac();
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-3.5 border-b border-white/10">
-        <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground font-bold">
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-primary text-[15px] font-bold text-primary-foreground">
           P
         </div>
-        <div className="leading-tight">
-          <div className="text-[13px] font-semibold tracking-wide">DIGIT Complaint Management</div>
-          <div className="text-[10px] uppercase tracking-wider text-[#93A4BC]">
+        <div className="min-w-0 leading-tight">
+          <div className="truncate text-[12.5px] font-semibold">DIGIT Complaint Management</div>
+          <div className="truncate text-[10.5px] text-[#93A4BC]">
             {t("ADMIN_CONSOLE", "Admin Console")}
           </div>
         </div>
@@ -425,7 +425,7 @@ function AdminTopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const headerTitle =
     role === "ACCOUNT_ADMIN" ? "Account Administration" : "Platform Administration";
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-surface px-3 lg:px-6">
       <button
         onClick={onMenuClick}
         className="lg:hidden flex h-8 w-8 items-center justify-center rounded-sm border border-border text-muted-foreground hover:bg-muted"
@@ -433,15 +433,8 @@ function AdminTopBar({ onMenuClick }: { onMenuClick: () => void }) {
       >
         <Menu className="h-4 w-4" />
       </button>
-      <div className="flex items-center gap-2">
-        <div className="leading-tight">
-          <div className="text-[12px] font-semibold text-foreground">
-            {t("ADMIN_HEADER_TITLE", headerTitle)}
-          </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            {t("ADMIN_HEADER_SUBTITLE", "Admin Console")}
-          </div>
-        </div>
+      <div className="min-w-0 truncate text-[13px] font-medium text-foreground">
+        {t("ADMIN_HEADER_TITLE", headerTitle)}
       </div>
       <Link
         to="/login"
@@ -470,13 +463,13 @@ export function AdminPageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-surface px-4 py-4 lg:px-6">
+    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-surface px-4 pb-4 pt-3 lg:px-6">
       <div className="min-w-0">
-        <h1 className="text-[18px] font-semibold tracking-tight text-foreground">
+        <h1 className="text-[24px] font-semibold leading-tight tracking-tight text-foreground">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-0.5 text-[12.5px] text-muted-foreground">{subtitle}</p>
+          <p className="mt-1 max-w-[700px] text-[13px] text-muted-foreground">{subtitle}</p>
         )}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
