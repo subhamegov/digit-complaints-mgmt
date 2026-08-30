@@ -67,54 +67,89 @@ export type AdminNavItem = {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   requires?: Permission[];
+  /** Extra route prefixes that should mark this item active. */
+  matches?: string[];
+  /** Optional account capability flag gating visibility. */
+  feature?: "projects_enabled";
 };
 
 export type AdminNavSection = {
   titleCode: string;
   title: string;
+  icon: React.ComponentType<{ className?: string }>;
   items: AdminNavItem[];
+};
+
+/** Level 1 direct link (no children). */
+export const ADMIN_NAV_HOME: AdminNavItem = {
+  to: "/admin/home",
+  labelCode: "ADMIN_NAV_HOME",
+  label: "Home",
+  icon: Home,
 };
 
 export const ADMIN_NAV: AdminNavSection[] = [
   {
-    titleCode: "ADMIN_SECTION_CONSOLE",
-    title: "Console",
+    titleCode: "ADMIN_SECTION_PEOPLE",
+    title: "People & Access",
+    icon: Users,
     items: [
-      { to: "/admin/home",               labelCode: "ADMIN_NAV_HOME",                label: "Home",                    icon: Home },
-      { to: "/admin/dashboards",         labelCode: "ADMIN_NAV_DASHBOARDS",          label: "Dashboards",              icon: LayoutDashboard },
-      { to: "/admin/users",              labelCode: "ADMIN_NAV_USERS",               label: "Users",                   icon: Users },
-      { to: "/admin/roles",              labelCode: "ADMIN_NAV_ROLES",               label: "Roles & Permissions",     icon: ShieldCheck },
-      { to: "/admin/complaints-config",  labelCode: "ADMIN_NAV_COMPLAINTS",          label: "Complaints",              icon: Inbox },
-      { to: "/admin/workflow-config",                labelCode: "ADMIN_NAV_WORKFLOW",           label: "Workflow Configuration",       icon: GitBranch },
-      { to: "/admin/workflow-config/visualization",  labelCode: "ADMIN_NAV_WORKFLOW_VIS",       label: "  └  Workflow Visualization",  icon: GitBranch },
-      { to: "/admin/workflow-config/sla-maps",       labelCode: "ADMIN_NAV_WORKFLOW_SLA",       label: "  └  SLA Maps",                icon: Gauge },
-      { to: "/admin/workflow-config/role-hierarchy", labelCode: "ADMIN_NAV_WORKFLOW_HIERARCHY", label: "  └  Role Hierarchy",          icon: ShieldCheck },
+      { to: "/admin/users",             labelCode: "ADMIN_NAV_USERS",          label: "Users",               icon: Users },
+      { to: "/admin/roles",             labelCode: "ADMIN_NAV_ROLES",          label: "Roles & Permissions", icon: ShieldCheck, matches: ["/admin/workflow-config/role-hierarchy"] },
+      { to: "/admin/authentication",    labelCode: "ADMIN_NAV_AUTHENTICATION", label: "Authentication",      icon: KeyRound },
+    ],
+  },
+  {
+    titleCode: "ADMIN_SECTION_TEMPLATE_CONFIG",
+    title: "Template Configuration",
+    icon: LayoutTemplate,
+    items: [
+      { to: "/admin/dashboards",        labelCode: "ADMIN_NAV_DASHBOARDS",     label: "Dashboards",                icon: LayoutDashboard },
+      { to: "/admin/templates",         labelCode: "ADMIN_NAV_TEMPLATES",      label: "Templates",                 icon: LayoutTemplate },
+      { to: "/admin/complaints-config", labelCode: "ADMIN_NAV_COMPLAINTS",     label: "Complaints",                icon: Inbox },
+      { to: "/admin/workflow-config",   labelCode: "ADMIN_NAV_WORKFLOW",       label: "Workflow",                  icon: GitBranch, matches: ["/admin/workflow-config/visualization"] },
+      { to: "/admin/workflow-config/sla-maps", labelCode: "ADMIN_NAV_SLA",     label: "SLA & Escalation",          icon: Gauge },
+      { to: "/admin/geographies",       labelCode: "ADMIN_NAV_GEOGRAPHIES",    label: "Geography & Jurisdictions", icon: MapPinned },
+      { to: "/admin/projects",          labelCode: "ADMIN_NAV_PROJECTS",       label: "Projects",                  icon: FileText, feature: "projects_enabled" },
     ],
   },
   {
     titleCode: "ADMIN_SECTION_CHANNELS",
     title: "Channels & Communications",
+    icon: Bell,
     items: [
-      { to: "/admin/sources",            labelCode: "ADMIN_NAV_SOURCES",             label: "Sources",                 icon: Globe2 },
-      { to: "/admin/channels",           labelCode: "ADMIN_NAV_CHANNELS",            label: "Channels",                icon: Bell },
-      { to: "/admin/communications",     labelCode: "ADMIN_NAV_COMMUNICATIONS",      label: "Communications",          icon: FormInput },
-      { to: "/admin/integrations",       labelCode: "ADMIN_NAV_INTEGRATIONS",        label: "Integrations",            icon: Plug },
+      { to: "/admin/sources",           labelCode: "ADMIN_NAV_SOURCES",        label: "Sources",       icon: Globe2 },
+      { to: "/admin/channels",          labelCode: "ADMIN_NAV_CHANNELS",       label: "Channels",      icon: Bell },
+      { to: "/admin/communications",    labelCode: "ADMIN_NAV_NOTIFICATIONS",  label: "Notifications", icon: FormInput },
+      { to: "/admin/integrations",      labelCode: "ADMIN_NAV_INTEGRATIONS",   label: "Integrations",  icon: Plug },
     ],
   },
   {
     titleCode: "ADMIN_SECTION_OPERATIONS",
     title: "Operations",
+    icon: BarChart3,
     items: [
-      { to: "/admin/knowledge-base",     labelCode: "ADMIN_NAV_KB",                  label: "Knowledge Base",          icon: BookOpen },
-      { to: "/admin/monitoring",         labelCode: "ADMIN_NAV_MONITORING",          label: "Monitoring & Analytics",  icon: BarChart3 },
-      { to: "/admin/audit-log",          labelCode: "ADMIN_NAV_AUDIT",               label: "Audit",                   icon: ScrollText },
-      { to: "/admin/settings",           labelCode: "ADMIN_NAV_SETTINGS",            label: "Settings",                icon: Settings },
+      { to: "/admin/knowledge-base",    labelCode: "ADMIN_NAV_KB",             label: "Knowledge Base", icon: BookOpen },
+      { to: "/admin/monitoring",        labelCode: "ADMIN_NAV_MONITORING",     label: "Monitoring",     icon: BarChart3 },
+      { to: "/admin/audit-log",         labelCode: "ADMIN_NAV_AUDIT",          label: "Audit Log",      icon: ScrollText },
+    ],
+  },
+  {
+    titleCode: "ADMIN_SECTION_ACCOUNT",
+    title: "Account",
+    icon: Settings,
+    items: [
+      { to: "/admin/settings",          labelCode: "ADMIN_NAV_ACCOUNT_SETTINGS", label: "Account Settings",       icon: Settings },
+      { to: "/admin/localization",      labelCode: "ADMIN_NAV_BRANDING",         label: "Branding & Localisation", icon: Languages },
+      { to: "/admin/data-export",       labelCode: "ADMIN_NAV_DATA_EXPORT",      label: "Data & Export",           icon: Database },
+      { to: "/admin/advanced-settings", labelCode: "ADMIN_NAV_ADVANCED",         label: "Advanced Settings",       icon: Lock },
     ],
   },
 ];
 
 /* Lookup helpers used by BlankAdminPage to derive a title from the route. */
 export function findAdminNavItem(pathname: string): AdminNavItem | undefined {
+  if (pathname === ADMIN_NAV_HOME.to) return ADMIN_NAV_HOME;
   for (const section of ADMIN_NAV) {
     for (const item of section.items) {
       if (item.to === pathname) return item;
@@ -122,6 +157,27 @@ export function findAdminNavItem(pathname: string): AdminNavItem | undefined {
   }
   return undefined;
 }
+
+function isItemActive(item: AdminNavItem, pathname: string): boolean {
+  if (pathname === item.to) return true;
+  if (item.matches?.some((m) => pathname === m || pathname.startsWith(m + "/"))) return true;
+  // Nested index/detail routes (e.g. /admin/dashboards/xyz) keep the parent active,
+  // except where a sibling nav item owns a deeper path.
+  if (pathname.startsWith(item.to + "/")) {
+    const owned = ADMIN_NAV.flatMap((s) => s.items).some(
+      (other) =>
+        other.to !== item.to &&
+        other.to.startsWith(item.to + "/") &&
+        (pathname === other.to || pathname.startsWith(other.to + "/")),
+    );
+    const claimed = ADMIN_NAV.flatMap((s) => s.items).some((other) =>
+      other.matches?.some((m) => pathname === m || pathname.startsWith(m + "/")),
+    );
+    return !owned && !claimed;
+  }
+  return false;
+}
+
 
 /* ------------------------------------------------------------------ */
 /* Sidebar primitives                                                 */
