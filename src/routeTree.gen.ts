@@ -15,6 +15,7 @@ import { Route as SlaRouteImport } from './routes/sla'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as OperationsRouteImport } from './routes/operations'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EscalationsRouteImport } from './routes/escalations'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -26,6 +27,7 @@ import { Route as SignupProvisioningRouteImport } from './routes/signup.provisio
 import { Route as SignupPendingApprovalRouteImport } from './routes/signup.pending-approval'
 import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as PlatformAdminAccountRequestsRouteImport } from './routes/platform-admin.account-requests'
+import { Route as OperationsHealthRouteImport } from './routes/operations.health'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as InboxIdRouteImport } from './routes/inbox.$id'
@@ -47,7 +49,6 @@ import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
 import { Route as AdminPlatformHealthRouteImport } from './routes/admin.platform-health'
 import { Route as AdminPlatformAdministratorsRouteImport } from './routes/admin.platform-administrators'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminMonitoringRouteImport } from './routes/admin.monitoring'
 import { Route as AdminMasterDataSchemasRouteImport } from './routes/admin.master-data-schemas'
 import { Route as AdminLocalizationRouteImport } from './routes/admin.localization'
 import { Route as AdminKnowledgeBaseRouteImport } from './routes/admin.knowledge-base'
@@ -120,6 +121,11 @@ const PlatformRoute = PlatformRouteImport.update({
   path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OperationsRoute = OperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -176,6 +182,11 @@ const PlatformAdminAccountRequestsRoute =
     path: '/platform-admin/account-requests',
     getParentRoute: () => rootRouteImport,
   } as any)
+const OperationsHealthRoute = OperationsHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => OperationsRoute,
+} as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
   id: '/legal/terms',
   path: '/legal/terms',
@@ -280,11 +291,6 @@ const AdminPlatformAdministratorsRoute =
 const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMonitoringRoute = AdminMonitoringRouteImport.update({
-  id: '/monitoring',
-  path: '/monitoring',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMasterDataSchemasRoute = AdminMasterDataSchemasRouteImport.update({
@@ -509,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/signup': typeof SignupRouteWithChildren
@@ -537,7 +544,6 @@ export interface FileRoutesByFullPath {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -559,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
@@ -591,6 +598,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/signup': typeof SignupRouteWithChildren
@@ -617,7 +625,6 @@ export interface FileRoutesByTo {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -637,6 +644,7 @@ export interface FileRoutesByTo {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
@@ -670,6 +678,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/escalations': typeof EscalationsRoute
   '/login': typeof LoginRoute
+  '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
   '/signup': typeof SignupRouteWithChildren
@@ -698,7 +707,6 @@ export interface FileRoutesById {
   '/admin/knowledge-base': typeof AdminKnowledgeBaseRoute
   '/admin/localization': typeof AdminLocalizationRoute
   '/admin/master-data-schemas': typeof AdminMasterDataSchemasRoute
-  '/admin/monitoring': typeof AdminMonitoringRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/platform-administrators': typeof AdminPlatformAdministratorsRoute
   '/admin/platform-health': typeof AdminPlatformHealthRoute
@@ -720,6 +728,7 @@ export interface FileRoutesById {
   '/inbox/$id': typeof InboxIdRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
@@ -754,6 +763,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/operations'
     | '/platform'
     | '/reports'
     | '/signup'
@@ -782,7 +792,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -804,6 +813,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
@@ -836,6 +846,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/operations'
     | '/platform'
     | '/reports'
     | '/signup'
@@ -862,7 +873,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -882,6 +892,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
@@ -914,6 +925,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/escalations'
     | '/login'
+    | '/operations'
     | '/platform'
     | '/reports'
     | '/signup'
@@ -942,7 +954,6 @@ export interface FileRouteTypes {
     | '/admin/knowledge-base'
     | '/admin/localization'
     | '/admin/master-data-schemas'
-    | '/admin/monitoring'
     | '/admin/notifications'
     | '/admin/platform-administrators'
     | '/admin/platform-health'
@@ -964,6 +975,7 @@ export interface FileRouteTypes {
     | '/inbox/$id'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
     | '/signup/pending-approval'
@@ -997,6 +1009,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   EscalationsRoute: typeof EscalationsRoute
   LoginRoute: typeof LoginRoute
+  OperationsRoute: typeof OperationsRouteWithChildren
   PlatformRoute: typeof PlatformRoute
   ReportsRoute: typeof ReportsRoute
   SignupRoute: typeof SignupRouteWithChildren
@@ -1059,6 +1072,13 @@ declare module '@tanstack/react-router' {
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operations': {
+      id: '/operations'
+      path: '/operations'
+      fullPath: '/operations'
+      preLoaderRoute: typeof OperationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1137,6 +1157,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/platform-admin/account-requests'
       preLoaderRoute: typeof PlatformAdminAccountRequestsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/operations/health': {
+      id: '/operations/health'
+      path: '/health'
+      fullPath: '/operations/health'
+      preLoaderRoute: typeof OperationsHealthRouteImport
+      parentRoute: typeof OperationsRoute
     }
     '/legal/terms': {
       id: '/legal/terms'
@@ -1283,13 +1310,6 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/admin/notifications'
       preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/monitoring': {
-      id: '/admin/monitoring'
-      path: '/monitoring'
-      fullPath: '/admin/monitoring'
-      preLoaderRoute: typeof AdminMonitoringRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/master-data-schemas': {
@@ -1677,7 +1697,6 @@ interface AdminRouteChildren {
   AdminKnowledgeBaseRoute: typeof AdminKnowledgeBaseRoute
   AdminLocalizationRoute: typeof AdminLocalizationRoute
   AdminMasterDataSchemasRoute: typeof AdminMasterDataSchemasRoute
-  AdminMonitoringRoute: typeof AdminMonitoringRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPlatformAdministratorsRoute: typeof AdminPlatformAdministratorsRoute
   AdminPlatformHealthRoute: typeof AdminPlatformHealthRoute
@@ -1717,7 +1736,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKnowledgeBaseRoute: AdminKnowledgeBaseRoute,
   AdminLocalizationRoute: AdminLocalizationRoute,
   AdminMasterDataSchemasRoute: AdminMasterDataSchemasRoute,
-  AdminMonitoringRoute: AdminMonitoringRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPlatformAdministratorsRoute: AdminPlatformAdministratorsRoute,
   AdminPlatformHealthRoute: AdminPlatformHealthRoute,
@@ -1736,6 +1754,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface OperationsRouteChildren {
+  OperationsHealthRoute: typeof OperationsHealthRoute
+}
+
+const OperationsRouteChildren: OperationsRouteChildren = {
+  OperationsHealthRoute: OperationsHealthRoute,
+}
+
+const OperationsRouteWithChildren = OperationsRoute._addFileChildren(
+  OperationsRouteChildren,
+)
 
 interface SignupRouteChildren {
   SignupPendingApprovalRoute: typeof SignupPendingApprovalRoute
@@ -1757,6 +1787,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   EscalationsRoute: EscalationsRoute,
   LoginRoute: LoginRoute,
+  OperationsRoute: OperationsRouteWithChildren,
   PlatformRoute: PlatformRoute,
   ReportsRoute: ReportsRoute,
   SignupRoute: SignupRouteWithChildren,

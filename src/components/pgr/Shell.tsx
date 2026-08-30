@@ -47,7 +47,7 @@ const PRIMARY_NAV: NavItem[] = [
   { to: "/admin/communications",    labelCode: "Communications",         icon: FormInput },
   { to: "/admin/integrations",      labelCode: "Integrations",           icon: Plug },
   { to: "/admin/knowledge-base",    labelCode: "Knowledge Base",         icon: BookOpen },
-  { to: "/admin/monitoring",        labelCode: "Monitoring & Analytics", icon: BarChart3 },
+  { to: "/operations/health",       labelCode: "Health",                icon: BarChart3, requires: ["SYSTEM_HEALTH_VIEW"] },
   { to: "/admin/audit-log",         labelCode: "Audit",                  icon: ScrollText },
   { to: "/admin/settings",          labelCode: "Settings",               icon: Settings },
 ];

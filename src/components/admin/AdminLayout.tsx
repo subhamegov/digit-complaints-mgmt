@@ -14,6 +14,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import digitLogo from "@/assets/digit-logo.png.asset.json";
 import {
   Home,
+  Activity,
   Building2,
   Users,
   Server,
@@ -133,7 +134,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     icon: BarChart3,
     items: [
       { to: "/admin/knowledge-base",    labelCode: "ADMIN_NAV_KB",             label: "Knowledge Base", icon: BookOpen },
-      { to: "/admin/monitoring",        labelCode: "ADMIN_NAV_MONITORING",     label: "Monitoring",     icon: BarChart3 },
+      { to: "/operations/health",        labelCode: "ADMIN_NAV_HEALTH",         label: "Health",         icon: Activity, requires: ["SYSTEM_HEALTH_VIEW"] },
       { to: "/admin/audit-log",         labelCode: "ADMIN_NAV_AUDIT",          label: "Audit Log",      icon: ScrollText },
     ],
   },
