@@ -154,7 +154,7 @@ export function findAdminNavItem(pathname: string): AdminNavItem | undefined {
   if (pathname === ADMIN_NAV_HOME.to) return ADMIN_NAV_HOME;
   for (const section of ADMIN_NAV) {
     for (const item of section.items) {
-      if (item.to === pathname) return item;
+      if (item.to === pathname || isItemActive(item, pathname)) return item;
     }
   }
   return undefined;
