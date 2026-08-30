@@ -999,8 +999,6 @@ function UrlCard({ label, description, url }: { label: string; description: stri
 function StepUrls({
   urls,
   summary,
-  onBack,
-  onFinish,
 }: {
   urls: { employeeUrl: string; citizenUrl: string; adminUrl: string };
   summary: {
