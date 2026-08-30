@@ -10,7 +10,7 @@
  */
 
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import digitLogo from "@/assets/digit-logo.png.asset.json";
 import {
   Home,
@@ -44,6 +44,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   MapPin,
+  ChevronDown,
 } from "lucide-react";
 import {
   useRbac,
@@ -56,6 +57,7 @@ import {
 import { ContextCombobox } from "@/components/pgr/ContextCombobox";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useAccountFeatures } from "@/lib/account-features";
 
 /* ------------------------------------------------------------------ */
 /* Navigation registry                                                */
@@ -67,61 +69,117 @@ export type AdminNavItem = {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   requires?: Permission[];
+  /** Extra route prefixes that should mark this item active. */
+  matches?: string[];
+  /** Optional account capability flag gating visibility. */
+  feature?: "projects_enabled";
 };
 
 export type AdminNavSection = {
   titleCode: string;
   title: string;
+  icon: React.ComponentType<{ className?: string }>;
   items: AdminNavItem[];
+};
+
+/** Level 1 direct link (no children). */
+export const ADMIN_NAV_HOME: AdminNavItem = {
+  to: "/admin/home",
+  labelCode: "ADMIN_NAV_HOME",
+  label: "Home",
+  icon: Home,
 };
 
 export const ADMIN_NAV: AdminNavSection[] = [
   {
-    titleCode: "ADMIN_SECTION_CONSOLE",
-    title: "Console",
+    titleCode: "ADMIN_SECTION_PEOPLE",
+    title: "People & Access",
+    icon: Users,
     items: [
-      { to: "/admin/home",               labelCode: "ADMIN_NAV_HOME",                label: "Home",                    icon: Home },
-      { to: "/admin/dashboards",         labelCode: "ADMIN_NAV_DASHBOARDS",          label: "Dashboards",              icon: LayoutDashboard },
-      { to: "/admin/users",              labelCode: "ADMIN_NAV_USERS",               label: "Users",                   icon: Users },
-      { to: "/admin/roles",              labelCode: "ADMIN_NAV_ROLES",               label: "Roles & Permissions",     icon: ShieldCheck },
-      { to: "/admin/complaints-config",  labelCode: "ADMIN_NAV_COMPLAINTS",          label: "Complaints",              icon: Inbox },
-      { to: "/admin/workflow-config",                labelCode: "ADMIN_NAV_WORKFLOW",           label: "Workflow Configuration",       icon: GitBranch },
-      { to: "/admin/workflow-config/visualization",  labelCode: "ADMIN_NAV_WORKFLOW_VIS",       label: "  └  Workflow Visualization",  icon: GitBranch },
-      { to: "/admin/workflow-config/sla-maps",       labelCode: "ADMIN_NAV_WORKFLOW_SLA",       label: "  └  SLA Maps",                icon: Gauge },
-      { to: "/admin/workflow-config/role-hierarchy", labelCode: "ADMIN_NAV_WORKFLOW_HIERARCHY", label: "  └  Role Hierarchy",          icon: ShieldCheck },
+      { to: "/admin/users",             labelCode: "ADMIN_NAV_USERS",          label: "Users",               icon: Users },
+      { to: "/admin/roles",             labelCode: "ADMIN_NAV_ROLES",          label: "Roles & Permissions", icon: ShieldCheck, matches: ["/admin/workflow-config/role-hierarchy"] },
+      { to: "/admin/authentication",    labelCode: "ADMIN_NAV_AUTHENTICATION", label: "Authentication",      icon: KeyRound },
+    ],
+  },
+  {
+    titleCode: "ADMIN_SECTION_TEMPLATE_CONFIG",
+    title: "Template Configuration",
+    icon: LayoutTemplate,
+    items: [
+      { to: "/admin/dashboards",        labelCode: "ADMIN_NAV_DASHBOARDS",     label: "Dashboards",                icon: LayoutDashboard },
+      { to: "/admin/templates",         labelCode: "ADMIN_NAV_TEMPLATES",      label: "Templates",                 icon: LayoutTemplate },
+      { to: "/admin/complaints-config", labelCode: "ADMIN_NAV_COMPLAINTS",     label: "Complaints",                icon: Inbox },
+      { to: "/admin/workflow-config",   labelCode: "ADMIN_NAV_WORKFLOW",       label: "Workflow",                  icon: GitBranch, matches: ["/admin/workflow-config/visualization"] },
+      { to: "/admin/workflow-config/sla-maps", labelCode: "ADMIN_NAV_SLA",     label: "SLA & Escalation",          icon: Gauge },
+      { to: "/admin/geographies",       labelCode: "ADMIN_NAV_GEOGRAPHIES",    label: "Geography & Jurisdictions", icon: MapPinned },
+      { to: "/admin/projects",          labelCode: "ADMIN_NAV_PROJECTS",       label: "Projects",                  icon: FileText, feature: "projects_enabled" },
     ],
   },
   {
     titleCode: "ADMIN_SECTION_CHANNELS",
     title: "Channels & Communications",
+    icon: Bell,
     items: [
-      { to: "/admin/sources",            labelCode: "ADMIN_NAV_SOURCES",             label: "Sources",                 icon: Globe2 },
-      { to: "/admin/channels",           labelCode: "ADMIN_NAV_CHANNELS",            label: "Channels",                icon: Bell },
-      { to: "/admin/communications",     labelCode: "ADMIN_NAV_COMMUNICATIONS",      label: "Communications",          icon: FormInput },
-      { to: "/admin/integrations",       labelCode: "ADMIN_NAV_INTEGRATIONS",        label: "Integrations",            icon: Plug },
+      { to: "/admin/sources",           labelCode: "ADMIN_NAV_SOURCES",        label: "Sources",       icon: Globe2 },
+      { to: "/admin/channels",          labelCode: "ADMIN_NAV_CHANNELS",       label: "Channels",      icon: Bell },
+      { to: "/admin/communications",    labelCode: "ADMIN_NAV_NOTIFICATIONS",  label: "Notifications", icon: FormInput },
+      { to: "/admin/integrations",      labelCode: "ADMIN_NAV_INTEGRATIONS",   label: "Integrations",  icon: Plug },
     ],
   },
   {
     titleCode: "ADMIN_SECTION_OPERATIONS",
     title: "Operations",
+    icon: BarChart3,
     items: [
-      { to: "/admin/knowledge-base",     labelCode: "ADMIN_NAV_KB",                  label: "Knowledge Base",          icon: BookOpen },
-      { to: "/admin/monitoring",         labelCode: "ADMIN_NAV_MONITORING",          label: "Monitoring & Analytics",  icon: BarChart3 },
-      { to: "/admin/audit-log",          labelCode: "ADMIN_NAV_AUDIT",               label: "Audit",                   icon: ScrollText },
-      { to: "/admin/settings",           labelCode: "ADMIN_NAV_SETTINGS",            label: "Settings",                icon: Settings },
+      { to: "/admin/knowledge-base",    labelCode: "ADMIN_NAV_KB",             label: "Knowledge Base", icon: BookOpen },
+      { to: "/admin/monitoring",        labelCode: "ADMIN_NAV_MONITORING",     label: "Monitoring",     icon: BarChart3 },
+      { to: "/admin/audit-log",         labelCode: "ADMIN_NAV_AUDIT",          label: "Audit Log",      icon: ScrollText },
+    ],
+  },
+  {
+    titleCode: "ADMIN_SECTION_ACCOUNT",
+    title: "Account",
+    icon: Settings,
+    items: [
+      { to: "/admin/settings",          labelCode: "ADMIN_NAV_ACCOUNT_SETTINGS", label: "Account Settings",       icon: Settings },
+      { to: "/admin/localization",      labelCode: "ADMIN_NAV_BRANDING",         label: "Branding & Localisation", icon: Languages },
+      { to: "/admin/data-export",       labelCode: "ADMIN_NAV_DATA_EXPORT",      label: "Data & Export",           icon: Database },
+      { to: "/admin/advanced-settings", labelCode: "ADMIN_NAV_ADVANCED",         label: "Advanced Settings",       icon: Lock },
     ],
   },
 ];
 
 /* Lookup helpers used by BlankAdminPage to derive a title from the route. */
 export function findAdminNavItem(pathname: string): AdminNavItem | undefined {
+  if (pathname === ADMIN_NAV_HOME.to) return ADMIN_NAV_HOME;
   for (const section of ADMIN_NAV) {
     for (const item of section.items) {
-      if (item.to === pathname) return item;
+      if (item.to === pathname || isItemActive(item, pathname)) return item;
     }
   }
   return undefined;
 }
+
+function isItemActive(item: AdminNavItem, pathname: string): boolean {
+  if (pathname === item.to) return true;
+  if (item.matches?.some((m) => pathname === m || pathname.startsWith(m + "/"))) return true;
+  // Nested index/detail routes (e.g. /admin/dashboards/xyz) keep the parent active,
+  // except where a sibling nav item owns a deeper path.
+  if (pathname.startsWith(item.to + "/")) {
+    const owned = ADMIN_NAV.flatMap((s) => s.items).some(
+      (other) =>
+        other.to !== item.to &&
+        other.to.startsWith(item.to + "/") &&
+        (pathname === other.to || pathname.startsWith(other.to + "/")),
+    );
+    const claimed = ADMIN_NAV.flatMap((s) => s.items).some((other) =>
+      other.matches?.some((m) => pathname === m || pathname.startsWith(m + "/")),
+    );
+    return !owned && !claimed;
+  }
+  return false;
+}
+
 
 /* ------------------------------------------------------------------ */
 /* Sidebar primitives                                                 */
@@ -131,10 +189,12 @@ export function SidebarItem({
   item,
   active,
   onNavigate,
+  indented = false,
 }: {
   item: AdminNavItem;
   active: boolean;
   onNavigate?: () => void;
+  indented?: boolean;
 }) {
   const Icon = item.icon;
   return (
@@ -142,7 +202,8 @@ export function SidebarItem({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "group flex items-center gap-2.5 border-l-2 px-2.5 py-1.5 text-[13px] transition-colors",
+        "group flex items-center gap-2.5 border-l-2 py-1.5 text-[13px] transition-colors",
+        indented ? "pl-8 pr-2.5" : "px-2.5",
         active
           ? "border-transparent bg-[#2563EB] font-medium text-white [&_svg]:text-white"
           : "border-transparent text-[#CBD5E1] [&_svg]:text-[#94A3B8] hover:bg-[#2563EB]/[0.12] hover:text-white",
@@ -157,32 +218,54 @@ export function SidebarItem({
 export function SidebarSection({
   section,
   pathname,
+  expanded,
+  onToggle,
   onNavigate,
 }: {
   section: AdminNavSection;
   pathname: string;
+  expanded: boolean;
+  onToggle: () => void;
   onNavigate?: () => void;
 }) {
   const { hasAnyPermission } = useRbac();
+  const { projects_enabled } = useAccountFeatures();
   const items = section.items.filter(
-    (i) => !i.requires || hasAnyPermission(i.requires),
+    (i) => (!i.requires || hasAnyPermission(i.requires)) &&
+      (!i.feature || (i.feature === "projects_enabled" && projects_enabled)),
   );
   if (items.length === 0) return null;
+  const active = items.some((item) => isItemActive(item, pathname));
   return (
-    <div className="mb-3">
-      <div className="px-2.5 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-[#93A4BC]">
-        {t(section.titleCode, section.title)}
-      </div>
-      <div className="space-y-0.5">
-        {items.map((item) => (
-          <SidebarItem
-            key={item.to}
-            item={item}
-            active={pathname === item.to}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </div>
+    <div className="mb-1">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className={cn(
+          "group flex w-full items-center gap-2.5 border-l-2 px-2.5 py-2 text-left text-[13px] font-medium transition-colors",
+          active
+            ? "border-transparent bg-[#2563EB]/[0.16] text-white [&_svg]:text-white"
+            : "border-transparent text-[#CBD5E1] hover:bg-[#2563EB]/[0.12] hover:text-white",
+        )}
+      >
+        <section.icon className="h-4 w-4 shrink-0 text-[#94A3B8]" />
+        <span className="min-w-0 flex-1 truncate">{t(section.titleCode, section.title)}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-[#94A3B8] transition-transform", expanded && "rotate-180")} />
+      </button>
+      {expanded && (
+        <div className="mt-0.5 space-y-0.5">
+          {items.map((item) => (
+            <SidebarItem
+              key={item.to}
+              item={item}
+              active={isItemActive(item, pathname)}
+              indented
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -194,13 +277,28 @@ export function SidebarNavigation({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const activeSection = ADMIN_NAV.findIndex((section) =>
+    section.items.some((item) => isItemActive(item, pathname)),
+  );
+  const [expandedIndex, setExpandedIndex] = useState(activeSection >= 0 ? activeSection : 0);
+  const visibleSections = ADMIN_NAV;
+
+  useEffect(() => {
+    if (activeSection >= 0) setExpandedIndex(activeSection);
+  }, [activeSection]);
+
   return (
     <nav className="flex-1 overflow-y-auto px-2 py-3">
-      {ADMIN_NAV.map((section) => (
+      <div className="mb-1">
+        <SidebarItem item={ADMIN_NAV_HOME} active={isItemActive(ADMIN_NAV_HOME, pathname)} onNavigate={onNavigate} />
+      </div>
+      {visibleSections.map((section, index) => (
         <SidebarSection
           key={section.titleCode}
           section={section}
           pathname={pathname}
+          expanded={expandedIndex === index}
+          onToggle={() => setExpandedIndex(expandedIndex === index ? -1 : index)}
           onNavigate={onNavigate}
         />
       ))}
@@ -247,13 +345,15 @@ function SidebarShell({
           options={JURISDICTIONS.map((j) => ({ value: j.code, label: j.name, hint: j.code }))}
           onChange={(v) => setJurisdiction(JURISDICTIONS.find((j) => j.code === v)!)}
         />
-        <ContextCombobox
-          icon={ShieldCheck}
-          label={t("COMMON_ROLE")}
-          value={role}
-          options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
-          onChange={(v) => setRole(v as Role)}
-        />
+        {role !== "ACCOUNT_ADMIN" && (
+          <ContextCombobox
+            icon={ShieldCheck}
+            label={t("COMMON_ROLE")}
+            value={role}
+            options={(Object.keys(ROLE_LABEL) as Role[]).map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
+            onChange={(v) => setRole(v as Role)}
+          />
+        )}
       </div>
       <SidebarNavigation pathname={pathname} onNavigate={onNavigate} />
 

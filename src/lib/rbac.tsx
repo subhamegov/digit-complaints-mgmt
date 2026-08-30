@@ -244,7 +244,9 @@ export function RbacProvider({ children }: { children: ReactNode }) {
     if (persisted.role) setRoleState(persisted.role as Role);
     const t = TENANTS.find((x) => x.code === persisted.tenantCode);
     if (t) setTenantState(t);
-    const j = JURISDICTIONS.find((x) => x.code === persisted.jurisdictionCode);
+    const j = persisted.role === "ACCOUNT_ADMIN"
+      ? JURISDICTIONS.find((x) => x.code === "ALL")
+      : JURISDICTIONS.find((x) => x.code === persisted.jurisdictionCode);
     if (j) setJurisdictionState(j);
   }, []);
 
@@ -264,7 +266,16 @@ export function RbacProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setRole = (r: Role) => { setRoleState(r); persist({ role: r }); };
+  const setRole = (r: Role) => {
+    setRoleState(r);
+    if (r === "ACCOUNT_ADMIN") {
+      const allLocalities = JURISDICTIONS.find((j) => j.code === "ALL");
+      if (allLocalities) setJurisdictionState(allLocalities);
+      persist({ role: r, jurisdiction: allLocalities });
+      return;
+    }
+    persist({ role: r });
+  };
   const setTenant = (t: Tenant) => { setTenantState(t); persist({ tenant: t }); };
   const setJurisdiction = (j: Jurisdiction) => { setJurisdictionState(j); persist({ jurisdiction: j }); };
 
