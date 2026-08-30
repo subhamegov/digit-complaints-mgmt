@@ -89,11 +89,28 @@ function TemplatesPage() {
               </div>
               <Switch
                 checked={projects_enabled}
-                onCheckedChange={(checked) => setFeature("projects_enabled", checked)}
+                onCheckedChange={(checked) => {
+                  if (checked) setFeature("projects_enabled", true);
+                  else setConfirmDisable(true);
+                }}
                 aria-label="Enable Projects"
               />
             </div>
             <p className="mt-3 text-[11.5px] text-muted-foreground">Project configuration and historical data are retained when this capability is turned off.</p>
+            <AlertDialog open={confirmDisable} onOpenChange={setConfirmDisable}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Turn off Projects?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Projects will no longer be available for configuration or normal use. Existing project data will be retained and will become available again if Projects is turned back on.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => setFeature("projects_enabled", false)}>Turn off Projects</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </section>
       </div>
