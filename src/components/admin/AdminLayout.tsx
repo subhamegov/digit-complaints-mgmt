@@ -134,6 +134,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     icon: BarChart3,
     items: [
       { to: "/admin/knowledge-base",    labelCode: "ADMIN_NAV_KB",             label: "Knowledge Base", icon: BookOpen },
+      { to: "/admin/localization",      labelCode: "ADMIN_NAV_LOCALISATION",   label: "Localisation",   icon: Languages },
       { to: "/operations/health",        labelCode: "ADMIN_NAV_HEALTH",         label: "Health",         icon: Activity, requires: ["SYSTEM_HEALTH_VIEW"] },
       { to: "/admin/audit-log",         labelCode: "ADMIN_NAV_AUDIT",          label: "Audit Log",      icon: ScrollText },
     ],
@@ -145,7 +146,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
     items: [
       { to: "/admin/settings",          labelCode: "ADMIN_NAV_ACCOUNT_SETTINGS", label: "Account Settings",       icon: Settings },
       { to: "/admin/branding",          labelCode: "ADMIN_NAV_BRANDING",         label: "Branding",                icon: LayoutTemplate },
-      { to: "/admin/localization",      labelCode: "ADMIN_NAV_LOCALISATION",     label: "Localisation",            icon: Languages },
+      { to: "/admin/data-export",       labelCode: "ADMIN_NAV_DATA_EXPORT",      label: "Data & Export",           icon: Database },
       { to: "/admin/data-export",       labelCode: "ADMIN_NAV_DATA_EXPORT",      label: "Data & Export",           icon: Database },
       { to: "/admin/advanced-settings", labelCode: "ADMIN_NAV_ADVANCED",         label: "Advanced Settings",       icon: Lock },
     ],
