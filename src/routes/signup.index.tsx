@@ -5,6 +5,7 @@ import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
+import { SIGNUP_INITIATION_KEY, type SignupInitiationState } from "@/lib/signup-flow";
 import { submitAccountRequest } from "@/lib/account-requests";
 import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
@@ -28,7 +29,7 @@ import {
   urlsFor,
 } from "@/lib/org-setup";
 
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute("/signup/")({
   head: () => ({
     meta: [
       { title: "Set Up Your Account - DIGIT Complaint Management" },
@@ -124,7 +125,9 @@ const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto"
 function SignupPage() {
   const navigate = useNavigate();
   const search = useRouterState({ select: (state) => state.location.search });
-  const approvalFlow = new URLSearchParams(search).get("flow") === "approval";
+  const approvalFlowFromSearch = new URLSearchParams(search).get("flow") === "approval";
+  const [initiatedApprovalFlow, setInitiatedApprovalFlow] = useState(false);
+  const approvalFlow = approvalFlowFromSearch || initiatedApprovalFlow;
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
@@ -181,6 +184,28 @@ function SignupPage() {
         if (d.terms) setTerms(true);
       } catch {
         /* ignore */
+      }
+    }
+
+    const initiatedRaw = window.sessionStorage.getItem(SIGNUP_INITIATION_KEY);
+    if (initiatedRaw) {
+      try {
+        const initiated = JSON.parse(initiatedRaw) as SignupInitiationState;
+        setEmail(initiated.email);
+        setFirstName(initiated.firstName);
+        setLastName(initiated.lastName);
+        setOrganisationName(initiated.organisationName);
+        setOrganisationCode(initiated.organisationCode);
+        setBaseCountry(initiated.baseCountry);
+        setLanguages(initiated.languages);
+        setTimezone(initiated.timezone);
+        setFinancialYearStart(initiated.financialYearStart);
+        setOrgSlug(initiated.orgSlug);
+        setInitiatedApprovalFlow(initiated.approvalFlow);
+        setStep(2);
+        window.sessionStorage.removeItem(SIGNUP_INITIATION_KEY);
+      } catch {
+        window.sessionStorage.removeItem(SIGNUP_INITIATION_KEY);
       }
     }
     hydrated.current = true;
@@ -505,13 +530,30 @@ function SignupPage() {
               slugStatus,
               slugSuggestion,
               codeUpdatedNotice,
-              organisationCode,
-              step2Valid,
-              onBack: () => setStep(0),
-              onContinue: () => {
-                saveDraft();
-                setStep(2);
-              },
+               organisationCode,
+               step2Valid,
+               onBack: () => setStep(0),
+               onContinue: () => {
+                 if (!step2Valid) return;
+                 saveDraft();
+                 window.sessionStorage.setItem(
+                   SIGNUP_INITIATION_KEY,
+                   JSON.stringify({
+                     email,
+                     firstName,
+                     lastName,
+                     organisationName,
+                     organisationCode,
+                     baseCountry,
+                     languages,
+                     timezone,
+                     financialYearStart,
+                     orgSlug,
+                     approvalFlow,
+                   } satisfies SignupInitiationState),
+                 );
+                 navigate({ to: "/signup/initiating", search: {} });
+               },
             }}
           />
         )}
@@ -1019,17 +1061,17 @@ function StepUrls({
 
    return (
      <div>
-       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
+       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Account creation initiated</h1>
        <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-         These will be the main entry points for your account once your workspace has been set up.
+         Your account details have been submitted and workspace setup is now in progress.
       </p>
 
       <div className="mt-5 flex items-start gap-2.5 rounded-md px-3 py-2.5" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#2D4FC4" }} />
         <div>
-          <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Ready to create</div>
+          <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Workspace setup in progress</div>
           <div style={{ color: "#5E6675", fontSize: 12.5, lineHeight: 1.5 }}>
-            Workspace setup usually takes 10 to 15 minutes. We will inform you by email as soon as it is done.
+            Setup usually takes 10 to 15 minutes. We will inform you by email when it is done.
           </div>
         </div>
       </div>
