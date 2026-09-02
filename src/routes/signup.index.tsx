@@ -28,7 +28,7 @@ import {
   urlsFor,
 } from "@/lib/org-setup";
 
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute("/signup/")({
   head: () => ({
     meta: [
       { title: "Set Up Your Account - DIGIT Complaint Management" },
