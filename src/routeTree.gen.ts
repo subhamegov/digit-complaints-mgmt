@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SlaRouteImport } from './routes/sla'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as OperationsRouteImport } from './routes/operations'
@@ -22,9 +21,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignupIndexRouteImport } from './routes/signup.index'
 import { Route as InboxIndexRouteImport } from './routes/inbox.index'
 import { Route as SignupProvisioningRouteImport } from './routes/signup.provisioning'
 import { Route as SignupPendingApprovalRouteImport } from './routes/signup.pending-approval'
+import { Route as SignupInitiatingRouteImport } from './routes/signup.initiating'
 import { Route as SetupOrganisationRouteImport } from './routes/setup.organisation'
 import { Route as PlatformAdminAccountRequestsRouteImport } from './routes/platform-admin.account-requests'
 import { Route as OperationsHealthRouteImport } from './routes/operations.health'
@@ -106,11 +107,6 @@ const SlaRoute = SlaRouteImport.update({
   path: '/sla',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -156,20 +152,30 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupIndexRoute = SignupIndexRouteImport.update({
+  id: '/signup/',
+  path: '/signup/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InboxIndexRoute = InboxIndexRouteImport.update({
   id: '/inbox/',
   path: '/inbox/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupProvisioningRoute = SignupProvisioningRouteImport.update({
-  id: '/provisioning',
-  path: '/provisioning',
-  getParentRoute: () => SignupRoute,
+  id: '/signup/provisioning',
+  path: '/signup/provisioning',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SignupPendingApprovalRoute = SignupPendingApprovalRouteImport.update({
-  id: '/pending-approval',
-  path: '/pending-approval',
-  getParentRoute: () => SignupRoute,
+  id: '/signup/pending-approval',
+  path: '/signup/pending-approval',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupInitiatingRoute = SignupInitiatingRouteImport.update({
+  id: '/signup/initiating',
+  path: '/signup/initiating',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SetupOrganisationRoute = SetupOrganisationRouteImport.update({
   id: '/setup/organisation',
@@ -518,7 +524,6 @@ export interface FileRoutesByFullPath {
   '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -568,9 +573,11 @@ export interface FileRoutesByFullPath {
   '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/initiating': typeof SignupInitiatingRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
+  '/signup/': typeof SignupIndexRoute
   '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
   '/admin/branding/logo': typeof AdminBrandingLogoRoute
   '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
@@ -601,7 +608,6 @@ export interface FileRoutesByTo {
   '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -647,9 +653,11 @@ export interface FileRoutesByTo {
   '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/initiating': typeof SignupInitiatingRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox': typeof InboxIndexRoute
+  '/signup': typeof SignupIndexRoute
   '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
   '/admin/branding/logo': typeof AdminBrandingLogoRoute
   '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
@@ -681,7 +689,6 @@ export interface FileRoutesById {
   '/operations': typeof OperationsRouteWithChildren
   '/platform': typeof PlatformRoute
   '/reports': typeof ReportsRoute
-  '/signup': typeof SignupRouteWithChildren
   '/sla': typeof SlaRoute
   '/tasks': typeof TasksRoute
   '/users': typeof UsersRoute
@@ -731,9 +738,11 @@ export interface FileRoutesById {
   '/operations/health': typeof OperationsHealthRoute
   '/platform-admin/account-requests': typeof PlatformAdminAccountRequestsRoute
   '/setup/organisation': typeof SetupOrganisationRoute
+  '/signup/initiating': typeof SignupInitiatingRoute
   '/signup/pending-approval': typeof SignupPendingApprovalRoute
   '/signup/provisioning': typeof SignupProvisioningRoute
   '/inbox/': typeof InboxIndexRoute
+  '/signup/': typeof SignupIndexRoute
   '/admin/branding/citizen-landing': typeof AdminBrandingCitizenLandingRoute
   '/admin/branding/logo': typeof AdminBrandingLogoRoute
   '/admin/branding/sign-in': typeof AdminBrandingSignInRoute
@@ -766,7 +775,6 @@ export interface FileRouteTypes {
     | '/operations'
     | '/platform'
     | '/reports'
-    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -816,9 +824,11 @@ export interface FileRouteTypes {
     | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
+    | '/signup/initiating'
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
+    | '/signup/'
     | '/admin/branding/citizen-landing'
     | '/admin/branding/logo'
     | '/admin/branding/sign-in'
@@ -849,7 +859,6 @@ export interface FileRouteTypes {
     | '/operations'
     | '/platform'
     | '/reports'
-    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -895,9 +904,11 @@ export interface FileRouteTypes {
     | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
+    | '/signup/initiating'
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox'
+    | '/signup'
     | '/admin/branding/citizen-landing'
     | '/admin/branding/logo'
     | '/admin/branding/sign-in'
@@ -928,7 +939,6 @@ export interface FileRouteTypes {
     | '/operations'
     | '/platform'
     | '/reports'
-    | '/signup'
     | '/sla'
     | '/tasks'
     | '/users'
@@ -978,9 +988,11 @@ export interface FileRouteTypes {
     | '/operations/health'
     | '/platform-admin/account-requests'
     | '/setup/organisation'
+    | '/signup/initiating'
     | '/signup/pending-approval'
     | '/signup/provisioning'
     | '/inbox/'
+    | '/signup/'
     | '/admin/branding/citizen-landing'
     | '/admin/branding/logo'
     | '/admin/branding/sign-in'
@@ -1012,7 +1024,6 @@ export interface RootRouteChildren {
   OperationsRoute: typeof OperationsRouteWithChildren
   PlatformRoute: typeof PlatformRoute
   ReportsRoute: typeof ReportsRoute
-  SignupRoute: typeof SignupRouteWithChildren
   SlaRoute: typeof SlaRoute
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
@@ -1027,7 +1038,11 @@ export interface RootRouteChildren {
   LegalTermsRoute: typeof LegalTermsRoute
   PlatformAdminAccountRequestsRoute: typeof PlatformAdminAccountRequestsRoute
   SetupOrganisationRoute: typeof SetupOrganisationRoute
+  SignupInitiatingRoute: typeof SignupInitiatingRoute
+  SignupPendingApprovalRoute: typeof SignupPendingApprovalRoute
+  SignupProvisioningRoute: typeof SignupProvisioningRoute
   InboxIndexRoute: typeof InboxIndexRoute
+  SignupIndexRoute: typeof SignupIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1051,13 +1066,6 @@ declare module '@tanstack/react-router' {
       path: '/sla'
       fullPath: '/sla'
       preLoaderRoute: typeof SlaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -1123,6 +1131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup/': {
+      id: '/signup/'
+      path: '/signup'
+      fullPath: '/signup/'
+      preLoaderRoute: typeof SignupIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inbox/': {
       id: '/inbox/'
       path: '/inbox'
@@ -1132,17 +1147,24 @@ declare module '@tanstack/react-router' {
     }
     '/signup/provisioning': {
       id: '/signup/provisioning'
-      path: '/provisioning'
+      path: '/signup/provisioning'
       fullPath: '/signup/provisioning'
       preLoaderRoute: typeof SignupProvisioningRouteImport
-      parentRoute: typeof SignupRoute
+      parentRoute: typeof rootRouteImport
     }
     '/signup/pending-approval': {
       id: '/signup/pending-approval'
-      path: '/pending-approval'
+      path: '/signup/pending-approval'
       fullPath: '/signup/pending-approval'
       preLoaderRoute: typeof SignupPendingApprovalRouteImport
-      parentRoute: typeof SignupRoute
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup/initiating': {
+      id: '/signup/initiating'
+      path: '/signup/initiating'
+      fullPath: '/signup/initiating'
+      preLoaderRoute: typeof SignupInitiatingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/setup/organisation': {
       id: '/setup/organisation'
@@ -1767,19 +1789,6 @@ const OperationsRouteWithChildren = OperationsRoute._addFileChildren(
   OperationsRouteChildren,
 )
 
-interface SignupRouteChildren {
-  SignupPendingApprovalRoute: typeof SignupPendingApprovalRoute
-  SignupProvisioningRoute: typeof SignupProvisioningRoute
-}
-
-const SignupRouteChildren: SignupRouteChildren = {
-  SignupPendingApprovalRoute: SignupPendingApprovalRoute,
-  SignupProvisioningRoute: SignupProvisioningRoute,
-}
-
-const SignupRouteWithChildren =
-  SignupRoute._addFileChildren(SignupRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -1790,7 +1799,6 @@ const rootRouteChildren: RootRouteChildren = {
   OperationsRoute: OperationsRouteWithChildren,
   PlatformRoute: PlatformRoute,
   ReportsRoute: ReportsRoute,
-  SignupRoute: SignupRouteWithChildren,
   SlaRoute: SlaRoute,
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
@@ -1805,7 +1813,11 @@ const rootRouteChildren: RootRouteChildren = {
   LegalTermsRoute: LegalTermsRoute,
   PlatformAdminAccountRequestsRoute: PlatformAdminAccountRequestsRoute,
   SetupOrganisationRoute: SetupOrganisationRoute,
+  SignupInitiatingRoute: SignupInitiatingRoute,
+  SignupPendingApprovalRoute: SignupPendingApprovalRoute,
+  SignupProvisioningRoute: SignupProvisioningRoute,
   InboxIndexRoute: InboxIndexRoute,
+  SignupIndexRoute: SignupIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
