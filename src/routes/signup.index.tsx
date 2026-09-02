@@ -125,7 +125,9 @@ const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto"
 function SignupPage() {
   const navigate = useNavigate();
   const search = useRouterState({ select: (state) => state.location.search });
-  const approvalFlow = new URLSearchParams(search).get("flow") === "approval";
+  const approvalFlowFromSearch = new URLSearchParams(search).get("flow") === "approval";
+  const [initiatedApprovalFlow, setInitiatedApprovalFlow] = useState(false);
+  const approvalFlow = approvalFlowFromSearch || initiatedApprovalFlow;
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [step, setStep] = useState(0);
 
