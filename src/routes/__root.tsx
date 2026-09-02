@@ -114,9 +114,7 @@ function AppLayout() {
   const isChromeless =
     pathname === "/login" ||
     pathname.endsWith("/login") ||
-     pathname === "/signup" ||
-     pathname === "/signup/provisioning" ||
-     pathname === "/signup/pending-approval" ||
+     pathname.startsWith("/signup") ||
 
      pathname === "/auth/google" ||
      pathname === "/auth/github" ||
