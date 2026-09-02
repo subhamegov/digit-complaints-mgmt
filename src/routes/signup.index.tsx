@@ -1061,17 +1061,17 @@ function StepUrls({
 
    return (
      <div>
-       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Review and create your account</h1>
+       <h1 style={{ color: "#17191F", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>Account creation initiated</h1>
        <p style={{ marginTop: 8, color: "#5E6675", fontSize: 14, lineHeight: 1.6 }}>
-         These will be the main entry points for your account once your workspace has been set up.
+         Your account details have been submitted and workspace setup is now in progress.
       </p>
 
       <div className="mt-5 flex items-start gap-2.5 rounded-md px-3 py-2.5" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#2D4FC4" }} />
         <div>
-          <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Ready to create</div>
+          <div style={{ color: "#17191F", fontSize: 13, fontWeight: 600 }}>Workspace setup in progress</div>
           <div style={{ color: "#5E6675", fontSize: 12.5, lineHeight: 1.5 }}>
-            Workspace setup usually takes 10 to 15 minutes. We will inform you by email as soon as it is done.
+            Setup usually takes 10 to 15 minutes. We will inform you by email when it is done.
           </div>
         </div>
       </div>
