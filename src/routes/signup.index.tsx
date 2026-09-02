@@ -528,13 +528,30 @@ function SignupPage() {
               slugStatus,
               slugSuggestion,
               codeUpdatedNotice,
-              organisationCode,
-              step2Valid,
-              onBack: () => setStep(0),
-              onContinue: () => {
-                saveDraft();
-                setStep(2);
-              },
+               organisationCode,
+               step2Valid,
+               onBack: () => setStep(0),
+               onContinue: () => {
+                 if (!step2Valid) return;
+                 saveDraft();
+                 window.sessionStorage.setItem(
+                   SIGNUP_INITIATION_KEY,
+                   JSON.stringify({
+                     email,
+                     firstName,
+                     lastName,
+                     organisationName,
+                     organisationCode,
+                     baseCountry,
+                     languages,
+                     timezone,
+                     financialYearStart,
+                     orgSlug,
+                     approvalFlow,
+                   } satisfies SignupInitiationState),
+                 );
+                 navigate({ to: "/signup/initiating", search: {} });
+               },
             }}
           />
         )}
