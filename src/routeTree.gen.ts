@@ -163,14 +163,14 @@ const InboxIndexRoute = InboxIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupProvisioningRoute = SignupProvisioningRouteImport.update({
-  id: '/provisioning',
-  path: '/provisioning',
-  getParentRoute: () => SignupRoute,
+  id: '/signup/provisioning',
+  path: '/signup/provisioning',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SignupPendingApprovalRoute = SignupPendingApprovalRouteImport.update({
-  id: '/pending-approval',
-  path: '/pending-approval',
-  getParentRoute: () => SignupRoute,
+  id: '/signup/pending-approval',
+  path: '/signup/pending-approval',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SignupInitiatingRoute = SignupInitiatingRouteImport.update({
   id: '/signup/initiating',
@@ -1039,6 +1039,8 @@ export interface RootRouteChildren {
   PlatformAdminAccountRequestsRoute: typeof PlatformAdminAccountRequestsRoute
   SetupOrganisationRoute: typeof SetupOrganisationRoute
   SignupInitiatingRoute: typeof SignupInitiatingRoute
+  SignupPendingApprovalRoute: typeof SignupPendingApprovalRoute
+  SignupProvisioningRoute: typeof SignupProvisioningRoute
   InboxIndexRoute: typeof InboxIndexRoute
   SignupIndexRoute: typeof SignupIndexRoute
 }
@@ -1145,17 +1147,17 @@ declare module '@tanstack/react-router' {
     }
     '/signup/provisioning': {
       id: '/signup/provisioning'
-      path: '/provisioning'
+      path: '/signup/provisioning'
       fullPath: '/signup/provisioning'
       preLoaderRoute: typeof SignupProvisioningRouteImport
-      parentRoute: typeof SignupRoute
+      parentRoute: typeof rootRouteImport
     }
     '/signup/pending-approval': {
       id: '/signup/pending-approval'
-      path: '/pending-approval'
+      path: '/signup/pending-approval'
       fullPath: '/signup/pending-approval'
       preLoaderRoute: typeof SignupPendingApprovalRouteImport
-      parentRoute: typeof SignupRoute
+      parentRoute: typeof rootRouteImport
     }
     '/signup/initiating': {
       id: '/signup/initiating'
@@ -1812,6 +1814,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAdminAccountRequestsRoute: PlatformAdminAccountRequestsRoute,
   SetupOrganisationRoute: SetupOrganisationRoute,
   SignupInitiatingRoute: SignupInitiatingRoute,
+  SignupPendingApprovalRoute: SignupPendingApprovalRoute,
+  SignupProvisioningRoute: SignupProvisioningRoute,
   InboxIndexRoute: InboxIndexRoute,
   SignupIndexRoute: SignupIndexRoute,
 }
