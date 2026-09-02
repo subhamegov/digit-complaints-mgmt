@@ -183,6 +183,28 @@ function SignupPage() {
         /* ignore */
       }
     }
+
+    const initiatedRaw = window.sessionStorage.getItem(SIGNUP_INITIATION_KEY);
+    if (initiatedRaw) {
+      try {
+        const initiated = JSON.parse(initiatedRaw) as SignupInitiationState;
+        setEmail(initiated.email);
+        setFirstName(initiated.firstName);
+        setLastName(initiated.lastName);
+        setOrganisationName(initiated.organisationName);
+        setOrganisationCode(initiated.organisationCode);
+        setBaseCountry(initiated.baseCountry);
+        setLanguages(initiated.languages);
+        setTimezone(initiated.timezone);
+        setFinancialYearStart(initiated.financialYearStart);
+        setOrgSlug(initiated.orgSlug);
+        setInitiatedApprovalFlow(initiated.approvalFlow);
+        setStep(2);
+        window.sessionStorage.removeItem(SIGNUP_INITIATION_KEY);
+      } catch {
+        window.sessionStorage.removeItem(SIGNUP_INITIATION_KEY);
+      }
+    }
     hydrated.current = true;
   }, []);
 
