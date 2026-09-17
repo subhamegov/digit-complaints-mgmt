@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
+import eGovLogoAsset from "@/assets/egov-foundation-white.png.asset.json";
 import loginVideoAsset from "@/assets/login-bg.mp4.asset.json";
 import loginPosterAsset from "@/assets/login-poster.jpg.asset.json";
 import { LanguagePicker } from "@/components/LanguagePicker";
