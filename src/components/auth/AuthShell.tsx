@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
+import eGovLogoAsset from "@/assets/egov-foundation-white.png.asset.json";
 import loginVideoAsset from "@/assets/login-bg.mp4.asset.json";
 import loginPosterAsset from "@/assets/login-poster.jpg.asset.json";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import type { LanguageCode } from "@/lib/accounts";
 
 /** Shared dark treatment so poster, video and gradient fallback read identically. */
-const OVERLAY =
-  "linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%)";
+const OVERLAY_BASE = "rgba(8, 20, 48, 0.30)";
+const OVERLAY_DIRECTIONAL =
+  "linear-gradient(90deg, rgba(5,18,45,0.58) 0%, rgba(8,25,60,0.34) 35%, rgba(8,25,60,0.18) 70%, rgba(8,25,60,0.12) 100%)";
+const OVERLAY_VERTICAL =
+  "linear-gradient(180deg, rgba(8,20,48,0.10) 0%, rgba(8,20,48,0.10) 55%, rgba(6,14,40,0.55) 100%)";
 
 /** Fallback used before the poster paints and if the poster itself fails. */
 const GRADIENT_FALLBACK =
@@ -64,7 +67,30 @@ function AuthBackdrop() {
           style={{ opacity: videoReady ? 1 : 0, transition: "opacity 400ms ease" }}
         />
       )}
-      <div className="absolute inset-0" style={{ background: OVERLAY }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_BASE }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_DIRECTIONAL }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_VERTICAL }} />
+      {/* Very slow, very faint drift so the scene stays alive even in still frames. */}
+      <div
+        className="auth-backdrop-drift absolute"
+        style={{
+          inset: "-25%",
+          background:
+            "radial-gradient(45% 45% at 30% 35%, rgba(53,91,224,0.22) 0%, rgba(53,91,224,0) 70%)," +
+            "radial-gradient(40% 40% at 70% 70%, rgba(94,140,255,0.16) 0%, rgba(94,140,255,0) 70%)",
+        }}
+      />
+      <style>{`
+        @keyframes authBackdropDrift {
+          0%   { transform: translate3d(0,0,0) scale(1); }
+          50%  { transform: translate3d(2.5%, -2%, 0) scale(1.05); }
+          100% { transform: translate3d(0,0,0) scale(1); }
+        }
+        .auth-backdrop-drift { animation: authBackdropDrift 46s ease-in-out infinite; will-change: transform; }
+        @media (prefers-reduced-motion: reduce) {
+          .auth-backdrop-drift { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -153,19 +179,26 @@ export function AuthShell({
         {/* Identity / media column */}
         <div className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex">
           <AuthBackdrop />
-          <div style={{ position: "absolute", top: 28, left: 28, right: 28, zIndex: 1 }}>
+          {/* Brand mark belongs to the shell, not the auth form: fixed within the visual column. */}
+          <div className="auth-brand-mark absolute z-[2]">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open DIGIT Complaint Management landing page in a new tab"
-              className="inline-block rounded-md px-2.5 py-1.5 transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40"
-              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
+              className="inline-block transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40"
             >
-              <img src={eGovLogoAsset.url} alt="eGov Foundation" style={{ height: 36, width: "auto", display: "block" }} />
+              <img
+                src={eGovLogoAsset.url}
+                alt="eGov Foundation"
+                className="auth-brand-logo"
+                style={{ height: "auto", display: "block", filter: "drop-shadow(0 2px 10px rgba(4,12,34,0.35))" }}
+              />
             </a>
+          </div>
 
-            <div style={{ marginTop: 18 }}>
+          <div style={{ position: "absolute", top: 110, left: 40, right: 28, zIndex: 1 }}>
+            <div>
               <div style={{ color: "#FFFFFF", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
                 DIGIT Complaint Management
               </div>
@@ -184,7 +217,7 @@ export function AuthShell({
           </div>
 
           <div />
-          <div style={{ padding: "0 28px 28px 28px", maxWidth: 416, position: "relative", zIndex: 1 }}>
+          <div style={{ padding: "0 28px 28px 40px", maxWidth: 428, position: "relative", zIndex: 1 }}>
             <h1
               style={{
                 color: "#FFFFFF",
@@ -219,6 +252,16 @@ export function AuthShell({
       </div>
 
       <style>{`
+        .auth-brand-mark { top: 20px; left: 20px; }
+        .auth-brand-logo { width: 140px; }
+        @media (min-width: 768px) {
+          .auth-brand-mark { top: 28px; left: 28px; }
+          .auth-brand-logo { width: 160px; }
+        }
+        @media (min-width: 1024px) {
+          .auth-brand-mark { top: 36px; left: 40px; }
+          .auth-brand-logo { width: 180px; }
+        }
         .login-input::placeholder { color: #8A90A2; }
         .login-input:focus {
           border-color: #355BE0 !important;
