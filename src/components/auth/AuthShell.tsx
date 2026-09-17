@@ -67,7 +67,30 @@ function AuthBackdrop() {
           style={{ opacity: videoReady ? 1 : 0, transition: "opacity 400ms ease" }}
         />
       )}
-      <div className="absolute inset-0" style={{ background: OVERLAY }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_BASE }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_DIRECTIONAL }} />
+      <div className="absolute inset-0" style={{ background: OVERLAY_VERTICAL }} />
+      {/* Very slow, very faint drift so the scene stays alive even in still frames. */}
+      <div
+        className="auth-backdrop-drift absolute"
+        style={{
+          inset: "-25%",
+          background:
+            "radial-gradient(45% 45% at 30% 35%, rgba(53,91,224,0.22) 0%, rgba(53,91,224,0) 70%)," +
+            "radial-gradient(40% 40% at 70% 70%, rgba(94,140,255,0.16) 0%, rgba(94,140,255,0) 70%)",
+        }}
+      />
+      <style>{`
+        @keyframes authBackdropDrift {
+          0%   { transform: translate3d(0,0,0) scale(1); }
+          50%  { transform: translate3d(2.5%, -2%, 0) scale(1.05); }
+          100% { transform: translate3d(0,0,0) scale(1); }
+        }
+        .auth-backdrop-drift { animation: authBackdropDrift 46s ease-in-out infinite; will-change: transform; }
+        @media (prefers-reduced-motion: reduce) {
+          .auth-backdrop-drift { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }
