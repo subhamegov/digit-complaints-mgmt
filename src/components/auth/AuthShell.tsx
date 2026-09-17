@@ -252,6 +252,16 @@ export function AuthShell({
       </div>
 
       <style>{`
+        .auth-brand-mark { top: 20px; left: 20px; }
+        .auth-brand-logo { width: 140px; }
+        @media (min-width: 768px) {
+          .auth-brand-mark { top: 28px; left: 28px; }
+          .auth-brand-logo { width: 160px; }
+        }
+        @media (min-width: 1024px) {
+          .auth-brand-mark { top: 36px; left: 40px; }
+          .auth-brand-logo { width: 180px; }
+        }
         .login-input::placeholder { color: #8A90A2; }
         .login-input:focus {
           border-color: #355BE0 !important;
