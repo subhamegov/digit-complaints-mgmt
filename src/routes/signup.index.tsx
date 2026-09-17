@@ -188,6 +188,10 @@ function SignupPage() {
       }
     }
 
+    // Email carried forward from the sign-in "no account found" flow.
+    const prefill = getSignupPrefillEmail();
+    if (prefill) setEmail(prefill);
+
     const initiatedRaw = window.sessionStorage.getItem(SIGNUP_INITIATION_KEY);
     if (initiatedRaw) {
       try {
