@@ -6,8 +6,11 @@ import { LanguagePicker } from "@/components/LanguagePicker";
 import type { LanguageCode } from "@/lib/accounts";
 
 /** Shared dark treatment so poster, video and gradient fallback read identically. */
-const OVERLAY =
-  "linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%)";
+const OVERLAY_BASE = "rgba(8, 20, 48, 0.30)";
+const OVERLAY_DIRECTIONAL =
+  "linear-gradient(90deg, rgba(5,18,45,0.58) 0%, rgba(8,25,60,0.34) 35%, rgba(8,25,60,0.18) 70%, rgba(8,25,60,0.12) 100%)";
+const OVERLAY_VERTICAL =
+  "linear-gradient(180deg, rgba(8,20,48,0.10) 0%, rgba(8,20,48,0.10) 55%, rgba(6,14,40,0.55) 100%)";
 
 /** Fallback used before the poster paints and if the poster itself fails. */
 const GRADIENT_FALLBACK =
