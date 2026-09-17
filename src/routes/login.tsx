@@ -13,7 +13,8 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-type Phase = "email" | "loading" | "no-account" | "resolved";
+type Phase = "start" | "loading" | "no-account" | "resolved";
+type Identity = "email" | "google" | "github";
 
 const reveal = "animate-in fade-in slide-in-from-top-1 duration-300";
 const eyebrowStyle: React.CSSProperties = {
@@ -24,19 +25,39 @@ const eyebrowStyle: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
+const ssoButtonStyle: React.CSSProperties = {
+  height: 46,
+  background: "#FFFFFF",
+  color: "#17191F",
+  border: "1px solid #CBD5F2",
+  borderRadius: 8,
+  fontWeight: 500,
+  fontSize: 14,
+};
+
+function GoogleIcon() {
+  return (
+    <svg className="h-[18px] w-[18px]" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.7 30.2.5 24 .5 14.6.5 6.5 5.9 2.6 13.8l7.8 6.1C12.3 14 17.7 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.6-4.9 7.3l7.6 5.9c4.4-4.1 7.1-10.2 7.1-17.7z" />
+      <path fill="#FBBC05" d="M10.4 28.1c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.8-6.1C.9 16.1 0 19.9 0 23.5s.9 7.4 2.6 10.7l7.8-6.1z" />
+      <path fill="#34A853" d="M24 46.5c6.2 0 11.5-2 15.4-5.6l-7.6-5.9c-2.1 1.4-4.8 2.3-7.8 2.3-6.3 0-11.7-4.5-13.6-10.5l-7.8 6.1C6.5 41.1 14.6 46.5 24 46.5z" />
+    </svg>
+  );
+}
+
 function LoginPage() {
   const navigate = useNavigate();
   const { role } = useRbac();
   const [email, setEmail] = useState("");
-  const [phase, setPhase] = useState<Phase>("email");
+  const [phase, setPhase] = useState<Phase>("start");
+  const [identity, setIdentity] = useState<Identity>("email");
   const [tenant, setTenant] = useState<string>("");
   const [password, setPassword] = useState("");
-  const [usePassword, setUsePassword] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
   const emailRef = useRef<HTMLInputElement>(null);
 
   const account = ACCOUNTS.find((a) => a.value === tenant) ?? null;
-  const methods = account?.methods ?? [];
   const isOrgSignIn = account?.authMode === "organisation_sign_in";
   const emailValid = /\S+@\S+\.\S+/.test(email.trim());
 
@@ -46,14 +67,13 @@ function LoginPage() {
   const resetAuthState = () => {
     setTenant("");
     setPassword("");
-    setUsePassword(false);
   };
 
-  const continueWithEmail = () => {
-    if (!emailValid) return;
+  const resolveAccounts = (source: Identity) => {
+    setIdentity(source);
     setPhase("loading");
     window.setTimeout(() => {
-      if (isNoAccountEmail(email)) {
+      if (source === "email" && isNoAccountEmail(email)) {
         setPhase("no-account");
         return;
       }
@@ -63,29 +83,24 @@ function LoginPage() {
     }, 600);
   };
 
-  const changeEmail = () => {
+  const startOver = () => {
     resetAuthState();
-    setPhase("email");
+    setIdentity("email");
+    setPhase("start");
     window.setTimeout(() => emailRef.current?.focus(), 0);
   };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phase === "email") {
-      continueWithEmail();
-      return;
-    }
-    if (phase === "resolved" && usePassword) navigate({ to: workspaceRoute });
+    if (phase === "start" && emailValid) resolveAccounts("email");
   };
 
-  const orgSignInHref =
-    account?.organisationSignInUrl
-      ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
-      : "#";
+  const orgSignInHref = account?.organisationSignInUrl
+    ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
+    : "#";
 
-  const showMethodHeading = !isOrgSignIn && methods.length > 1;
-  const showPasswordFields = methods.includes("password") && (methods.length === 1 || usePassword);
-  const showUsePasswordAction = methods.includes("password") && methods.length > 1 && !usePassword;
+  const showPassword = identity === "email" && !!account && !isOrgSignIn;
+  const showSsoContinue = identity !== "email" && !!account && !isOrgSignIn;
 
   return (
     <AuthShell language={language} onLanguageChange={setLanguage}>
@@ -109,7 +124,38 @@ function LoginPage() {
         </div>
 
         <div className="space-y-4">
-          {phase === "email" || phase === "loading" ? (
+          {phase === "start" && (
+            <>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => resolveAccounts("google")}
+                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
+                  style={ssoButtonStyle}
+                >
+                  <GoogleIcon />
+                  Sign in with Google
+                </button>
+                <button
+                  type="button"
+                  onClick={() => resolveAccounts("github")}
+                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
+                  style={ssoButtonStyle}
+                >
+                  <Github className="h-[18px] w-[18px]" />
+                  Sign in with GitHub
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3" style={{ paddingTop: 2, paddingBottom: 2 }}>
+                <span style={{ flex: 1, height: 1, background: "#E7ECFB" }} />
+                <span style={{ color: "#8A93A5", fontSize: 11, fontWeight: 600, letterSpacing: "0.12em" }}>OR</span>
+                <span style={{ flex: 1, height: 1, background: "#E7ECFB" }} />
+              </div>
+            </>
+          )}
+
+          {phase === "start" || phase === "loading" ? (
             <AuthField label="Administrator email">
               <input
                 ref={emailRef}
@@ -121,7 +167,7 @@ function LoginPage() {
                 style={authInputStyle}
               />
             </AuthField>
-          ) : (
+          ) : identity === "email" ? (
             <div>
               <div style={eyebrowStyle}>Administrator email</div>
               <div
@@ -133,7 +179,28 @@ function LoginPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={changeEmail}
+                  onClick={startOver}
+                  className="hover:underline"
+                  style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500, background: "transparent" }}
+                >
+                  Change
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={eyebrowStyle}>Signed in with {identity === "google" ? "Google" : "GitHub"}</div>
+              <div
+                className="mt-1.5 flex items-center justify-between gap-3 rounded-md px-3"
+                style={{ height: 46, background: "#F5F7FF", border: "1px solid #E2E8FA" }}
+              >
+                <span className="flex items-center gap-2" style={{ color: "#17191F", fontSize: 14 }}>
+                  {identity === "google" ? <GoogleIcon /> : <Github className="h-4 w-4" />}
+                  Identity verified
+                </span>
+                <button
+                  type="button"
+                  onClick={startOver}
                   className="hover:underline"
                   style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500, background: "transparent" }}
                 >
@@ -143,7 +210,7 @@ function LoginPage() {
             </div>
           )}
 
-          {phase === "email" && (
+          {phase === "start" && (
             <button
               type="submit"
               disabled={!emailValid}
@@ -199,7 +266,7 @@ function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={changeEmail}
+                onClick={startOver}
                 className="mt-2 w-full hover:underline"
                 style={{ color: "#4A5162", fontSize: 13, background: "transparent" }}
               >
@@ -216,7 +283,6 @@ function LoginPage() {
                   onChange={(e) => {
                     setTenant(e.target.value);
                     setPassword("");
-                    setUsePassword(false);
                   }}
                   className={authInputCls}
                   style={authSelectStyle}
@@ -254,95 +320,47 @@ function LoginPage() {
             </div>
           )}
 
-          {phase === "resolved" && account && !isOrgSignIn && (
+          {phase === "resolved" && showPassword && (
             <div className={`space-y-3 ${reveal}`} style={{ borderTop: "1px solid #E7ECFB", paddingTop: 16 }}>
-              <div style={eyebrowStyle}>Sign in method</div>
-              {showMethodHeading && (
-                <p style={{ color: "#5E6675", fontSize: 13 }}>Choose how you want to sign in</p>
-              )}
-
-              {methods.includes("google") && (
+              <AuthField label="Password">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={authInputCls}
+                  style={authInputStyle}
+                  placeholder="Enter your password"
+                />
+              </AuthField>
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => navigate({ to: workspaceRoute })}
-                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
-                  style={{
-                    height: 46,
-                    background: "#FFFFFF",
-                    color: "#17191F",
-                    border: "1px solid #CBD5F2",
-                    borderRadius: 8,
-                    fontWeight: 500,
-                    fontSize: 14,
-                  }}
+                  className="hover:underline"
+                  style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500 }}
                 >
-                  Continue with Google
+                  Forgot password?
                 </button>
-              )}
-
-              {methods.includes("github") && (
-                <button
-                  type="button"
-                  onClick={() => navigate({ to: workspaceRoute })}
-                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
-                  style={{
-                    height: 46,
-                    background: "#FFFFFF",
-                    color: "#17191F",
-                    border: "1px solid #CBD5F2",
-                    borderRadius: 8,
-                    fontWeight: 500,
-                    fontSize: 14,
-                  }}
-                >
-                  <Github className="h-4 w-4" />
-                  Continue with GitHub
-                </button>
-              )}
-
-              {showUsePasswordAction && (
-                <button
-                  type="button"
-                  onClick={() => setUsePassword(true)}
-                  className="w-full hover:underline"
-                  style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500, background: "transparent" }}
-                >
-                  Use password
-                </button>
-              )}
-
-              {showPasswordFields && (
-                <div className={`space-y-3 ${reveal}`}>
-                  <AuthField label="Password">
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className={authInputCls}
-                      style={authInputStyle}
-                      placeholder="Enter your password"
-                    />
-                  </AuthField>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="hover:underline"
-                      style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500 }}
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate({ to: workspaceRoute })}
-                    className="w-full transition-colors"
-                    style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
-                  >
-                    {t("COMMON_SIGN_IN")}
-                  </button>
-                </div>
-              )}
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate({ to: workspaceRoute })}
+                className="w-full transition-colors"
+                style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+              >
+                {t("COMMON_SIGN_IN")}
+              </button>
             </div>
+          )}
+
+          {phase === "resolved" && showSsoContinue && (
+            <button
+              type="button"
+              onClick={() => navigate({ to: workspaceRoute })}
+              className={`w-full transition-colors ${reveal}`}
+              style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+            >
+              Continue to account
+            </button>
           )}
         </div>
 
