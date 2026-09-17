@@ -151,15 +151,9 @@ export function AuthShell({
     <div className="min-h-screen w-full" style={{ background: "#F5F7FF" }}>
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[45fr_55fr] xl:grid-cols-2">
         {/* Identity / media column */}
-        <div
-          className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%), url(${loginBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div style={{ position: "absolute", top: 28, left: 28, right: 28 }}>
+        <div className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex">
+          <AuthBackdrop />
+          <div style={{ position: "absolute", top: 28, left: 28, right: 28, zIndex: 1 }}>
             <a
               href="/"
               target="_blank"
