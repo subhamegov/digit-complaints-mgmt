@@ -2,15 +2,22 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
-import { ShieldCheck, ExternalLink } from "lucide-react";
+import { ShieldCheck, ExternalLink, Loader2 } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
 import { AuthShell, AuthField, authInputCls, authInputStyle, authSelectStyle } from "@/components/auth/AuthShell";
 import { PoweredByDigit } from "@/components/PoweredByDigit";
+import {
+  isNoAccountEmail,
+  setSignupPrefillEmail,
+  clearSignupPrefillEmail,
+} from "@/lib/signup-prefill";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In - DIGIT Complaint Management" }] }),
   component: LoginPage,
 });
+
+type Phase = "lookup" | "loading" | "accounts" | "no-account";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -19,7 +26,9 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [tenant, setTenant] = useState("acc.makueni.cg");
   const [language, setLanguage] = useState<LanguageCode>("en");
+  const [phase, setPhase] = useState<Phase>("lookup");
   const accountRef = useRef<HTMLSelectElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   const account = ACCOUNTS.find((a) => a.value === tenant)!;
   const mode = account.authMode;
@@ -32,14 +41,28 @@ function LoginPage() {
   const workspaceRoute =
     role === "PLATFORM_ADMIN" ? "/platform" : role === "ACCOUNT_ADMIN" ? "/admin/home" : "/dashboard";
 
+  const lookup = () => {
+    setPhase("loading");
+    window.setTimeout(() => {
+      setPhase(isNoAccountEmail(email) ? "no-account" : "accounts");
+    }, 900);
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: workspaceRoute });
+    if (phase === "lookup") {
+      lookup();
+      return;
+    }
+    if (phase === "accounts") navigate({ to: workspaceRoute });
   };
 
   const orgSignInHref = account.organisationSignInUrl
     ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
     : "#";
+
+  const emailValid = /\S+@\S+\.\S+/.test(email.trim());
+
 
   return (
     <AuthShell language={language} onLanguageChange={setLanguage}>
