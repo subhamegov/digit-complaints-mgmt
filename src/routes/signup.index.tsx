@@ -7,6 +7,7 @@ import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
 import { SIGNUP_INITIATION_KEY, type SignupInitiationState } from "@/lib/signup-flow";
+import { getSignupPrefillEmail } from "@/lib/signup-prefill";
 import { submitAccountRequest } from "@/lib/account-requests";
 import { ACCOUNT_STATE_COPY, nonActiveAccountStatus, type NonActiveAccountStatus } from "@/lib/existing-accounts";
 
@@ -187,6 +188,10 @@ function SignupPage() {
         /* ignore */
       }
     }
+
+    // Email carried forward from the sign-in "no account found" flow.
+    const prefill = getSignupPrefillEmail();
+    if (prefill) setEmail(prefill);
 
     const initiatedRaw = window.sessionStorage.getItem(SIGNUP_INITIATION_KEY);
     if (initiatedRaw) {
