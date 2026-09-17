@@ -1,8 +1,73 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import eGovLogoAsset from "@/assets/eGov-Foundation.png.asset.json";
-import loginBg from "@/assets/login-crowd.jpg";
+import loginVideoAsset from "@/assets/login-bg.mp4.asset.json";
+import loginPosterAsset from "@/assets/login-poster.jpg.asset.json";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import type { LanguageCode } from "@/lib/accounts";
+
+/** Shared dark treatment so poster, video and gradient fallback read identically. */
+const OVERLAY =
+  "linear-gradient(180deg, rgba(12,24,74,0.42) 0%, rgba(12,24,74,0.42) 60%, rgba(8,16,52,0.72) 100%)";
+
+/** Fallback used before the poster paints and if the poster itself fails. */
+const GRADIENT_FALLBACK =
+  "radial-gradient(120% 90% at 15% 10%, rgba(45,79,196,0.55) 0%, rgba(45,79,196,0) 60%)," +
+  "radial-gradient(100% 80% at 85% 90%, rgba(53,91,224,0.45) 0%, rgba(53,91,224,0) 55%)," +
+  "linear-gradient(160deg, #0B1F3A 0%, #10275A 45%, #1B3A8A 100%)";
+
+/**
+ * Decorative background: gradient base, poster image, then an async video that
+ * cross-fades in. Authentication never waits on any of these layers.
+ */
+function AuthBackdrop() {
+  const [posterFailed, setPosterFailed] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [allowVideo, setAllowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    const slow = conn?.saveData === true || /(^|-)2g$/.test(conn?.effectiveType ?? "");
+    const smallScreen = window.matchMedia?.("(max-width: 1023px)").matches;
+    if (reducedMotion || slow || smallScreen) return;
+    // Defer the download so the authentication card renders first.
+    const id = window.setTimeout(() => setAllowVideo(true), 300);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  return (
+    <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0" style={{ background: GRADIENT_FALLBACK }} />
+      {!posterFailed && (
+        <img
+          src={loginPosterAsset.url}
+          alt=""
+          onError={() => setPosterFailed(true)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      {allowVideo && (
+        <video
+          ref={videoRef}
+          src={loginVideoAsset.url}
+          poster={loginPosterAsset.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onCanPlay={() => setVideoReady(true)}
+          onError={() => setVideoReady(false)}
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ opacity: videoReady ? 1 : 0, transition: "opacity 400ms ease" }}
+        />
+      )}
+      <div className="absolute inset-0" style={{ background: OVERLAY }} />
+    </div>
+  );
+}
 
 /**
  * Shared authentication shell used by /login and /signup.
