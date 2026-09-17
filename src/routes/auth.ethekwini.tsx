@@ -3,7 +3,6 @@ import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
-import { useRbac } from "@/lib/rbac";
 
 export const Route = createFileRoute("/auth/ethekwini")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -26,7 +25,6 @@ export const Route = createFileRoute("/auth/ethekwini")({
 function EthekwiniSignIn() {
   const navigate = useNavigate();
   const { account, returnTo } = useSearch({ from: "/auth/ethekwini" });
-  const { setTenant } = useRbac();
   const [language, setLanguage] = useState<LanguageCode>("en");
   const [userId, setUserId] = useState("manjit.singh@ethekwini.gov.za");
   const [password, setPassword] = useState("••••••••");
@@ -35,8 +33,7 @@ function EthekwiniSignIn() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selected) setTenant(selected.value);
-    navigate({ to: returnTo || "/dashboard" });
+    navigate({ to: (returnTo || "/dashboard") as "/dashboard" });
   };
 
   return (
