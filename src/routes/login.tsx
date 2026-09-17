@@ -276,7 +276,13 @@ function LoginPage() {
 
         <div style={{ marginTop: 16, color: "#6F7684", fontSize: 13, textAlign: "center" }}>
           New to the platform?{" "}
-          <Link to="/signup" search={{}} style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
+          <Link
+            to="/signup"
+            search={{}}
+            onClick={() => clearSignupPrefillEmail()}
+            style={{ color: "#2D4FC4", fontWeight: 600 }}
+            className="hover:underline"
+          >
             Create an account
           </Link>
         </div>
