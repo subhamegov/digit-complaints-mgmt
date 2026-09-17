@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { ROLE_LABEL, useRbac, type Role } from "@/lib/rbac";
+import { useEffect, useRef, useState } from "react";
+import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
-import { ShieldCheck, ArrowUpRight } from "lucide-react";
+import { ShieldCheck, ExternalLink } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
-
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In - DIGIT Complaint Management" }] }),
@@ -14,167 +13,189 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { role: currentRole, setRole } = useRbac();
-  const [userId, setUserId] = useState("manjit.singh");
-  const [password, setPassword] = useState("••••••••");
-  const [role, setLocalRole] = useState<Role>(currentRole);
+  const { role } = useRbac();
+  const [email, setEmail] = useState("manjit.singh@example.org");
+  const [password, setPassword] = useState("");
   const [tenant, setTenant] = useState("acc.makueni.cg");
   const [language, setLanguage] = useState<LanguageCode>("en");
-  const selectedAccount = ACCOUNTS.find((a) => a.value === tenant);
+  const accountRef = useRef<HTMLSelectElement>(null);
+
+  const account = ACCOUNTS.find((a) => a.value === tenant)!;
+  const mode = account.authMode;
+
+  // Authentication state is scoped to the selected account.
+  useEffect(() => {
+    setPassword("");
+  }, [tenant]);
+
+  const workspaceRoute =
+    role === "PLATFORM_ADMIN" ? "/platform" : role === "ACCOUNT_ADMIN" ? "/admin/home" : "/dashboard";
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    setRole(role);
-    navigate({
-      to: role === "PLATFORM_ADMIN" ? "/platform" : role === "ACCOUNT_ADMIN" ? "/admin/home" : "/dashboard",
-    });
+    navigate({ to: workspaceRoute });
   };
 
+  const orgSignInHref = account.organisationSignInUrl
+    ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
+    : "#";
+
   return (
-    <AuthShell
-      language={language}
-      onLanguageChange={setLanguage}
-    >
+    <AuthShell language={language} onLanguageChange={setLanguage}>
       <form
         onSubmit={submit}
+        className="w-full"
+        style={{
+          maxWidth: 400,
+          background: "rgba(255,255,255,0.88)",
+          border: "1px solid #DCE4FF",
+          borderRadius: 16,
+          padding: 32,
+          boxShadow: "0 12px 36px rgba(32,55,140,0.08)",
+        }}
+      >
+        <div style={{ marginBottom: 24 }}>
+          <div
+            style={{ color: "#4E64B5", fontSize: 12, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase" }}
+          >
+            Secure Sign In
+          </div>
+          <h2 style={{ marginTop: 8, color: "#17191F", fontSize: 34, fontWeight: 600, lineHeight: 1.15 }}>
+            Access your account
+          </h2>
+        </div>
 
-            className="w-full"
+        <div className="space-y-4">
+          <AuthField label="Administrator email">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={authInputCls}
+              style={authInputStyle}
+            />
+          </AuthField>
+
+          <AuthField label={t("COMMON_TENANT")}>
+            <select
+              ref={accountRef}
+              value={tenant}
+              onChange={(e) => setTenant(e.target.value)}
+              className={authInputCls}
+              style={authInputStyle}
+            >
+              {ACCOUNTS.map((a) => (
+                <option key={a.value} value={a.value}>{a.label}</option>
+              ))}
+            </select>
+          </AuthField>
+
+          {mode === "organisation_sign_in" && (
+            <div className="rounded-md px-3 py-3" style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}>
+              <div
+                className="flex items-center gap-1.5"
+                style={{ color: "#2D4FC4", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Organisation sign-in
+              </div>
+              <p style={{ marginTop: 6, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
+                This organisation uses its own sign-in page.
+              </p>
+              <a
+                href={orgSignInHref}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 transition-colors"
+                style={{
+                  height: 44,
+                  background: "#2D4FC4",
+                  color: "#FFFFFF",
+                  borderRadius: 8,
+                  fontWeight: 500,
+                  fontSize: 14,
+                }}
+              >
+                Continue to organisation sign-in
+                <ExternalLink className="h-4 w-4" />
+              </a>
+              <button
+                type="button"
+                onClick={() => accountRef.current?.focus()}
+                className="mt-2 w-full hover:underline"
+                style={{ color: "#4A5162", fontSize: 13, background: "transparent" }}
+              >
+                Choose another account
+              </button>
+            </div>
+          )}
+
+          {(mode === "platform_password" || mode === "hybrid") && (
+            <>
+              {mode === "hybrid" && (
+                <p style={{ color: "#5E6675", fontSize: 13 }}>Choose how you want to sign in.</p>
+              )}
+              <AuthField label="Password">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={authInputCls}
+                  style={authInputStyle}
+                  placeholder="Enter your password"
+                />
+              </AuthField>
+              <div className="flex justify-end">
+                <button type="button" className="hover:underline" style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500 }}>
+                  Forgot password?
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {(mode === "platform_password" || mode === "hybrid") && (
+          <button
+            type="submit"
+            className="mt-5 w-full transition-colors focus:outline-none focus:ring-2"
+            style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#2443B0")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#2D4FC4")}
+          >
+            {t("COMMON_SIGN_IN")}
+          </button>
+        )}
+
+        {(mode === "platform_sso" || mode === "hybrid") && (
+          <button
+            type="button"
+            onClick={() => navigate({ to: workspaceRoute })}
+            className="mt-3 flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
             style={{
-              maxWidth: 400,
-              background: "rgba(255,255,255,0.88)",
-              border: "1px solid #DCE4FF",
-              borderRadius: 16,
-              padding: 32,
-              boxShadow: "0 12px 36px rgba(32,55,140,0.08)",
+              height: 46,
+              background: mode === "platform_sso" ? "#2D4FC4" : "#FFFFFF",
+              color: mode === "platform_sso" ? "#FFFFFF" : "#17191F",
+              border: mode === "platform_sso" ? "none" : "1px solid #CBD5F2",
+              borderRadius: 8,
+              fontWeight: 500,
+              fontSize: 14,
             }}
           >
-            <div style={{ marginBottom: 24 }}>
-              <div
-                style={{
-                  color: "#4E64B5",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                }}
-              >
-                Secure Sign In
-              </div>
-              <h2
-                style={{
-                  marginTop: 8,
-                  color: "#17191F",
-                  fontSize: 34,
-                  fontWeight: 600,
-                  lineHeight: 1.15,
-                }}
-              >
-                Access your account
-              </h2>
-            </div>
+            Continue with {account.provider ?? "SSO"}
+          </button>
+        )}
 
-            <div className="space-y-4">
-              <Field label="User ID">
-                <input value={userId} onChange={(e) => setUserId(e.target.value)} className={inputCls} style={inputStyle} />
-              </Field>
-              <Field label="Password">
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} style={inputStyle} />
-              </Field>
-              <Field label={t("COMMON_TENANT")}>
-                <select value={tenant} onChange={(e) => setTenant(e.target.value)} className={inputCls} style={inputStyle}>
-                  {ACCOUNTS.map((a) => (
-                    <option key={a.value} value={a.value}>{a.label}</option>
-                  ))}
-                </select>
-              </Field>
+        <div style={{ marginTop: 16, color: "#6F7684", fontSize: 13, textAlign: "center" }}>
+          New to the platform?{" "}
+          <Link to="/signup" search={{}} style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
+            Create an account
+          </Link>
+        </div>
 
-              {selectedAccount?.hasCustomLogin && selectedAccount.customLoginUrl && (
-                <div
-                  className="rounded-md px-3 py-3"
-                  style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}
-                >
-                  <div className="flex items-center gap-1.5" style={{ color: "#2D4FC4", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Organisation sign-in
-                  </div>
-                  <p style={{ marginTop: 6, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
-                    Your administrator has configured a separate sign-in page for this organisation.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigate({ to: "/$org/login", params: { org: selectedAccount.customLoginUrl!.split("/")[1] } })}
-                    className="mt-2.5 inline-flex items-center gap-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#355BE0]/30"
-                    style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 600 }}
-                  >
-                    Go to organisation sign-in
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              )}
-
-
-              <Field
-                label={
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="h-3 w-3" style={{ color: "#2D4FC4" }} />
-                    Sign in as (prototype role)
-                  </span>
-                }
-              >
-                <select value={role} onChange={(e) => setLocalRole(e.target.value as Role)} className={inputCls} style={inputStyle}>
-                  {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
-                    <option key={r} value={r}>{ROLE_LABEL[r]}</option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-
-            <button
-              type="submit"
-              className="mt-6 w-full transition-colors focus:outline-none focus:ring-2"
-              style={{
-                height: 46,
-                background: "#2D4FC4",
-                color: "#FFFFFF",
-                borderRadius: 8,
-                fontWeight: 500,
-                fontSize: 14,
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#2443B0")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#2D4FC4")}
-            >
-              {t("COMMON_SIGN_IN")}
-            </button>
-
-            <div
-              style={{
-                marginTop: 16,
-                color: "#6F7684",
-                fontSize: 13,
-                textAlign: "center",
-              }}
-            >
-              New to the platform?{" "}
-              <Link to="/signup" search={{}} style={{ color: "#2D4FC4", fontWeight: 600 }} className="hover:underline">
-                Create an account
-              </Link>
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                color: "#6F7684",
-                fontSize: 12,
-                textAlign: "center",
-              }}
-            >
-              Use the role selector to experience the lives of a resolver, an agent, or a government manager.
-            </div>
+        <div
+          style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid #E7ECFB", color: "#9AA1B1", fontSize: 11, textAlign: "center" }}
+        >
+          Powered by DIGIT
+        </div>
       </form>
     </AuthShell>
   );
 }
-
-const inputCls = authInputCls;
-const inputStyle = authInputStyle;
-const Field = AuthField;

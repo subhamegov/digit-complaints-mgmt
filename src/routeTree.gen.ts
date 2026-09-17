@@ -37,6 +37,7 @@ import { Route as ConfigComplaintTypesRouteImport } from './routes/config.compla
 import { Route as ComplaintsNewRouteImport } from './routes/complaints.new'
 import { Route as AuthGoogleRouteImport } from './routes/auth.google'
 import { Route as AuthGithubRouteImport } from './routes/auth.github'
+import { Route as AuthEthekwiniRouteImport } from './routes/auth.ethekwini'
 import { Route as AdminWorkflowConfigRouteImport } from './routes/admin.workflow-config'
 import { Route as AdminValidationRulesRouteImport } from './routes/admin.validation-rules'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
@@ -231,6 +232,11 @@ const AuthGoogleRoute = AuthGoogleRouteImport.update({
 const AuthGithubRoute = AuthGithubRouteImport.update({
   id: '/auth/github',
   path: '/auth/github',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthEthekwiniRoute = AuthEthekwiniRouteImport.update({
+  id: '/auth/ethekwini',
+  path: '/auth/ethekwini',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminWorkflowConfigRoute = AdminWorkflowConfigRouteImport.update({
@@ -562,6 +568,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/ethekwini': typeof AuthEthekwiniRoute
   '/auth/github': typeof AuthGithubRoute
   '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
@@ -642,6 +649,7 @@ export interface FileRoutesByTo {
   '/admin/user-stats': typeof AdminUserStatsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
+  '/auth/ethekwini': typeof AuthEthekwiniRoute
   '/auth/github': typeof AuthGithubRoute
   '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
@@ -727,6 +735,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/validation-rules': typeof AdminValidationRulesRoute
   '/admin/workflow-config': typeof AdminWorkflowConfigRouteWithChildren
+  '/auth/ethekwini': typeof AuthEthekwiniRoute
   '/auth/github': typeof AuthGithubRoute
   '/auth/google': typeof AuthGoogleRoute
   '/complaints/new': typeof ComplaintsNewRoute
@@ -813,6 +822,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/ethekwini'
     | '/auth/github'
     | '/auth/google'
     | '/complaints/new'
@@ -893,6 +903,7 @@ export interface FileRouteTypes {
     | '/admin/user-stats'
     | '/admin/users'
     | '/admin/validation-rules'
+    | '/auth/ethekwini'
     | '/auth/github'
     | '/auth/google'
     | '/complaints/new'
@@ -977,6 +988,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/validation-rules'
     | '/admin/workflow-config'
+    | '/auth/ethekwini'
     | '/auth/github'
     | '/auth/google'
     | '/complaints/new'
@@ -1028,6 +1040,7 @@ export interface RootRouteChildren {
   TasksRoute: typeof TasksRoute
   UsersRoute: typeof UsersRoute
   OrgLoginRoute: typeof OrgLoginRoute
+  AuthEthekwiniRoute: typeof AuthEthekwiniRoute
   AuthGithubRoute: typeof AuthGithubRoute
   AuthGoogleRoute: typeof AuthGoogleRoute
   ComplaintsNewRoute: typeof ComplaintsNewRoute
@@ -1241,6 +1254,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/github'
       fullPath: '/auth/github'
       preLoaderRoute: typeof AuthGithubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/ethekwini': {
+      id: '/auth/ethekwini'
+      path: '/auth/ethekwini'
+      fullPath: '/auth/ethekwini'
+      preLoaderRoute: typeof AuthEthekwiniRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/workflow-config': {
@@ -1803,6 +1823,7 @@ const rootRouteChildren: RootRouteChildren = {
   TasksRoute: TasksRoute,
   UsersRoute: UsersRoute,
   OrgLoginRoute: OrgLoginRoute,
+  AuthEthekwiniRoute: AuthEthekwiniRoute,
   AuthGithubRoute: AuthGithubRoute,
   AuthGoogleRoute: AuthGoogleRoute,
   ComplaintsNewRoute: ComplaintsNewRoute,
