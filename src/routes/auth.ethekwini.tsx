@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
+import { PoweredByDigit } from "@/components/PoweredByDigit";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
 
 export const Route = createFileRoute("/auth/ethekwini")({
@@ -97,7 +98,7 @@ function EthekwiniSignIn() {
           Choose another account
         </button>
 
-        <div style={{ marginTop: 18, color: "#9AA1B1", fontSize: 11, textAlign: "center" }}>Powered by DIGIT</div>
+        <PoweredByDigit className="mt-5" />
       </form>
     </AuthShell>
   );

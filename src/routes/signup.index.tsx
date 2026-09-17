@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, Clock3, Copy, Github, MailCheck, ShieldAlert } from "lucide-react";
-import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
+import { PoweredByDigit } from "@/components/PoweredByDigit";
+import { AuthShell, AuthField, authInputCls, authInputStyle , authSelectStyle } from "@/components/auth/AuthShell";
 import type { LanguageCode } from "@/lib/accounts";
 import { clearPrototypeIdentity, getPrototypeIdentity, setPrototypeIdentity } from "@/lib/prototype-identity";
 import { PROVISIONING_KEY } from "@/routes/signup.provisioning";
@@ -120,7 +121,7 @@ function PrimaryButton({
   );
 }
 
-const selectStyle: React.CSSProperties = { ...authInputStyle, appearance: "auto", padding: "0 10px" };
+const selectStyle: React.CSSProperties = authSelectStyle;
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -1126,9 +1127,7 @@ function StepUrls({
         </Link>
       </div>
 
-      <div className="mt-6 text-center" style={{ color: "#A6ABBA", fontSize: 11, letterSpacing: "0.04em" }}>
-        Powered by DIGIT
-      </div>
+      <PoweredByDigit className="mt-6" />
     </div>
   );
 }

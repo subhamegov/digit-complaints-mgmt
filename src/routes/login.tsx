@@ -4,7 +4,8 @@ import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
 import { ShieldCheck, ExternalLink } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
-import { AuthShell, AuthField, authInputCls, authInputStyle } from "@/components/auth/AuthShell";
+import { AuthShell, AuthField, authInputCls, authInputStyle, authSelectStyle } from "@/components/auth/AuthShell";
+import { PoweredByDigit } from "@/components/PoweredByDigit";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In - DIGIT Complaint Management" }] }),
@@ -82,7 +83,7 @@ function LoginPage() {
               value={tenant}
               onChange={(e) => setTenant(e.target.value)}
               className={authInputCls}
-              style={authInputStyle}
+              style={authSelectStyle}
             >
               {ACCOUNTS.map((a) => (
                 <option key={a.value} value={a.value}>{a.label}</option>
@@ -190,10 +191,8 @@ function LoginPage() {
           </Link>
         </div>
 
-        <div
-          style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid #E7ECFB", color: "#9AA1B1", fontSize: 11, textAlign: "center" }}
-        >
-          Powered by DIGIT
+        <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid #E7ECFB" }}>
+          <PoweredByDigit />
         </div>
       </form>
     </AuthShell>
