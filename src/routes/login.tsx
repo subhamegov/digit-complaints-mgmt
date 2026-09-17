@@ -255,7 +255,7 @@ function LoginPage() {
           </button>
         )}
 
-        {(mode === "platform_sso" || mode === "hybrid") && (
+        {phase === "accounts" && (mode === "platform_sso" || mode === "hybrid") && (
           <button
             type="button"
             onClick={() => navigate({ to: workspaceRoute })}
