@@ -1,74 +1,97 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRbac } from "@/lib/rbac";
 import { t } from "@/lib/i18n";
-import { ShieldCheck, ExternalLink, Loader2 } from "lucide-react";
+import { ShieldCheck, ExternalLink, Loader2, Github } from "lucide-react";
 import { ACCOUNTS, type LanguageCode } from "@/lib/accounts";
 import { AuthShell, AuthField, authInputCls, authInputStyle, authSelectStyle } from "@/components/auth/AuthShell";
 import { PoweredByDigit } from "@/components/PoweredByDigit";
-import {
-  isNoAccountEmail,
-  setSignupPrefillEmail,
-  clearSignupPrefillEmail,
-} from "@/lib/signup-prefill";
+import { isNoAccountEmail, setSignupPrefillEmail, clearSignupPrefillEmail } from "@/lib/signup-prefill";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign In - DIGIT Complaint Management" }] }),
   component: LoginPage,
 });
 
-type Phase = "lookup" | "loading" | "accounts" | "no-account";
+type Phase = "email" | "loading" | "no-account" | "resolved";
+
+const reveal = "animate-in fade-in slide-in-from-top-1 duration-300";
+const eyebrowStyle: React.CSSProperties = {
+  color: "#4E64B5",
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+};
 
 function LoginPage() {
   const navigate = useNavigate();
   const { role } = useRbac();
-  const [email, setEmail] = useState("manjit.singh@example.org");
+  const [email, setEmail] = useState("");
+  const [phase, setPhase] = useState<Phase>("email");
+  const [tenant, setTenant] = useState<string>("");
   const [password, setPassword] = useState("");
-  const [tenant, setTenant] = useState("acc.makueni.cg");
+  const [usePassword, setUsePassword] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("en");
-  const [phase, setPhase] = useState<Phase>("lookup");
-  const accountRef = useRef<HTMLSelectElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
-  const account = ACCOUNTS.find((a) => a.value === tenant)!;
-  const mode = account.authMode;
-
-  // Authentication state is scoped to the selected account.
-  useEffect(() => {
-    setPassword("");
-  }, [tenant]);
+  const account = ACCOUNTS.find((a) => a.value === tenant) ?? null;
+  const methods = account?.methods ?? [];
+  const isOrgSignIn = account?.authMode === "organisation_sign_in";
+  const emailValid = /\S+@\S+\.\S+/.test(email.trim());
 
   const workspaceRoute =
     role === "PLATFORM_ADMIN" ? "/platform" : role === "ACCOUNT_ADMIN" ? "/admin/home" : "/dashboard";
 
-  const lookup = () => {
+  const resetAuthState = () => {
+    setTenant("");
+    setPassword("");
+    setUsePassword(false);
+  };
+
+  const continueWithEmail = () => {
+    if (!emailValid) return;
     setPhase("loading");
     window.setTimeout(() => {
-      setPhase(isNoAccountEmail(email) ? "no-account" : "accounts");
-    }, 900);
+      if (isNoAccountEmail(email)) {
+        setPhase("no-account");
+        return;
+      }
+      resetAuthState();
+      if (ACCOUNTS.length === 1) setTenant(ACCOUNTS[0]!.value);
+      setPhase("resolved");
+    }, 600);
+  };
+
+  const changeEmail = () => {
+    resetAuthState();
+    setPhase("email");
+    window.setTimeout(() => emailRef.current?.focus(), 0);
   };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phase === "lookup") {
-      lookup();
+    if (phase === "email") {
+      continueWithEmail();
       return;
     }
-    if (phase === "accounts") navigate({ to: workspaceRoute });
+    if (phase === "resolved" && usePassword) navigate({ to: workspaceRoute });
   };
 
-  const orgSignInHref = account.organisationSignInUrl
-    ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
-    : "#";
+  const orgSignInHref =
+    account?.organisationSignInUrl
+      ? `${account.organisationSignInUrl}?account=${encodeURIComponent(account.value)}&returnTo=${encodeURIComponent(workspaceRoute)}`
+      : "#";
 
-  const emailValid = /\S+@\S+\.\S+/.test(email.trim());
-
+  const showMethodHeading = !isOrgSignIn && methods.length > 1;
+  const showPasswordFields = methods.includes("password") && (methods.length === 1 || usePassword);
+  const showUsePasswordAction = methods.includes("password") && methods.length > 1 && !usePassword;
 
   return (
     <AuthShell language={language} onLanguageChange={setLanguage}>
       <form
         onSubmit={submit}
-        className="w-full"
+        className="w-full transition-all duration-300"
         style={{
           maxWidth: 400,
           background: "rgba(255,255,255,0.88)",
@@ -79,32 +102,48 @@ function LoginPage() {
         }}
       >
         <div style={{ marginBottom: 24 }}>
-          <div
-            style={{ color: "#4E64B5", fontSize: 12, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase" }}
-          >
-            Secure Sign In
-          </div>
+          <div style={{ ...eyebrowStyle, fontSize: 12, letterSpacing: "0.14em" }}>Secure Sign In</div>
           <h2 style={{ marginTop: 8, color: "#17191F", fontSize: 34, fontWeight: 600, lineHeight: 1.15 }}>
             Access your account
           </h2>
         </div>
 
         <div className="space-y-4">
-          <AuthField label="Administrator email">
-            <input
-              ref={emailRef}
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setPhase("lookup");
-              }}
-              className={authInputCls}
-              style={authInputStyle}
-            />
-          </AuthField>
+          {phase === "email" || phase === "loading" ? (
+            <AuthField label="Administrator email">
+              <input
+                ref={emailRef}
+                type="email"
+                value={email}
+                placeholder="name@organisation.org"
+                onChange={(e) => setEmail(e.target.value)}
+                className={authInputCls}
+                style={authInputStyle}
+              />
+            </AuthField>
+          ) : (
+            <div>
+              <div style={eyebrowStyle}>Administrator email</div>
+              <div
+                className="mt-1.5 flex items-center justify-between gap-3 rounded-md px-3"
+                style={{ height: 46, background: "#F5F7FF", border: "1px solid #E2E8FA" }}
+              >
+                <span style={{ color: "#17191F", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {email.trim()}
+                </span>
+                <button
+                  type="button"
+                  onClick={changeEmail}
+                  className="hover:underline"
+                  style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500, background: "transparent" }}
+                >
+                  Change
+                </button>
+              </div>
+            </div>
+          )}
 
-          {phase === "lookup" && (
+          {phase === "email" && (
             <button
               type="submit"
               disabled={!emailValid}
@@ -135,7 +174,11 @@ function LoginPage() {
           )}
 
           {phase === "no-account" && (
-            <div aria-live="polite" className="rounded-md px-4 py-4" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
+            <div
+              aria-live="polite"
+              className={`rounded-md px-4 py-4 ${reveal}`}
+              style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}
+            >
               <h3 style={{ color: "#17191F", fontSize: 17, fontWeight: 600 }}>No account found</h3>
               <p style={{ marginTop: 6, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
                 We could not find an account associated with {email.trim()}.
@@ -156,7 +199,7 @@ function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => emailRef.current?.focus()}
+                onClick={changeEmail}
                 className="mt-2 w-full hover:underline"
                 style={{ color: "#4A5162", fontSize: 13, background: "transparent" }}
               >
@@ -165,28 +208,35 @@ function LoginPage() {
             </div>
           )}
 
-          {phase === "accounts" && (
-          <AuthField label={t("COMMON_TENANT")}>
-            <select
-              ref={accountRef}
-              value={tenant}
-              onChange={(e) => setTenant(e.target.value)}
-              className={authInputCls}
-              style={authSelectStyle}
-            >
-              {ACCOUNTS.map((a) => (
-                <option key={a.value} value={a.value}>{a.label}</option>
-              ))}
-            </select>
-          </AuthField>
+          {phase === "resolved" && (
+            <div className={reveal}>
+              <AuthField label={t("COMMON_TENANT")}>
+                <select
+                  value={tenant}
+                  onChange={(e) => {
+                    setTenant(e.target.value);
+                    setPassword("");
+                    setUsePassword(false);
+                  }}
+                  className={authInputCls}
+                  style={authSelectStyle}
+                >
+                  <option value="">Select an account</option>
+                  {ACCOUNTS.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
+                </select>
+              </AuthField>
+              <p style={{ marginTop: 6, color: "#6F7684", fontSize: 12 }}>Choose the account you want to access.</p>
+            </div>
           )}
 
-          {phase === "accounts" && mode === "organisation_sign_in" && (
-            <div className="rounded-md px-3 py-3" style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}>
-              <div
-                className="flex items-center gap-1.5"
-                style={{ color: "#2D4FC4", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}
-              >
+          {phase === "resolved" && account && isOrgSignIn && (
+            <div
+              className={`rounded-md px-3 py-3 ${reveal}`}
+              style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}
+            >
+              <div className="flex items-center gap-1.5" style={{ ...eyebrowStyle, color: "#2D4FC4", fontSize: 12 }}>
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Organisation sign-in
               </div>
@@ -196,83 +246,105 @@ function LoginPage() {
               <a
                 href={orgSignInHref}
                 className="mt-3 flex w-full items-center justify-center gap-1.5 transition-colors"
-                style={{
-                  height: 44,
-                  background: "#2D4FC4",
-                  color: "#FFFFFF",
-                  borderRadius: 8,
-                  fontWeight: 500,
-                  fontSize: 14,
-                }}
+                style={{ height: 44, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
               >
                 Continue to organisation sign-in
                 <ExternalLink className="h-4 w-4" />
               </a>
-              <button
-                type="button"
-                onClick={() => accountRef.current?.focus()}
-                className="mt-2 w-full hover:underline"
-                style={{ color: "#4A5162", fontSize: 13, background: "transparent" }}
-              >
-                Choose another account
-              </button>
             </div>
           )}
 
-          {phase === "accounts" && (mode === "platform_password" || mode === "hybrid") && (
-            <>
-              {mode === "hybrid" && (
-                <p style={{ color: "#5E6675", fontSize: 13 }}>Choose how you want to sign in.</p>
+          {phase === "resolved" && account && !isOrgSignIn && (
+            <div className={`space-y-3 ${reveal}`} style={{ borderTop: "1px solid #E7ECFB", paddingTop: 16 }}>
+              <div style={eyebrowStyle}>Sign in method</div>
+              {showMethodHeading && (
+                <p style={{ color: "#5E6675", fontSize: 13 }}>Choose how you want to sign in</p>
               )}
-              <AuthField label="Password">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={authInputCls}
-                  style={authInputStyle}
-                  placeholder="Enter your password"
-                />
-              </AuthField>
-              <div className="flex justify-end">
-                <button type="button" className="hover:underline" style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500 }}>
-                  Forgot password?
+
+              {methods.includes("google") && (
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: workspaceRoute })}
+                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
+                  style={{
+                    height: 46,
+                    background: "#FFFFFF",
+                    color: "#17191F",
+                    border: "1px solid #CBD5F2",
+                    borderRadius: 8,
+                    fontWeight: 500,
+                    fontSize: 14,
+                  }}
+                >
+                  Continue with Google
                 </button>
-              </div>
-            </>
+              )}
+
+              {methods.includes("github") && (
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: workspaceRoute })}
+                  className="flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
+                  style={{
+                    height: 46,
+                    background: "#FFFFFF",
+                    color: "#17191F",
+                    border: "1px solid #CBD5F2",
+                    borderRadius: 8,
+                    fontWeight: 500,
+                    fontSize: 14,
+                  }}
+                >
+                  <Github className="h-4 w-4" />
+                  Continue with GitHub
+                </button>
+              )}
+
+              {showUsePasswordAction && (
+                <button
+                  type="button"
+                  onClick={() => setUsePassword(true)}
+                  className="w-full hover:underline"
+                  style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500, background: "transparent" }}
+                >
+                  Use password
+                </button>
+              )}
+
+              {showPasswordFields && (
+                <div className={`space-y-3 ${reveal}`}>
+                  <AuthField label="Password">
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className={authInputCls}
+                      style={authInputStyle}
+                      placeholder="Enter your password"
+                    />
+                  </AuthField>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      className="hover:underline"
+                      style={{ color: "#2D4FC4", fontSize: 13, fontWeight: 500 }}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate({ to: workspaceRoute })}
+                    className="w-full transition-colors"
+                    style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+                  >
+                    {t("COMMON_SIGN_IN")}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
-
-        {phase === "accounts" && (mode === "platform_password" || mode === "hybrid") && (
-          <button
-            type="submit"
-            className="mt-5 w-full transition-colors focus:outline-none focus:ring-2"
-            style={{ height: 46, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#2443B0")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#2D4FC4")}
-          >
-            {t("COMMON_SIGN_IN")}
-          </button>
-        )}
-
-        {phase === "accounts" && (mode === "platform_sso" || mode === "hybrid") && (
-          <button
-            type="button"
-            onClick={() => navigate({ to: workspaceRoute })}
-            className="mt-3 flex w-full items-center justify-center gap-2 hover:bg-[#F5F7FF]"
-            style={{
-              height: 46,
-              background: mode === "platform_sso" ? "#2D4FC4" : "#FFFFFF",
-              color: mode === "platform_sso" ? "#FFFFFF" : "#17191F",
-              border: mode === "platform_sso" ? "none" : "1px solid #CBD5F2",
-              borderRadius: 8,
-              fontWeight: 500,
-              fontSize: 14,
-            }}
-          >
-            Continue with {account.provider ?? "SSO"}
-          </button>
-        )}
 
         <div style={{ marginTop: 16, color: "#6F7684", fontSize: 13, textAlign: "center" }}>
           New to the platform?{" "}
