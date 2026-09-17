@@ -92,14 +92,80 @@ function LoginPage() {
         <div className="space-y-4">
           <AuthField label="Administrator email">
             <input
+              ref={emailRef}
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setPhase("lookup");
+              }}
               className={authInputCls}
               style={authInputStyle}
             />
           </AuthField>
 
+          {phase === "lookup" && (
+            <button
+              type="submit"
+              disabled={!emailValid}
+              className="w-full transition-colors"
+              style={{
+                height: 46,
+                background: emailValid ? "#2D4FC4" : "#AFBBE4",
+                color: "#FFFFFF",
+                borderRadius: 8,
+                fontWeight: 500,
+                fontSize: 14,
+                cursor: emailValid ? "pointer" : "not-allowed",
+              }}
+            >
+              Continue
+            </button>
+          )}
+
+          {phase === "loading" && (
+            <div
+              className="flex items-center justify-center gap-2 py-3"
+              aria-live="polite"
+              style={{ color: "#4A5162", fontSize: 13 }}
+            >
+              <Loader2 className="h-4 w-4 animate-spin" style={{ color: "#2D4FC4" }} />
+              Finding your accounts...
+            </div>
+          )}
+
+          {phase === "no-account" && (
+            <div aria-live="polite" className="rounded-md px-4 py-4" style={{ background: "#F5F7FF", border: "1px solid #DCE4FF" }}>
+              <h3 style={{ color: "#17191F", fontSize: 17, fontWeight: 600 }}>No account found</h3>
+              <p style={{ marginTop: 6, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
+                We could not find an account associated with {email.trim()}.
+              </p>
+              <p style={{ marginTop: 8, color: "#4A5162", fontSize: 13, lineHeight: 1.5 }}>
+                Create an account to get started. We will use this email address for your new account.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSignupPrefillEmail(email.trim());
+                  navigate({ to: "/signup", search: {} });
+                }}
+                className="mt-3 w-full transition-colors"
+                style={{ height: 44, background: "#2D4FC4", color: "#FFFFFF", borderRadius: 8, fontWeight: 500, fontSize: 14 }}
+              >
+                Create an account
+              </button>
+              <button
+                type="button"
+                onClick={() => emailRef.current?.focus()}
+                className="mt-2 w-full hover:underline"
+                style={{ color: "#4A5162", fontSize: 13, background: "transparent" }}
+              >
+                Use a different email
+              </button>
+            </div>
+          )}
+
+          {phase === "accounts" && (
           <AuthField label={t("COMMON_TENANT")}>
             <select
               ref={accountRef}
@@ -113,8 +179,9 @@ function LoginPage() {
               ))}
             </select>
           </AuthField>
+          )}
 
-          {mode === "organisation_sign_in" && (
+          {phase === "accounts" && mode === "organisation_sign_in" && (
             <div className="rounded-md px-3 py-3" style={{ background: "#EEF3FF", border: "1px solid #DCE4FF" }}>
               <div
                 className="flex items-center gap-1.5"
