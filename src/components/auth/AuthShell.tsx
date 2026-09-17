@@ -217,7 +217,7 @@ export function AuthShell({
           </div>
 
           <div />
-          <div style={{ padding: "0 28px 28px 28px", maxWidth: 416, position: "relative", zIndex: 1 }}>
+          <div style={{ padding: "0 28px 28px 40px", maxWidth: 428, position: "relative", zIndex: 1 }}>
             <h1
               style={{
                 color: "#FFFFFF",
