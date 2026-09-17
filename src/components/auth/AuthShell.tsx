@@ -182,6 +182,24 @@ export const authInputStyle: React.CSSProperties = {
   padding: "0 12px",
 };
 
+/** Chevron drawn as an inline SVG so every dropdown aligns identically. */
+const CHEVRON =
+  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235E6675' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")";
+
+/** Shared dropdown styling: same height, text inset and trailing chevron as text inputs. */
+export const authSelectStyle: React.CSSProperties = {
+  ...authInputStyle,
+  appearance: "none",
+  WebkitAppearance: "none",
+  MozAppearance: "none",
+  padding: "0 38px 0 12px",
+  textOverflow: "ellipsis",
+  backgroundImage: CHEVRON,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 12px center",
+  backgroundSize: "16px 16px",
+};
+
 export function AuthField({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block">
