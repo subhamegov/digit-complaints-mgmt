@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import eGovLogoAsset from "@/assets/egov-foundation-white.png.asset.json";
-import loginVideoAsset from "@/assets/login-bg.mp4.asset.json";
-import loginPosterAsset from "@/assets/login-poster.jpg.asset.json";
+import loginCrowdImage from "@/assets/login-crowd.jpg";
 import { LanguagePicker } from "@/components/LanguagePicker";
 import type { LanguageCode } from "@/lib/accounts";
 
