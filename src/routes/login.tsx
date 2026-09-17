@@ -243,7 +243,7 @@ function LoginPage() {
           )}
         </div>
 
-        {(mode === "platform_password" || mode === "hybrid") && (
+        {phase === "accounts" && (mode === "platform_password" || mode === "hybrid") && (
           <button
             type="submit"
             className="mt-5 w-full transition-colors focus:outline-none focus:ring-2"
