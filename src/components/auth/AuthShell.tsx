@@ -179,19 +179,26 @@ export function AuthShell({
         {/* Identity / media column */}
         <div className="relative hidden min-h-[320px] flex-col justify-between overflow-hidden lg:flex">
           <AuthBackdrop />
-          <div style={{ position: "absolute", top: 28, left: 28, right: 28, zIndex: 1 }}>
+          {/* Brand mark belongs to the shell, not the auth form: fixed within the visual column. */}
+          <div className="auth-brand-mark absolute z-[2]">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open DIGIT Complaint Management landing page in a new tab"
-              className="inline-block rounded-md px-2.5 py-1.5 transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40"
-              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(6px)" }}
+              className="inline-block transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white/40"
             >
-              <img src={eGovLogoAsset.url} alt="eGov Foundation" style={{ height: 36, width: "auto", display: "block" }} />
+              <img
+                src={eGovLogoAsset.url}
+                alt="eGov Foundation"
+                className="auth-brand-logo"
+                style={{ height: "auto", display: "block", filter: "drop-shadow(0 2px 10px rgba(4,12,34,0.35))" }}
+              />
             </a>
+          </div>
 
-            <div style={{ marginTop: 18 }}>
+          <div style={{ position: "absolute", top: 110, left: 40, right: 28, zIndex: 1 }}>
+            <div>
               <div style={{ color: "#FFFFFF", fontSize: 28, fontWeight: 600, lineHeight: 1.15 }}>
                 DIGIT Complaint Management
               </div>
