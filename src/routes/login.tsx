@@ -219,7 +219,7 @@ function LoginPage() {
             </div>
           )}
 
-          {(mode === "platform_password" || mode === "hybrid") && (
+          {phase === "accounts" && (mode === "platform_password" || mode === "hybrid") && (
             <>
               {mode === "hybrid" && (
                 <p style={{ color: "#5E6675", fontSize: 13 }}>Choose how you want to sign in.</p>
